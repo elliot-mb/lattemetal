@@ -18,7 +18,8 @@ public class Assembler {
 
     /**
      *
-     * @param fileName must have the '.coffee' file extension
+     * @param fileName must have the '.latte' file extension, please note set files according to where you run the
+     *                 compile&run script
      */
     public Assembler(String fileName) throws RuntimeException{
         if(!extensionCheck(fileName)) throw new RuntimeException("Assembler: fileName has the wrong extension, requires '." + EXT + "' file");
