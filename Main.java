@@ -1,3 +1,5 @@
+import java.util.function.BiFunction;
+
 public class Main {
 
     /**
@@ -24,6 +26,10 @@ public class Main {
             System.out.println(args[0]);
         }
 
+        Assembler assembler = new Assembler("./assembly/text2.latte");
+        boolean didRead = assembler.readFile();
+        System.out.println("didRead is " + didRead);
+        System.out.println("readFile read: " + Utils.writeList(assembler.getRawLines()));
     }
 
 }
