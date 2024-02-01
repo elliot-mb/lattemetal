@@ -1,16 +1,21 @@
+import java.util.Optional;
+
 public class Operand {
 
-    private int value = 0;
-    private boolean isNull = true;
+    private final int value;
+    private final boolean unused;
 
-    Operand(int value, boolean isNull){
-        this.isNull = isNull;
-        this.value = value;
+    Operand(Integer... value){
+        this.unused = value.length == 0;
+        this.value = value.length > 0 ? value[0] : 0;
     }
 
-    public int getValue() throws RuntimeException{
-        if(isNull) throw new RuntimeException("getValue: operand is null");
+    public int getValue(){
         return value;
+    }
+
+    public boolean isUsed(){
+        return !this.unused;
     }
 
 }

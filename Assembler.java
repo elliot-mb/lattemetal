@@ -49,7 +49,9 @@ public class Assembler {
             BufferedReader br = new BufferedReader(reader)){
             String ln = br.readLine();
             while(ln != null){
-                rawLines.add(ln);
+                String noComment = ln.split("--")[0];
+                if(!Utils.isSpace(noComment))
+                    rawLines.add(noComment); //should remove comments
                 ln = br.readLine();
             }
         }catch(FileNotFoundException err){
@@ -61,6 +63,34 @@ public class Assembler {
         }
 
         return PASS;
+    }
+
+    public int getLineCount(){
+        return rawLines.size();
+    }
+
+    /**
+     * instruction format in IC
+     * one integer stores
+     // iiiii    rrrrr   rrrrr   rrrrr   iiiiiiiiiiiii
+     // opcode   destin  source  source  immediate
+     * @return an integer array that is the same length as the number of rawlines
+     */
+    public int[] assemble() throws RuntimeException{
+        // line by line
+            // split up line on spaces
+            // select opcode, rd, rs, rt, immediate expecting them in that order
+            // so the first register to appear is rd in the spec, the next is rs, finally rt, and any immediate fills the immediate slot
+            // pack into bits
+
+        for(String ln : this.rawLines){
+            String[] tokens = ln.split("\s");
+            String op = tokens[0];
+            if(!Lookup.op.containsKey(op)) throw new RuntimeException("assemble: there is no such opcode '" + op + "'");
+
+        }
+
+
     }
 
     public ArrayList<String> getRawLines(){

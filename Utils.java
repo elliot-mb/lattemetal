@@ -17,6 +17,19 @@ public class Utils {
 
     public static <T> String writeList(ArrayList<T> xs){
         List<String> shows = xs.stream().map(Object::toString).toList();
-        return shows.stream().reduce("", (acc, x) -> acc + x.toString() + "\r\n");
+        return shows.stream().reduce("", (acc, x) -> acc + "'" + x.toString() + "'" + "\r\n");
+    }
+
+    public static boolean isSpace(String maybeSpace){
+        char[] whitespace = new char[]{' ', '\n', '\r', '\t'};
+
+        for(char c : maybeSpace.toCharArray()){
+            boolean isWhitespace = false;
+            for(char ws : whitespace){
+                isWhitespace = c == ws || isWhitespace;
+            }
+            if(!isWhitespace) return false; //if it was not any of them
+        }
+        return true;
     }
 }

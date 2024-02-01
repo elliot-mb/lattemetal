@@ -1,17 +1,24 @@
 public abstract class Instruction {
 
-    private int duration;
-    private int rd; //always not null
-    private int rs;
-    private int rt;
+    protected int duration;
+    private final Operand rd; //always not null
+    private final Operand rs;
+    private final Operand rt;
+    protected boolean[] defined;
+
 
     // all instructions can be seen as
-    Instruction(int rd, int rs, int rt){
+    Instruction(Operand rd, Operand rs, Operand rt){
         this.rd = rd;
         this.rs = rs;
         this.rt = rt;
     }
 
-
+    protected boolean definedOperands(){
+        return this.rd.isUsed() == defined[0] &&
+                this.rs.isUsed() == defined[1] &&
+                this.rt.isUsed() == defined[2];
+    }
 
 }
+

@@ -35,3 +35,11 @@ It is a pipelined superscalar implementation which focuses on hardware-optimisat
   - The same is true for memory accesses or anything that takes non-zero time
 - What does the decode stage look like if our instructions are just strings?
   - it could let the branch predictor know if this is a branch; early (mis)prediction
+
+# Devlog
+
+@ 01/02/24
+
+Instruction cache will be stored as integers! 
+an instruction may be 
+``big end << [opcode 0-11 (5b)] [register_s 0-31 (5b)] [register_s 0-31 (5b)] [register_t 0-31 (5b)] [immediate 0-8192 (12b)] small end >>``
