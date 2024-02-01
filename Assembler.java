@@ -18,6 +18,7 @@ public class Assembler {
     private static final char IMMEDIATE = '#';
     public static final int IMM_UNSET = Integer.MIN_VALUE; //used globally
     private static final String EXT = "latte";
+    private static final int ARG_REGS = 3; //rd, rs and rt
 
     /**
      *
@@ -54,8 +55,7 @@ public class Assembler {
             while(ln != null){
                 String noComment = ln.split("--")[0];
                 String trimmed   = noComment.trim();
-                if(trimmed.length() != 0)
-                    rawLines.add(trimmed); //should remove comments
+                rawLines.add(trimmed); //should remove comments
                 ln = br.readLine();
             }
         }catch(FileNotFoundException err){
@@ -95,6 +95,10 @@ public class Assembler {
 
     }
 
+    private String errorPrefix(int lnNo){
+        return fileName + " @ ln " + lnNo + ": assemble: ";
+    }
+
     /**
      * instruction format in IC
      * one integer stores
@@ -107,38 +111,48 @@ public class Assembler {
             // split up line on spaces
             // select opcode, rd, rs, rt, immediate expecting them in that order
             // so the first register to appear is rd in the spec, the next is rs, finally rt, and any immediate fills the immediate slot
-            // pack into bits
+            // pack into objects
 
         ArrayList<Instruction> program = new ArrayList<Instruction>();
-
+        int lnNo = 1;
         for(String ln : this.rawLines){
-            String[] tokens = ln.split("\s");
-            String op = tokens[0];
-            if(!Lookup.op.containsKey(op)) throw new RuntimeException("assemble: there is no such opcode '" + op + "'");
-            Opcode code = Lookup.op.get(op);
-            RegisterName[] regs = new RegisterName[3]; //between zero to three registers can be specified
-            int regI = 0;
-            int immediate = IMM_UNSET; //has it been set
-            for(int i = 1; i < tokens.length; i++){
-                String regOrImmediate = tokens[i];
-                if(Lookup.reg.containsKey(regOrImmediate)){ //it must be a register
-                    regs[regI] = Lookup.reg.get(regOrImmediate);
-                    regI++;
-                }
-                if(regOrImmediate.charAt(0) == IMMEDIATE){
-                    if(immediate != IMM_UNSET) throw new RuntimeException("assemble: more than one immediate isn't allowed");
-                    String imm = regOrImmediate.substring(1); //throw away the hash
-                    int immNum;
-                    try{ immNum = Integer.parseInt(imm); }
-                    catch(NumberFormatException err){
-                        throw new RuntimeException("assembl: immediate was not recognised as a number");
+            if(ln.length() != 0) { //add it just if it isnt blank!
+                String[] tokens = ln.split("\s");
+                String op = tokens[0];
+                if (!Lookup.op.containsKey(op))
+                    throw new RuntimeException(errorPrefix(lnNo) + "there is no such opcode '" + op + "'");
+                Opcode code = Lookup.op.get(op);
+                RegisterName[] regs = new RegisterName[ARG_REGS]; //between zero to three registers can be specified
+                int regI = 0;
+                int immediate = IMM_UNSET; //has it been set
+                for (int i = 1; i < tokens.length; i++) {
+                    String regOrImmediate = tokens[i];
+                    if (Lookup.reg.containsKey(regOrImmediate)) { //it must be a register
+                        if (regI >= ARG_REGS)
+                            throw new RuntimeException(errorPrefix(lnNo) + "more than three registers were provided to this operator");
+                        regs[regI] = Lookup.reg.get(regOrImmediate);
+                        regI++;
                     }
-                    immediate = immNum;
+                    if (regOrImmediate.charAt(0) == IMMEDIATE) {
+                        if (immediate != IMM_UNSET)
+                            throw new RuntimeException(errorPrefix(lnNo) + "more than one immediate isn't allowed");
+                        String imm = regOrImmediate.substring(1); //throw away the hash
+                        int immNum;
+                        try {
+                            immNum = Integer.parseInt(imm);
+                        } catch (NumberFormatException err) {
+                            throw new RuntimeException(errorPrefix(lnNo) + "immediate was not recognised as a number");
+                        }
+                        immediate = immNum;
+                    }
+                }
+
+                try{program.add(makeInstr(code, regs, immediate));}
+                catch(RuntimeException err){
+                    throw new RuntimeException(errorPrefix(lnNo) + err.getMessage());
                 }
             }
-
-            System.out.println("op:" + code.toString() + " regs:" + Arrays.toString(regs) + " #" + immediate);
-            program.add(makeInstr(code, regs, immediate));
+            lnNo++;
         }
 
         return program;

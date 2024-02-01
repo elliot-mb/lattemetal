@@ -1,4 +1,4 @@
-public class Printer implements InstructionVisitor{
+public class Id implements InstructionVisitor{ //just returns the opcode (identity function?)
 
 
     @Override

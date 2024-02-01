@@ -2,12 +2,45 @@ public class Op {
 
     Op(){}
 
+    // term shapes:
+    //      three registers
+    //      two registers, one immediate
+    //      one register, one immediate
+    //      one immediate
+
+
+    // operator argument validation on the four instruction shapes
+    private static void shapeRdRsRt(Instruction instr, RegisterName rd, RegisterName rs, RegisterName rt){
+        if(rd == null || rs == null || rt == null)
+            throw new RuntimeException(instr.visit(new Id()) + ": missing at least one register reference");
+    }
+
+    private static void shapeRdRsIm(Instruction instr, RegisterName rd, RegisterName rs, int im){
+        if(rd == null || rs == null)
+            throw new RuntimeException(instr.visit(new Id()) +": missing at least one register reference");
+        if(im == Assembler.IMM_UNSET)
+            throw new RuntimeException(instr.visit(new Id()) +": missing immediate");
+    }
+
+    private static void shapeRdIm(Instruction instr, RegisterName rd, int im){
+        if(rd == null)
+            throw new RuntimeException(instr.visit(new Id()) +": missing the register reference");
+        if(im == Assembler.IMM_UNSET)
+            throw new RuntimeException(instr.visit(new Id()) +": missing immediate");
+    }
+
+    private static void shapeIm(Instruction instr, int im){
+        if(im == Assembler.IMM_UNSET)
+            throw new RuntimeException(instr.visit(new Id()) +": missing immediate");
+    }
+
     public class Add extends Instruction{
 
         private static final int DURATION = 2;
 
         Add(RegisterName rd, RegisterName rs, RegisterName rt){
             super(DURATION, Assembler.IMM_UNSET, rd, rs, rt);
+            shapeRdRsRt(this, rd, rs, rt);
         }
 
         @Override
@@ -21,6 +54,7 @@ public class Op {
 
         AddI(RegisterName rd, RegisterName rs, int immediate){
             super(DURATION, immediate, rd, rs);
+            shapeRdRsIm(this, rd, rs, immediate);
         }
 
         @Override
@@ -34,6 +68,7 @@ public class Op {
 
         Mul(RegisterName rd, RegisterName rs, RegisterName rt){
             super(DURATION, Assembler.IMM_UNSET, rd, rs, rt);
+            shapeRdRsRt(this, rd, rs, rt);
         }
 
         @Override
@@ -47,6 +82,7 @@ public class Op {
 
         MulI(RegisterName rd, RegisterName rs, int immediate){
             super(DURATION, immediate, rd, rs);
+            shapeRdRsIm(this, rd, rs, immediate);
         }
 
         @Override
@@ -61,6 +97,7 @@ public class Op {
 
         Cmp(RegisterName rd, RegisterName rs, RegisterName rt){
             super(DURATION, Assembler.IMM_UNSET, rd, rs, rt);
+            shapeRdRsRt(this, rd, rs, rt);
         }
 
         @Override
@@ -74,6 +111,7 @@ public class Op {
 
         Ld(RegisterName rd, RegisterName rs, int immediate){
             super(DURATION, immediate, rd, rs);
+            shapeRdRsIm(this, rd, rs, immediate);
         }
 
         @Override
@@ -87,6 +125,7 @@ public class Op {
 
         LdC(RegisterName rd, int immediate){
             super(DURATION, immediate, rd);
+            shapeRdIm(this, rd, immediate);
         }
 
         @Override
@@ -100,6 +139,7 @@ public class Op {
 
         St(RegisterName rd, RegisterName rs, int immediate){
             super(DURATION, immediate, rd, rs);
+            shapeRdRsIm(this, rd, rs, immediate);
         }
 
         @Override
@@ -114,6 +154,7 @@ public class Op {
 
         BrLZ(RegisterName rd, int immediate){
             super(DURATION, immediate, rd);
+            shapeRdIm(this, rd, immediate);
         }
 
         @Override
@@ -127,6 +168,7 @@ public class Op {
 
         JpLZ(RegisterName rd, int immediate){
             super(DURATION, immediate, rd);
+            shapeRdIm(this, rd, immediate);
         }
 
         @Override
@@ -140,6 +182,7 @@ public class Op {
 
         Br(int immediate){
             super(DURATION, immediate);
+            shapeIm(this, immediate);
         }
 
         @Override
@@ -153,6 +196,7 @@ public class Op {
 
         Jp(int immediate){
             super(DURATION, immediate);
+            shapeIm(this, immediate);
         }
 
         @Override

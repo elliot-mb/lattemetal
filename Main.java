@@ -44,7 +44,7 @@ public class Main {
      *      * ldc  rd #n        --load a constant
      *      *
      *      * //EXCLUDED                                    st rd n(rs)[rt] -- exclude scaled load and store for now; im not sure how to give an instruction four arguments
-     *      * st   rd (rs) #n   --store whats in register rd into address r1 offset by n
+     *      * st   rd (rs) #n   --store whats in register rd into address rs offset by n
      *
      *      * brlz rd #n      --branch; if rd is less than or equal to zero move to absolute instruction # n
      *      * jplz rd #n      --branch; if rd is less than or equal to zero, relative branch by immediate operand

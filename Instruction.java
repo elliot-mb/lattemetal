@@ -44,7 +44,7 @@ public abstract class Instruction {
 
     @Override
     public String toString(){
-        Opcode underlying = visit(new Printer());
+        Opcode underlying = visit(new Id());
         return underlying.name() + " " + regToString(rd) + " " + regToString(rs) + " " + regToString(rt) + " #" + immToString(immediate);
     }
 
