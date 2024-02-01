@@ -16,7 +16,7 @@ public class Assembler {
     private static final int EOF = -1;
     private static final String DOT = ".";
     private static final char IMMEDIATE = '#';
-    private static final int IMM_UNSET = Integer.MIN_VALUE;
+    public static final int IMM_UNSET = Integer.MIN_VALUE; //used globally
     private static final String EXT = "latte";
 
     /**
@@ -73,6 +73,28 @@ public class Assembler {
         return rawLines.size();
     }
 
+    private Instruction makeInstr(Opcode code, RegisterName[] regs, int immediate){
+        RegisterName rd = regs[0];
+        RegisterName rs = regs[1];
+        RegisterName rt = regs[2];
+        Op ops = new Op();
+        switch(code){
+            case add: return ops.new Add(rd, rs, rt);
+            case addi: return ops.new AddI(rd, rs, immediate);
+            case mul: return ops.new Mul(rd, rs, rt);
+            case muli: return ops.new MulI(rd, rs, immediate);
+            case cmp: return ops.new Cmp(rd, rs, rt);
+            case ld: return ops.new Ld(rd, rs, immediate);
+            case ldc: return ops.new LdC(rd, immediate);
+            case st: return ops.new St(rd, rs, immediate);
+            case brlz: return ops.new BrLZ(rd, immediate);
+            case jplz: return ops.new JpLZ(rd, immediate);
+            case br: return ops.new Br(immediate);
+            default: return ops.new Jp(immediate); //jp
+        }
+
+    }
+
     /**
      * instruction format in IC
      * one integer stores
@@ -80,12 +102,14 @@ public class Assembler {
      // opcode   destin  source  source  immediate
      * @return an integer array that is the same length as the number of rawlines
      */
-    public int[] assemble() throws RuntimeException{
+    public ArrayList<Instruction> assemble() throws RuntimeException{
         // line by line
             // split up line on spaces
             // select opcode, rd, rs, rt, immediate expecting them in that order
             // so the first register to appear is rd in the spec, the next is rs, finally rt, and any immediate fills the immediate slot
             // pack into bits
+
+        ArrayList<Instruction> program = new ArrayList<Instruction>();
 
         for(String ln : this.rawLines){
             String[] tokens = ln.split("\s");
@@ -114,9 +138,10 @@ public class Assembler {
             }
 
             System.out.println("op:" + code.toString() + " regs:" + Arrays.toString(regs) + " #" + immediate);
+            program.add(makeInstr(code, regs, immediate));
         }
 
-        return new int[]{};
+        return program;
     }
 
     public ArrayList<String> getRawLines(){
