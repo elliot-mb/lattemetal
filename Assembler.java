@@ -4,6 +4,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Assembler {
     // this class contains the basic assembler that turns our raw instructions into machine readable objects
@@ -14,6 +15,8 @@ public class Assembler {
     private static final Boolean PASS = true;
     private static final int EOF = -1;
     private static final String DOT = ".";
+    private static final char IMMEDIATE = '#';
+    private static final int IMM_UNSET = Integer.MIN_VALUE;
     private static final String EXT = "latte";
 
     /**
@@ -50,8 +53,9 @@ public class Assembler {
             String ln = br.readLine();
             while(ln != null){
                 String noComment = ln.split("--")[0];
-                if(!Utils.isSpace(noComment))
-                    rawLines.add(noComment); //should remove comments
+                String trimmed   = noComment.trim();
+                if(trimmed.length() != 0)
+                    rawLines.add(trimmed); //should remove comments
                 ln = br.readLine();
             }
         }catch(FileNotFoundException err){
@@ -87,10 +91,32 @@ public class Assembler {
             String[] tokens = ln.split("\s");
             String op = tokens[0];
             if(!Lookup.op.containsKey(op)) throw new RuntimeException("assemble: there is no such opcode '" + op + "'");
+            Opcode code = Lookup.op.get(op);
+            RegisterName[] regs = new RegisterName[3]; //between zero to three registers can be specified
+            int regI = 0;
+            int immediate = IMM_UNSET; //has it been set
+            for(int i = 1; i < tokens.length; i++){
+                String regOrImmediate = tokens[i];
+                if(Lookup.reg.containsKey(regOrImmediate)){ //it must be a register
+                    regs[regI] = Lookup.reg.get(regOrImmediate);
+                    regI++;
+                }
+                if(regOrImmediate.charAt(0) == IMMEDIATE){
+                    if(immediate != IMM_UNSET) throw new RuntimeException("assemble: more than one immediate isn't allowed");
+                    String imm = regOrImmediate.substring(1); //throw away the hash
+                    int immNum;
+                    try{ immNum = Integer.parseInt(imm); }
+                    catch(NumberFormatException err){
+                        throw new RuntimeException("assembl: immediate was not recognised as a number");
+                    }
+                    immediate = immNum;
+                }
+            }
 
+            System.out.println("op:" + code.toString() + " regs:" + Arrays.toString(regs) + " #" + immediate);
         }
 
-
+        return new int[]{};
     }
 
     public ArrayList<String> getRawLines(){

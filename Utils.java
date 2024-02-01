@@ -3,6 +3,8 @@ import java.util.List;
 
 public class Utils {
 
+    private static final char[] WHITESPACE = new char[]{' ', '\n', '\r', '\t'};
+
     public static <T> T last(ArrayList<T> xs) throws RuntimeException{
         int size = xs.size();
         if(size == 0) throw new RuntimeException("last: cannot take last element of the empty array");
@@ -21,15 +23,9 @@ public class Utils {
     }
 
     public static boolean isSpace(String maybeSpace){
-        char[] whitespace = new char[]{' ', '\n', '\r', '\t'};
-
-        for(char c : maybeSpace.toCharArray()){
-            boolean isWhitespace = false;
-            for(char ws : whitespace){
-                isWhitespace = c == ws || isWhitespace;
-            }
-            if(!isWhitespace) return false; //if it was not any of them
-        }
-        return true;
+        String trimmed = maybeSpace.trim();
+        return trimmed.length() == 0;
     }
+
+
 }

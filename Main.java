@@ -71,8 +71,9 @@ public class Main {
 
         Assembler assembler = new Assembler("./assembly/test.latte");
         boolean didRead = assembler.readFile();
-        System.out.println("didRead is " + didRead);
-        System.out.println("readFile read: " + Utils.writeList(assembler.getRawLines()));
+        if(didRead){
+            assembler.assemble();
+        }
     }
 
 }
