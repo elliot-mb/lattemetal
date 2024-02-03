@@ -72,10 +72,10 @@ public class Main {
 
         Assembler assembler = new Assembler("./assembly/test.latte");
         boolean didRead = assembler.readFile();
-        if(didRead){
-            ArrayList<Instruction> program = assembler.assemble();
-            System.out.println(Utils.writeList(program));
+        if(!didRead){
+            throw new RuntimeException("main: program assembler failed to read program");
         }
+        InstructionCache ic = new InstructionCache(assembler.assemble());
 
     }
 

@@ -1,14 +1,32 @@
-public class InstructionCache extends Block{
+import java.util.ArrayList;
 
-    // one integer stores
-    // iiiii    rrrrr   rrrrr   rrrrr   iiiiiiiiiiiii
-    // opcode   destin  source  source  immediate
+public class InstructionCache{
 
-    InstructionCache(int size, int[] data){ // instruction cache is not writable
-        super(size, data);
+//    // one integer stores
+//    // iiiii    rrrrr   rrrrr   rrrrr   iiiiiiiiiiiii
+//    // opcode   destin  source  source  immediate
+//    // this is a possible extension for me to implement later
+//
+//    InstructionCache(int size, int[] data){ // instruction cache is not writable
+//        super(size, data);
+//    }
+//
+//    protected int readDelegate(int addr){
+//        return data[addr];
+//    }
+
+    private final ArrayList<Instruction> program;
+
+    InstructionCache(ArrayList<Instruction> program){
+        this.program = program;
     }
 
-    protected int readDelegate(int addr){
-        return data[addr];
+    public Instruction getInstruction(int pcVal){
+        return program.get(pcVal);
+    }
+
+    @Override
+    public String toString(){
+        return Utils.writeList(program);
     }
 }

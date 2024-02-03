@@ -2,51 +2,32 @@ public class Op {
 
     Op(){}
 
-    // term shapes:
-    //      three registers
-    //      two registers, one immediate
-    //      one register, one immediate
-    //      one immediate
-
-
-    // operator argument validation on the four instruction shapes
-    private static void shapeRdRsRt(Instruction instr, RegisterName rd, RegisterName rs, RegisterName rt){
-        if(rd == null || rs == null || rt == null)
-            throw new RuntimeException(instr.visit(new Id()) + ": missing at least one register reference");
-    }
-
-    private static void shapeRdRsIm(Instruction instr, RegisterName rd, RegisterName rs, int im){
-        if(rd == null || rs == null)
-            throw new RuntimeException(instr.visit(new Id()) +": missing at least one register reference");
-        if(im == Assembler.IMM_UNSET)
-            throw new RuntimeException(instr.visit(new Id()) +": missing immediate");
-    }
-
-    private static void shapeRdIm(Instruction instr, RegisterName rd, int im){
-        if(rd == null)
-            throw new RuntimeException(instr.visit(new Id()) +": missing the register reference");
-        if(im == Assembler.IMM_UNSET)
-            throw new RuntimeException(instr.visit(new Id()) +": missing immediate");
-    }
-
-    private static void shapeIm(Instruction instr, int im){
-        if(im == Assembler.IMM_UNSET)
-            throw new RuntimeException(instr.visit(new Id()) +": missing immediate");
-    }
-
-    public class Add extends Instruction{
+    public class Add extends Instruction{ //all operations extend hasduration also by proxy
 
         private static final int DURATION = 2;
 
         Add(RegisterName rd, RegisterName rs, RegisterName rt){
             super(DURATION, Assembler.IMM_UNSET, rd, rs, rt);
-            shapeRdRsRt(this, rd, rs, rt);
+            checkShape(rd, rs, rt);
         }
 
+
         @Override
-        public Opcode visit(InstructionVisitor v) {
+        public Opcode visit(InstructionCodeVisitor v) {
             return v.accept(this);
         }
+        @Override
+        public void visit(InstructionVoidVisitor v) {
+            v.accept(this);
+        }
+
+        public void setRd(int v) { rdVal = v; }
+        public int getRdVal() { return rdVal; }
+        public void setRs(int v) { rsVal = v; }
+        public int getRsVal() { return rsVal; }
+        public void setRt(int v) { rtVal = v; }
+        public int getRtVal() { return rtVal; }
+
     }
 
     public class AddI extends Instruction{
@@ -54,13 +35,24 @@ public class Op {
 
         AddI(RegisterName rd, RegisterName rs, int immediate){
             super(DURATION, immediate, rd, rs);
-            shapeRdRsIm(this, rd, rs, immediate);
+            checkShape(rd, rs, immediate);
         }
 
         @Override
-        public Opcode visit(InstructionVisitor v) {
+        public Opcode visit(InstructionCodeVisitor v) {
             return v.accept(this);
         }
+        @Override
+        public void visit(InstructionVoidVisitor v) {
+            v.accept(this);
+        }
+
+        public void setRd(int v) { rdVal = v; }
+        public int getRdVal() { return rdVal; }
+        public void setRs(int v) { rsVal = v; }
+        public int getRsVal() { return rsVal; }
+        public void setIm(int v) { imVal = v; }
+        public int getImVal() { return imVal; }
     }
 
     public class Mul extends Instruction{
@@ -68,13 +60,24 @@ public class Op {
 
         Mul(RegisterName rd, RegisterName rs, RegisterName rt){
             super(DURATION, Assembler.IMM_UNSET, rd, rs, rt);
-            shapeRdRsRt(this, rd, rs, rt);
+            checkShape(rd, rs, rt);
         }
 
         @Override
-        public Opcode visit(InstructionVisitor v){
+        public Opcode visit(InstructionCodeVisitor v){
             return v.accept(this);
         }
+        @Override
+        public void visit(InstructionVoidVisitor v) {
+            v.accept(this);
+        }
+
+        public void setRd(int v) { rdVal = v; }
+        public int getRdVal() { return rdVal; }
+        public void setRs(int v) { rsVal = v; }
+        public int getRsVal() { return rsVal; }
+        public void setRt(int v) { rtVal = v; }
+        public int getRtVal() { return rtVal; }
     }
 
     public class MulI extends Instruction{
@@ -82,13 +85,24 @@ public class Op {
 
         MulI(RegisterName rd, RegisterName rs, int immediate){
             super(DURATION, immediate, rd, rs);
-            shapeRdRsIm(this, rd, rs, immediate);
+            checkShape(rd, rs, immediate);
         }
 
         @Override
-        public Opcode visit(InstructionVisitor v){
+        public Opcode visit(InstructionCodeVisitor v){
             return v.accept(this);
         }
+        @Override
+        public void visit(InstructionVoidVisitor v) {
+            v.accept(this);
+        }
+
+        public void setRd(int v) { rdVal = v; }
+        public int getRdVal() { return rdVal; }
+        public void setRs(int v) { rsVal = v; }
+        public int getRsVal() { return rsVal; }
+        public void setIm(int v) { imVal = v; }
+        public int getImVal() { return imVal; }
     }
 
     public class Cmp extends Instruction{
@@ -97,13 +111,24 @@ public class Op {
 
         Cmp(RegisterName rd, RegisterName rs, RegisterName rt){
             super(DURATION, Assembler.IMM_UNSET, rd, rs, rt);
-            shapeRdRsRt(this, rd, rs, rt);
+            checkShape(rd, rs, rt);
         }
 
         @Override
-        public Opcode visit(InstructionVisitor v) {
+        public Opcode visit(InstructionCodeVisitor v) {
             return v.accept(this);
         }
+        @Override
+        public void visit(InstructionVoidVisitor v) {
+            v.accept(this);
+        }
+
+        public void setRd(int v) { rdVal = v; }
+        public int getRdVal() { return rdVal; }
+        public void setRs(int v) { rsVal = v; }
+        public int getRsVal() { return rsVal; }
+        public void setRt(int v) { rtVal = v; }
+        public int getRtVal() { return rtVal; }
     }
 
     public class Ld extends Instruction{
@@ -111,13 +136,22 @@ public class Op {
 
         Ld(RegisterName rd, RegisterName rs, int immediate){
             super(DURATION, immediate, rd, rs);
-            shapeRdRsIm(this, rd, rs, immediate);
+            checkShape(rd, rs, immediate);
         }
 
         @Override
-        public Opcode visit(InstructionVisitor v) {
-            return v.accept(this);
+        public Opcode visit(InstructionCodeVisitor v) { return v.accept(this); }
+        @Override
+        public void visit(InstructionVoidVisitor v) {
+            v.accept(this);
         }
+
+        public void setRd(int v) { rdVal = v; }
+        public int getRdVal() { return rdVal; }
+        public void setRs(int v) { rsVal = v; }
+        public int getRsVal() { return rsVal; }
+        public void setIm(int v) { imVal = v; }
+        public int getImVal() { return imVal; }
     }
 
     public class LdC extends Instruction{
@@ -125,13 +159,22 @@ public class Op {
 
         LdC(RegisterName rd, int immediate){
             super(DURATION, immediate, rd);
-            shapeRdIm(this, rd, immediate);
+            checkShape(rd, immediate);
         }
 
         @Override
-        public Opcode visit(InstructionVisitor v){
+        public Opcode visit(InstructionCodeVisitor v){
             return v.accept(this);
         }
+        @Override
+        public void visit(InstructionVoidVisitor v) {
+            v.accept(this);
+        }
+
+        public void setRd(int v) { rdVal = v; }
+        public int getRdVal() { return rdVal; }
+        public void setIm(int v) { imVal = v; }
+        public int getImVal() { return imVal; }
     }
 
     public class St extends Instruction{
@@ -139,13 +182,24 @@ public class Op {
 
         St(RegisterName rd, RegisterName rs, int immediate){
             super(DURATION, immediate, rd, rs);
-            shapeRdRsIm(this, rd, rs, immediate);
+            checkShape(rd, rs, immediate);
         }
 
         @Override
-        public Opcode visit(InstructionVisitor v){
+        public Opcode visit(InstructionCodeVisitor v){
             return v.accept(this);
         }
+        @Override
+        public void visit(InstructionVoidVisitor v) {
+            v.accept(this);
+        }
+
+        public void setRd(int v) { rdVal = v; }
+        public int getRdVal() { return rdVal; }
+        public void setRs(int v) { rsVal = v; }
+        public int getRsVal() { return rsVal; }
+        public void setIm(int v) { imVal = v; }
+        public int getImVal() { return imVal; }
     }
 
     public class BrLZ extends Instruction{
@@ -154,13 +208,22 @@ public class Op {
 
         BrLZ(RegisterName rd, int immediate){
             super(DURATION, immediate, rd);
-            shapeRdIm(this, rd, immediate);
+            checkShape(rd, immediate);
         }
 
         @Override
-        public Opcode visit(InstructionVisitor v) {
+        public Opcode visit(InstructionCodeVisitor v) {
             return v.accept(this);
         }
+        @Override
+        public void visit(InstructionVoidVisitor v) {
+            v.accept(this);
+        }
+
+        public void setRd(int v) { rdVal = v; }
+        public int getRdVal() { return rdVal; }
+        public void setIm(int v) { imVal = v; }
+        public int getImVal() { return imVal; }
     }
 
     public class JpLZ extends Instruction{
@@ -168,13 +231,20 @@ public class Op {
 
         JpLZ(RegisterName rd, int immediate){
             super(DURATION, immediate, rd);
-            shapeRdIm(this, rd, immediate);
+            checkShape(rd, immediate);
         }
 
         @Override
-        public Opcode visit(InstructionVisitor v) {
-            return v.accept(this);
+        public Opcode visit(InstructionCodeVisitor v) { return v.accept(this); }
+        @Override
+        public void visit(InstructionVoidVisitor v) {
+            v.accept(this);
         }
+
+        public void setRd(int v) { rdVal = v; }
+        public int getRdVal() { return rdVal; }
+        public void setIm(int v) { imVal = v; }
+        public int getImVal() { return imVal; }
     }
 
     public class Br extends Instruction{
@@ -182,13 +252,20 @@ public class Op {
 
         Br(int immediate){
             super(DURATION, immediate);
-            shapeIm(this, immediate);
+            checkShape(immediate);
         }
 
         @Override
-        public Opcode visit(InstructionVisitor v){
+        public Opcode visit(InstructionCodeVisitor v){
             return v.accept(this);
         }
+        @Override
+        public void visit(InstructionVoidVisitor v) {
+            v.accept(this);
+        }
+
+        public void setIm(int v) { imVal = v; }
+        public int getImVal() { return imVal; }
     }
 
     public class Jp extends Instruction{
@@ -196,12 +273,19 @@ public class Op {
 
         Jp(int immediate){
             super(DURATION, immediate);
-            shapeIm(this, immediate);
+            checkShape(immediate);
         }
 
         @Override
-        public Opcode visit(InstructionVisitor v){
+        public Opcode visit(InstructionCodeVisitor v){
             return v.accept(this);
         }
+        @Override
+        public void visit(InstructionVoidVisitor v) {
+            v.accept(this);
+        }
+
+        public void setIm(int v) { imVal = v; }
+        public int getImVal() { return imVal; }
     }
 }

@@ -132,8 +132,7 @@ public class Assembler {
                             throw new RuntimeException(errorPrefix(lnNo) + "more than three registers were provided to this operator");
                         regs[regI] = Lookup.reg.get(regOrImmediate);
                         regI++;
-                    }
-                    if (regOrImmediate.charAt(0) == IMMEDIATE) {
+                    }else if (regOrImmediate.charAt(0) == IMMEDIATE) {
                         if (immediate != IMM_UNSET)
                             throw new RuntimeException(errorPrefix(lnNo) + "more than one immediate isn't allowed");
                         String imm = regOrImmediate.substring(1); //throw away the hash
@@ -144,6 +143,8 @@ public class Assembler {
                             throw new RuntimeException(errorPrefix(lnNo) + "immediate was not recognised as a number");
                         }
                         immediate = immNum;
+                    }else{
+                        throw new RuntimeException(errorPrefix(lnNo) + "'" + code.name() +"' does not recognise argument " + i); //i is the 1-indexed argument, or just the plain argument number
                     }
                 }
 

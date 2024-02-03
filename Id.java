@@ -1,4 +1,4 @@
-public class Id implements InstructionVisitor{ //just returns the opcode (identity function?)
+public class Id implements InstructionCodeVisitor { //just returns the opcode (identity function?)
 
 
     @Override
