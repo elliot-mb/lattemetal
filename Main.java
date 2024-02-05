@@ -76,7 +76,7 @@ public class Main {
             throw new RuntimeException("main: program assembler failed to read program");
         }
         InstructionCache ic = new InstructionCache(assembler.assemble());
-
+        Processor proc = new Processor(ic);
     }
 
 }
