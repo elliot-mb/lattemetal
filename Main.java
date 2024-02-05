@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.function.BiFunction;
 
 public class Main {
@@ -43,10 +44,10 @@ public class Main {
      *      * ldc  rd #n        --load a constant
      *      *
      *      * //EXCLUDED                                    st rd n(rs)[rt] -- exclude scaled load and store for now; im not sure how to give an instruction four arguments
-     *      * st   rd (rs) #n   --store whats in register rd into address r1 offset by n
+     *      * st   rd (rs) #n   --store whats in register rd into address rs offset by n
      *
-     *      * brlz rs #n      --branch; if rs is less than or equal to zero move to absolute instruction # n
-     *      * jplz rs #n      --branch; if rs is less than or equal to zero, relative branch by immediate operand
+     *      * brlz rd #n      --branch; if rd is less than or equal to zero move to absolute instruction # n
+     *      * jplz rd #n      --branch; if rd is less than or equal to zero, relative branch by immediate operand
      *      *
      *      *
      *      * br   #n      --branch; sets the pc to absolute address (immediate/const)
@@ -71,8 +72,11 @@ public class Main {
 
         Assembler assembler = new Assembler("./assembly/test.latte");
         boolean didRead = assembler.readFile();
-        System.out.println("didRead is " + didRead);
-        System.out.println("readFile read: " + Utils.writeList(assembler.getRawLines()));
+        if(!didRead){
+            throw new RuntimeException("main: program assembler failed to read program");
+        }
+        InstructionCache ic = new InstructionCache(assembler.assemble());
+        Processor proc = new Processor(ic);
     }
 
 }
