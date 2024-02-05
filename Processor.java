@@ -29,6 +29,9 @@ public class Processor {
  * - 'pretty configurable' is harder
  * - marks are not allocated for configurability
  *
+ * IN THE VIVA:
+ * - you have one question you can pick and one picked for you; memory hierarchy is a good one to talk about in the viva
+ *
  * first territory:
  * - pipelined & superscalar & out of order with a branch predictor (you could get into the seventies)
  *
