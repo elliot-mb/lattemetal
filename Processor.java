@@ -27,6 +27,7 @@ public class Processor {
  *
  * how configurable do we want the processor to be:
  * - 'pretty configurable' is harder
+ * - marks are not allocated for configurability
  *
  * first territory:
  * - pipelined & superscalar & out of order with a branch predictor (you could get into the seventies)
