@@ -5,30 +5,26 @@ public abstract class Block {
 
     protected final int[] data;
     protected final int size;
+    static protected final int[] NODATA = {};
 
-    Block(int size, int[]... datas) throws RuntimeException{
+    //numbers are passed in variadically for now for easy parameter setting
+    Block(int size, int[] data) throws RuntimeException{
         this.size = size;
         this.data = new int[size];
 
-        if(datas.length > 0){ //just takes the first data argument
-            int[] dataOption = Utils.last(datas);
-            if(dataOption.length > size) throw new RuntimeException("Block: data block passed in was too large");
+        if(data.length > 0){ //just takes the first data argument
+            if(data.length > size) throw new RuntimeException("Block: data block passed in was too large");
             int addr = 0;
-            for(int e: dataOption){
+            for(int e: data){
                 this.data[addr] = e;
             }
         }
 
     }
 
-    //all methods must have a read method defined, but e.g. the instruction cache can have no write method
-    public int read(int addr) throws RuntimeException {
-        if(addr > this.size) throw new RuntimeException("read: address is larger than the size of the block");
-        return readDelegate(addr);
+    protected int read(int addr) throws RuntimeException{
+        if(addr > this.size || addr < 0) throw new RuntimeException("read: address is larger than the size of the block, or smaller than zero");
+        return data[addr];
     }
-
-    protected abstract int readDelegate(int addr); // addresses passed here are always within size if called through read
-
-
 
 }

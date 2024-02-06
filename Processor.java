@@ -4,12 +4,14 @@ public class Processor {
     private final InstructionCache ic;
     private final ArithmeticLogicUnit alu;
     private final RegisterFile rf;
+    private final Memory mem;
 
     Processor(InstructionCache ic){
         this.pc = new ProgramCounter();
         this.ic = ic;
-        this.alu = new ArithmeticLogicUnit();
         this.rf = new RegisterFile();
+        this.mem = new Memory();
+        this.alu = new ArithmeticLogicUnit(this.mem, this.pc);
     }
 
 }
