@@ -21,11 +21,11 @@ public class Op {
             v.accept(this);
         }
 
-        public void setRd(int v) { rdVal = v; }
+        public void setRdValVal(int v) { rdVal = v; }
         public int getRdVal() { return rdVal; }
-        public void setRs(int v) { rsVal = v; }
+        public void setRsVal(int v) { rsVal = v; }
         public int getRsVal() { return rsVal; }
-        public void setRt(int v) { rtVal = v; }
+        public void setRtVal(int v) { rtVal = v; }
         public int getRtVal() { return rtVal; }
 
     }
@@ -47,9 +47,9 @@ public class Op {
             v.accept(this);
         }
 
-        public void setRd(int v) { rdVal = v; }
+        public void setRdVal(int v) { rdVal = v; }
         public int getRdVal() { return rdVal; }
-        public void setRs(int v) { rsVal = v; }
+        public void setRsVal(int v) { rsVal = v; }
         public int getRsVal() { return rsVal; }
         public void setIm(int v) { imVal = v; }
         public int getImVal() { return imVal; }
@@ -72,11 +72,11 @@ public class Op {
             v.accept(this);
         }
 
-        public void setRd(int v) { rdVal = v; }
+        public void setRdVal(int v) { rdVal = v; }
         public int getRdVal() { return rdVal; }
-        public void setRs(int v) { rsVal = v; }
+        public void setRsVal(int v) { rsVal = v; }
         public int getRsVal() { return rsVal; }
-        public void setRt(int v) { rtVal = v; }
+        public void setRtVal(int v) { rtVal = v; }
         public int getRtVal() { return rtVal; }
     }
 
@@ -97,9 +97,9 @@ public class Op {
             v.accept(this);
         }
 
-        public void setRd(int v) { rdVal = v; }
+        public void setRdVal(int v) { rdVal = v; }
         public int getRdVal() { return rdVal; }
-        public void setRs(int v) { rsVal = v; }
+        public void setRsVal(int v) { rsVal = v; }
         public int getRsVal() { return rsVal; }
         public void setIm(int v) { imVal = v; }
         public int getImVal() { return imVal; }
@@ -123,11 +123,11 @@ public class Op {
             v.accept(this);
         }
 
-        public void setRd(int v) { rdVal = v; }
+        public void setRdVal(int v) { rdVal = v; }
         public int getRdVal() { return rdVal; }
-        public void setRs(int v) { rsVal = v; }
+        public void setRsVal(int v) { rsVal = v; }
         public int getRsVal() { return rsVal; }
-        public void setRt(int v) { rtVal = v; }
+        public void setRtVal(int v) { rtVal = v; }
         public int getRtVal() { return rtVal; }
     }
 
@@ -146,9 +146,9 @@ public class Op {
             v.accept(this);
         }
 
-        public void setRd(int v) { rdVal = v; }
+        public void setRdVal(int v) { rdVal = v; }
         public int getRdVal() { return rdVal; }
-        public void setRs(int v) { rsVal = v; }
+        public void setRsVal(int v) { rsVal = v; }
         public int getRsVal() { return rsVal; }
         public void setIm(int v) { imVal = v; }
         public int getImVal() { return imVal; }
@@ -171,7 +171,7 @@ public class Op {
             v.accept(this);
         }
 
-        public void setRd(int v) { rdVal = v; }
+        public void setRdVal(int v) { rdVal = v; }
         public int getRdVal() { return rdVal; }
         public void setIm(int v) { imVal = v; }
         public int getImVal() { return imVal; }
@@ -194,9 +194,9 @@ public class Op {
             v.accept(this);
         }
 
-        public void setRd(int v) { rdVal = v; }
+        public void setRdVal(int v) { rdVal = v; }
         public int getRdVal() { return rdVal; }
-        public void setRs(int v) { rsVal = v; }
+        public void setRsVal(int v) { rsVal = v; }
         public int getRsVal() { return rsVal; }
         public void setIm(int v) { imVal = v; }
         public int getImVal() { return imVal; }
@@ -220,7 +220,7 @@ public class Op {
             v.accept(this);
         }
 
-        public void setRd(int v) { rdVal = v; }
+        public void setRdVal(int v) { rdVal = v; }
         public int getRdVal() { return rdVal; }
         public void setIm(int v) { imVal = v; }
         public int getImVal() { return imVal; }
@@ -241,7 +241,7 @@ public class Op {
             v.accept(this);
         }
 
-        public void setRd(int v) { rdVal = v; }
+        public void setRdVal(int v) { rdVal = v; }
         public int getRdVal() { return rdVal; }
         public void setIm(int v) { imVal = v; }
         public int getImVal() { return imVal; }

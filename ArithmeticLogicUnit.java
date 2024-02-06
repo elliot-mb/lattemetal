@@ -25,7 +25,9 @@ public class ArithmeticLogicUnit implements InstructionVoidVisitor, Ticks {
     @Override
     public void accept(Op.Add op) {
         if(op.isDone()){
-            //modify register value = op.getRsVal() + op.getRtVal();
+            //modify register value = op.getRsVal() + op.getRtVal(); // i guess we can just write into the instruction
+            //and then create a writeback stage
+            op.setRdVal();
             done = true;
             return;
         }

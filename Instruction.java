@@ -8,7 +8,6 @@ public abstract class Instruction extends HasDuration {
     protected int rdVal;
     protected int rsVal;
     protected int rtVal;
-    protected int imVal;
 
     Instruction(int duration, int immediate,  RegisterName... regs){
         super(duration);
@@ -30,7 +29,7 @@ public abstract class Instruction extends HasDuration {
         if(this.rt == null) throw new RuntimeException("getRt: there is no third register defined for this instruction");
         return this.rt;
     }
-    public int getImmediate() throws RuntimeException{
+    public int getIm() throws RuntimeException{
         if(this.im == Assembler.IMM_UNSET) throw new RuntimeException("getImmediate: there is no immediate defined for this instruction");
         return this.im;
     }
