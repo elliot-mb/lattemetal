@@ -5,13 +5,41 @@ public class Processor {
     private final ArithmeticLogicUnit alu;
     private final RegisterFile rf;
     private final Memory mem;
+    private final Decoder de;
+    private int tally;
+    private WriteBackUnit wb;
 
     Processor(InstructionCache ic){
-        this.pc = new ProgramCounter();
         this.ic = ic;
+        this.pc = new ProgramCounter(ic.numInstrs());
         this.rf = new RegisterFile();
         this.mem = new Memory();
         this.alu = new ArithmeticLogicUnit(this.mem, this.pc);
+        this.de = new Decoder(this.rf);
+        this.tally = 0;
+        this.wb = new WriteBackUnit(this.rf);
+    }
+
+    public void run(){
+        Id preDecoder = new Id();
+        System.out.println(ic);
+        while(!pc.isDone()){
+            Instruction fetched = ic.getInstruction(pc.getCount());
+            Opcode code = fetched.visit(preDecoder);
+            Instruction decoded = de.decode(fetched);
+            alu.loadFilledOp(decoded);
+            while(!alu.isDone()){
+                alu.clk();
+                tally++;
+            }
+            Instruction finished = alu.requestOp();
+            wb.go(finished);
+            if(code != Opcode.br && code != Opcode.brlz && code != Opcode.jp && code != Opcode.jplz){
+                pc.incr();
+            }
+        }
+        System.out.println("run: program finished in " + tally + " cycles");
+        System.out.println(mem);
     }
 
 }

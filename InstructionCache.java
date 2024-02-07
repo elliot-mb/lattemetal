@@ -25,6 +25,11 @@ public class InstructionCache{
         return program.get(pcVal);
     }
 
+    //gets number of instructions
+    public int numInstrs(){
+        return program.size();
+    }
+
     @Override
     public String toString(){
         return Utils.writeList(program);
