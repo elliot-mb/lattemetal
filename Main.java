@@ -70,7 +70,7 @@ public class Main {
             System.out.println(args[0]);
         }
 
-        Assembler assembler = new Assembler("./assembly/test.latte");
+        Assembler assembler = new Assembler("./assembly/quot.latte");
         boolean didRead = assembler.readFile();
         if(!didRead){
             throw new RuntimeException("main: program assembler failed to read program");

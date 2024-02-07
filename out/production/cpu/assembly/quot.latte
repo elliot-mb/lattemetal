@@ -5,7 +5,7 @@ addi t4 zero #2
 muli t6 t4 #-1 --so we can subtract t4 by adding it
 add t5 t3 zero --set t5 to t3
 add t5 t5 t6 -- loop head
-cmp t0 zero t3 -- set t7 to comparison result
-jplz t0git  #-2 -- loop tail
+cmp t7 zero t3 -- set t7 to comparison result
+jplz t7 #-2 -- loop tail
 st t5 zero #0 --output result in memory
 
