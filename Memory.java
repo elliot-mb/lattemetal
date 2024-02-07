@@ -1,6 +1,6 @@
 public class Memory extends Block{
 
-    private static final int SIZE = 16;
+    private static final int SIZE = 8;
 
     Memory(int... data){
         super(SIZE, data);

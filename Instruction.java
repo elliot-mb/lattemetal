@@ -38,17 +38,17 @@ public abstract class Instruction extends HasDuration {
     abstract public void visit(InstructionVoidVisitor v);
 
     protected String regToString(RegisterName r){
-        return r == null ? "_" : r.name();
+        return r == null ? "" : " " + r.name();
     }
 
     protected String immToString(int immediate){
-        return immediate == Assembler.IMM_UNSET ? "_" : "" + immediate;
+        return immediate == Assembler.IMM_UNSET ? "" : " #" + immediate;
     }
 
     @Override
     public String toString(){
         Opcode underlying = visit(new Id());
-        return underlying.name() + " " + regToString(rd) + " " + regToString(rs) + " " + regToString(rt) + " #" + immToString(im);
+        return underlying.name() + "\t" + regToString(rd) + regToString(rs) + regToString(rt) + immToString(im);
     }
 
     // term shapes:

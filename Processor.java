@@ -25,6 +25,7 @@ public class Processor {
         System.out.println(ic);
         while(!pc.isDone()){
             Instruction fetched = ic.getInstruction(pc.getCount());
+            System.out.println(fetched);
             Opcode code = fetched.visit(preDecoder);
             Instruction decoded = de.decode(fetched);
             alu.loadFilledOp(decoded);
@@ -39,8 +40,8 @@ public class Processor {
             }
         }
         System.out.println("run: program finished in " + tally + " cycles");
-        System.out.println("memory: " + mem);
         System.out.println("registers: " + rf);
+        System.out.println("memory: " + mem);
     }
 
 }

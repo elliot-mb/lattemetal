@@ -132,6 +132,8 @@ public class ArithmeticLogicUnit implements InstructionVoidVisitor, Ticks {
             //modify program counter
             if(op.getRdVal() <= 0) {
                 pc.set(op.getImVal());
+            }else{
+                pc.incr();
             }
             done = true;
             return;
@@ -145,6 +147,8 @@ public class ArithmeticLogicUnit implements InstructionVoidVisitor, Ticks {
             //modify program counter
             if(op.getRdVal() <= 0){
                 pc.set(pc.getCount() + op.getImVal());
+            }else{
+                pc.incr();
             }
             done = true;
             return;
