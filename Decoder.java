@@ -63,6 +63,7 @@ public class Decoder implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.St op) {
+        op.setRdVal(rf.getReg(op.getRd()));
         op.setRsVal(rf.getReg(op.getRs()));
         currentInstruction = op;
     }

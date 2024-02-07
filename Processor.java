@@ -39,7 +39,8 @@ public class Processor {
             }
         }
         System.out.println("run: program finished in " + tally + " cycles");
-        System.out.println(mem);
+        System.out.println("memory: " + mem);
+        System.out.println("registers: " + rf);
     }
 
 }

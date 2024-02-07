@@ -1,7 +1,16 @@
    -- this is a comment
 
-ld t0 #1
-addi t1 t0 #1
-addi t2 t1 #1 --comment
-add t3 t2 t1
-st t3
+-- ldc t0 #1
+-- addi t1 t0 #1
+-- addi t2 t1 #1 --comment
+-- add t3 t2 t1
+-- st t3 zero #0
+-- st t3 zero #0
+-- mul t0 t1 t2
+-- st t0 zero #1
+
+addi t0 zero #1 --create a 1 in the t0 register
+st t0 zero #0 --store it in memory at address zero
+ld t1 zero #0 --load the stored one into t1
+add t2 t0 t1 --add these two together
+st t2 zero #1 --store the contents of t2 and addr 1

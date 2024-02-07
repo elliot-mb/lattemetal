@@ -1,7 +1,9 @@
 public class RegisterFile extends Block{
 
+    private static final int NUM_REGS = RegisterName.values().length;
+
     RegisterFile(){
-        super(RegisterName.values().length, Block.NODATA);
+        super(NUM_REGS, Block.NODATA);
     }
 
     public void setReg(RegisterName name, int val){
@@ -11,5 +13,14 @@ public class RegisterFile extends Block{
 
     public int getReg(RegisterName name){
         return read(name.ordinal());
+    }
+
+    @Override
+    public String toString() {
+        String builder = "";
+        for(RegisterName reg : RegisterName.values()){
+            builder += "\r\n " + reg.name() + "\t" + getReg(reg);
+        }
+        return builder;
     }
 }
