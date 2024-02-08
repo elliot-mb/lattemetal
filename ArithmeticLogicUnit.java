@@ -1,20 +1,30 @@
 public class ArithmeticLogicUnit implements InstructionVoidVisitor, Ticks {
 
+    private PipelineRegister pipeRegIn;
+    private PipelineRegister pipeRegOut;
     private Instruction currentOp;
     private boolean done;
-    private final Memory mem;
-    private final ProgramCounter pc;
+    private boolean pushed;
 
-    ArithmeticLogicUnit(Memory mem, ProgramCounter pc){
+
+    ArithmeticLogicUnit(PipelineRegister pipeRegIn, PipelineRegister pipeRegOut){
+        this.pipeRegIn = pipeRegIn;
+        this.pipeRegOut = pipeRegOut;
         this.currentOp = null;
-        this.mem = mem;
-        this.pc = pc;
         this.done = true;
+        this.pushed = false;
     }
 
     @Override //overriding because we need to delegate to whats inside
     public void clk() { //effectively delegates to the instruction clk
-        if(!isDone()) currentOp.visit(this);
+        if(done) { //all Ticks objects ought to have this!
+            if(!pushed) pushed = pipeRegOut.push(currentOp);
+            //if we could push, we can try to overwrite what we have
+            if(pushed) currentOp = pipeRegIn.pull();
+            //if pulling was successful, we set done false to begin working, else we try again
+            done = currentOp == null;
+        }
+        else currentOp.visit(this);
     }
 
     public void loadFilledOp(Instruction op){

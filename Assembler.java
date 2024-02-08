@@ -4,7 +4,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Assembler {
     // this class contains the basic assembler that turns our raw instructions into machine readable objects
@@ -73,7 +72,7 @@ public class Assembler {
         return rawLines.size();
     }
 
-    private Instruction makeInstr(Opcode code, RegisterName[] regs, int immediate){
+    private Instruction makeInstr(OpCode code, RegisterName[] regs, int immediate){
         RegisterName rd = regs[0];
         RegisterName rs = regs[1];
         RegisterName rt = regs[2];
@@ -121,7 +120,7 @@ public class Assembler {
                 String op = tokens[0];
                 if (!Lookup.op.containsKey(op))
                     throw new RuntimeException(errorPrefix(lnNo) + "there is no such opcode '" + op + "'");
-                Opcode code = Lookup.op.get(op);
+                OpCode code = Lookup.op.get(op);
                 RegisterName[] regs = new RegisterName[ARG_REGS]; //between zero to three registers can be specified
                 int regI = 0;
                 int immediate = IMM_UNSET; //has it been set

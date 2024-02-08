@@ -17,24 +17,7 @@ public abstract class Instruction extends HasDuration {
         this.rt = regs.length > 2 ? regs[2] : null;
     }
 
-    public RegisterName getRd() throws RuntimeException{
-        if(this.rd == null) throw new RuntimeException("getRd: there is no first register defined for this instruction");
-        return this.rd;
-    }
-    public RegisterName getRs() throws RuntimeException{
-        if(this.rs == null) throw new RuntimeException("getRs: there is no second register defined for this instruction");
-        return this.rs;
-    }
-    public RegisterName getRt() throws RuntimeException{
-        if(this.rt == null) throw new RuntimeException("getRt: there is no third register defined for this instruction");
-        return this.rt;
-    }
-    public int getIm() throws RuntimeException{
-        if(this.im == Assembler.IMM_UNSET) throw new RuntimeException("getImmediate: there is no immediate defined for this instruction");
-        return this.im;
-    }
-
-    abstract public Opcode visit(InstructionCodeVisitor v);
+    abstract public OpCode visit(InstructionCodeVisitor v);
     abstract public void visit(InstructionVoidVisitor v);
 
     protected String regToString(RegisterName r){
@@ -47,7 +30,7 @@ public abstract class Instruction extends HasDuration {
 
     @Override
     public String toString(){
-        Opcode underlying = visit(new Id());
+        OpCode underlying = visit(new OpCoder());
         return underlying.name() + "\t" + regToString(rd) + regToString(rs) + regToString(rt) + immToString(im);
     }
 
@@ -60,26 +43,28 @@ public abstract class Instruction extends HasDuration {
     // operator argument validation on the four instruction shapes
     protected void checkShape(RegisterName rd, RegisterName rs, RegisterName rt){
         if(rd == null || rs == null || rt == null)
-            throw new RuntimeException(visit(new Id()) + ": missing at least one register reference");
+            throw new RuntimeException(visit(new OpCoder()) + ": missing at least one register reference");
     }
 
     protected void checkShape(RegisterName rd, RegisterName rs, int im){
         if(rd == null || rs == null)
-            throw new RuntimeException(visit(new Id()) +": missing at least one register reference");
+            throw new RuntimeException(visit(new OpCoder()) +": missing at least one register reference");
         if(im == Assembler.IMM_UNSET)
-            throw new RuntimeException(visit(new Id()) +": missing immediate");
+            throw new RuntimeException(visit(new OpCoder()) +": missing immediate");
     }
 
     protected void checkShape(RegisterName rd, int im){
         if(rd == null)
-            throw new RuntimeException(visit(new Id()) +": missing the register reference");
+            throw new RuntimeException(visit(new OpCoder()) +": missing the register reference");
         if(im == Assembler.IMM_UNSET)
-            throw new RuntimeException(visit(new Id()) +": missing immediate");
+            throw new RuntimeException(visit(new OpCoder()) +": missing immediate");
     }
 
     protected void checkShape(int im){
         if(im == Assembler.IMM_UNSET)
-            throw new RuntimeException(visit(new Id()) +": missing immediate");
+            throw new RuntimeException(visit(new OpCoder()) +": missing immediate");
     }
+
+    public abstract Instruction copy();
 
 }

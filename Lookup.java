@@ -3,19 +3,19 @@ import java.util.Map;
 
 public class Lookup {
     //for assembling
-    public static Map<String, Opcode> op = Map.ofEntries(
-            new AbstractMap.SimpleEntry<String, Opcode>("add", Opcode.add),
-            new AbstractMap.SimpleEntry<String, Opcode>("addi", Opcode.addi),
-            new AbstractMap.SimpleEntry<String, Opcode>("mul", Opcode.mul),
-            new AbstractMap.SimpleEntry<String, Opcode>("muli", Opcode.muli),
-            new AbstractMap.SimpleEntry<String, Opcode>("cmp", Opcode.cmp),
-            new AbstractMap.SimpleEntry<String, Opcode>("ld", Opcode.ld),
-            new AbstractMap.SimpleEntry<String, Opcode>("ldc", Opcode.ldc),
-            new AbstractMap.SimpleEntry<String, Opcode>("st", Opcode.st),
-            new AbstractMap.SimpleEntry<String, Opcode>("brlz", Opcode.brlz),
-            new AbstractMap.SimpleEntry<String, Opcode>("jplz", Opcode.jplz),
-            new AbstractMap.SimpleEntry<String, Opcode>("br", Opcode.br),
-            new AbstractMap.SimpleEntry<String, Opcode>("jp", Opcode.jp)
+    public static Map<String, OpCode> op = Map.ofEntries(
+            new AbstractMap.SimpleEntry<String, OpCode>("add", OpCode.add),
+            new AbstractMap.SimpleEntry<String, OpCode>("addi", OpCode.addi),
+            new AbstractMap.SimpleEntry<String, OpCode>("mul", OpCode.mul),
+            new AbstractMap.SimpleEntry<String, OpCode>("muli", OpCode.muli),
+            new AbstractMap.SimpleEntry<String, OpCode>("cmp", OpCode.cmp),
+            new AbstractMap.SimpleEntry<String, OpCode>("ld", OpCode.ld),
+            new AbstractMap.SimpleEntry<String, OpCode>("ldc", OpCode.ldc),
+            new AbstractMap.SimpleEntry<String, OpCode>("st", OpCode.st),
+            new AbstractMap.SimpleEntry<String, OpCode>("brlz", OpCode.brlz),
+            new AbstractMap.SimpleEntry<String, OpCode>("jplz", OpCode.jplz),
+            new AbstractMap.SimpleEntry<String, OpCode>("br", OpCode.br),
+            new AbstractMap.SimpleEntry<String, OpCode>("jp", OpCode.jp)
     );
 
     public static Map<String, RegisterName> reg = Map.ofEntries(

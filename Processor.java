@@ -9,28 +9,33 @@ public class Processor {
     private int tally;
     private WriteBackUnit wb;
 
-    private enum pipeRegNames { IF_ID, ID_EX, EX_MEM, MEM_WB }
-    private final Instruction[] pipeReg = new Instruction[4];
-
+    /**
+     * parts that read and write to these buffers should check that they are null first before writing (otherwise assume
+     * a stall)
+     */
+    private final PipelineRegister IF_ID = new PipelineRegister(); //in-flight register between fetch, and decode
+    private final PipelineRegister ID_EX = new PipelineRegister(); //in-flight register between decode, and execute
+    private final PipelineRegister EX_MM = new PipelineRegister(); //in-flight register between execute, and memory unit
+    private final PipelineRegister MM_WB = new PipelineRegister(); //in-flight register between memory unit, and write back
 
     Processor(InstructionCache ic){
         this.ic = ic;
         this.pc = new ProgramCounter(ic.numInstrs());
         this.rf = new RegisterFile();
         this.mem = new Memory();
-        this.alu = new ArithmeticLogicUnit();
+        this.alu = new ArithmeticLogicUnit(ID_EX, EX_MM);
         this.de = new Decoder(this.rf);
         this.tally = 0;
         this.wb = new WriteBackUnit(this.rf);
     }
 
     public void run(){
-        Id preDecoder = new Id();
+        OpCoder preDecoder = new OpCoder();
         System.out.println(ic);
         while(!pc.isDone()){
             Instruction fetched = ic.getInstruction(pc.getCount());
             //IF/ID
-            Opcode code = fetched.visit(preDecoder); //if at a branch, we stall until the operand is done
+            OpCode code = fetched.visit(preDecoder); //if at a branch, we stall until the operand is done
             Instruction decoded = de.decode(fetched);
             //ID/EX
             alu.loadFilledOp(decoded);
@@ -40,7 +45,7 @@ public class Processor {
             }
             Instruction finished = alu.requestOp();
             //EX/MEM
-            if(code != Opcode.br && code != Opcode.brlz && code != Opcode.jp && code != Opcode.jplz){
+            if(code != OpCode.br && code != OpCode.brlz && code != OpCode.jp && code != OpCode.jplz){
                 pc.incr();
             }
             //load/store unit
