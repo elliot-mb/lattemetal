@@ -1,16 +1,26 @@
 public class ProgramCounter {
 
     private int counter; //address
+    private int icSize;
 
-    ProgramCounter(){
+    ProgramCounter(int icSize){
         this.counter = 0;
+        this.icSize = icSize;
     }
 
     public void incr(){
         this.counter++;
     }
 
-    public int count(){
+    public boolean isDone(){
+        return this.counter >= this.icSize;
+    }
+
+    public void set(int val){
+        this.counter = val;
+    }
+
+    public int getCount(){
         return counter;
     }
 }

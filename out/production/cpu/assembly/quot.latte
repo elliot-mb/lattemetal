@@ -1,0 +1,10 @@
+-- load operands
+addi t3 zero #10
+addi t4 zero #2
+-- a quotient division t3 / t4 into t5
+muli t6 t4 #-1 --so we can subtract t4 by adding it
+add t3 t3 t6 -- loop head
+cmp t0 t4 t3 -- if we are less than what we're subtracting we shall not subtract no more
+jplz t0 #-2 -- loop tail
+st t5 zero #0 --output result in memory
+

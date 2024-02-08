@@ -1,20 +1,26 @@
-import java.util.Arrays;
+public class RegisterFile extends Block{
 
-public class RegisterFile {
-
-    private final int[] rf = new int[32]; //we should index this with the enum
+    private static final int NUM_REGS = RegisterName.values().length;
 
     RegisterFile(){
-        Arrays.fill(rf, 0);
-    }
-
-    public int getReg(RegisterName name){
-        return rf[name.ordinal()];
+        super(NUM_REGS, Block.NODATA);
     }
 
     public void setReg(RegisterName name, int val){
         if(name == RegisterName.zero) throw new RuntimeException("setReg: mutation not possible: 'zero' is a constant register");
-        rf[name.ordinal()] = val;
+        data[name.ordinal()] = val;
     }
 
+    public int getReg(RegisterName name){
+        return read(name.ordinal());
+    }
+
+    @Override
+    public String toString() {
+        String builder = "";
+        for(RegisterName reg : RegisterName.values()){
+            builder += "\r\n " + reg.name() + "\t" + getReg(reg);
+        }
+        return builder;
+    }
 }

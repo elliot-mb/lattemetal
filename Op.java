@@ -21,11 +21,11 @@ public class Op {
             v.accept(this);
         }
 
-        public void setRd(int v) { rdVal = v; }
+        public void setRdVal(int v) { rdVal = v; }
         public int getRdVal() { return rdVal; }
-        public void setRs(int v) { rsVal = v; }
+        public void setRsVal(int v) { rsVal = v; }
         public int getRsVal() { return rsVal; }
-        public void setRt(int v) { rtVal = v; }
+        public void setRtVal(int v) { rtVal = v; }
         public int getRtVal() { return rtVal; }
 
     }
@@ -47,12 +47,11 @@ public class Op {
             v.accept(this);
         }
 
-        public void setRd(int v) { rdVal = v; }
+        public void setRdVal(int v) { rdVal = v; }
         public int getRdVal() { return rdVal; }
-        public void setRs(int v) { rsVal = v; }
+        public void setRsVal(int v) { rsVal = v; }
         public int getRsVal() { return rsVal; }
-        public void setIm(int v) { imVal = v; }
-        public int getImVal() { return imVal; }
+        public int getImVal() { return im; }
     }
 
     public class Mul extends Instruction{
@@ -72,11 +71,11 @@ public class Op {
             v.accept(this);
         }
 
-        public void setRd(int v) { rdVal = v; }
+        public void setRdVal(int v) { rdVal = v; }
         public int getRdVal() { return rdVal; }
-        public void setRs(int v) { rsVal = v; }
+        public void setRsVal(int v) { rsVal = v; }
         public int getRsVal() { return rsVal; }
-        public void setRt(int v) { rtVal = v; }
+        public void setRtVal(int v) { rtVal = v; }
         public int getRtVal() { return rtVal; }
     }
 
@@ -97,12 +96,11 @@ public class Op {
             v.accept(this);
         }
 
-        public void setRd(int v) { rdVal = v; }
+        public void setRdVal(int v) { rdVal = v; }
         public int getRdVal() { return rdVal; }
-        public void setRs(int v) { rsVal = v; }
+        public void setRsVal(int v) { rsVal = v; }
         public int getRsVal() { return rsVal; }
-        public void setIm(int v) { imVal = v; }
-        public int getImVal() { return imVal; }
+        public int getImVal() { return im; }
     }
 
     public class Cmp extends Instruction{
@@ -123,11 +121,11 @@ public class Op {
             v.accept(this);
         }
 
-        public void setRd(int v) { rdVal = v; }
+        public void setRdVal(int v) { rdVal = v; }
         public int getRdVal() { return rdVal; }
-        public void setRs(int v) { rsVal = v; }
+        public void setRsVal(int v) { rsVal = v; }
         public int getRsVal() { return rsVal; }
-        public void setRt(int v) { rtVal = v; }
+        public void setRtVal(int v) { rtVal = v; }
         public int getRtVal() { return rtVal; }
     }
 
@@ -146,12 +144,11 @@ public class Op {
             v.accept(this);
         }
 
-        public void setRd(int v) { rdVal = v; }
+        public void setRdVal(int v) { rdVal = v; }
         public int getRdVal() { return rdVal; }
-        public void setRs(int v) { rsVal = v; }
+        public void setRsVal(int v) { rsVal = v; }
         public int getRsVal() { return rsVal; }
-        public void setIm(int v) { imVal = v; }
-        public int getImVal() { return imVal; }
+        public int getImVal() { return im; }
     }
 
     public class LdC extends Instruction{
@@ -171,10 +168,9 @@ public class Op {
             v.accept(this);
         }
 
-        public void setRd(int v) { rdVal = v; }
+        public void setRdVal(int v) { rdVal = v; }
         public int getRdVal() { return rdVal; }
-        public void setIm(int v) { imVal = v; }
-        public int getImVal() { return imVal; }
+        public int getImVal() { return im; }
     }
 
     public class St extends Instruction{
@@ -194,12 +190,11 @@ public class Op {
             v.accept(this);
         }
 
-        public void setRd(int v) { rdVal = v; }
+        public void setRdVal(int v) { rdVal = v; }
         public int getRdVal() { return rdVal; }
-        public void setRs(int v) { rsVal = v; }
+        public void setRsVal(int v) { rsVal = v; }
         public int getRsVal() { return rsVal; }
-        public void setIm(int v) { imVal = v; }
-        public int getImVal() { return imVal; }
+        public int getImVal() { return im; }
     }
 
     public class BrLZ extends Instruction{
@@ -220,10 +215,9 @@ public class Op {
             v.accept(this);
         }
 
-        public void setRd(int v) { rdVal = v; }
+        public void setRdVal(int v) { rdVal = v; }
         public int getRdVal() { return rdVal; }
-        public void setIm(int v) { imVal = v; }
-        public int getImVal() { return imVal; }
+        public int getImVal() { return im; }
     }
 
     public class JpLZ extends Instruction{
@@ -241,10 +235,9 @@ public class Op {
             v.accept(this);
         }
 
-        public void setRd(int v) { rdVal = v; }
+        public void setRdVal(int v) { rdVal = v; }
         public int getRdVal() { return rdVal; }
-        public void setIm(int v) { imVal = v; }
-        public int getImVal() { return imVal; }
+        public int getImVal() { return im; }
     }
 
     public class Br extends Instruction{
@@ -264,8 +257,7 @@ public class Op {
             v.accept(this);
         }
 
-        public void setIm(int v) { imVal = v; }
-        public int getImVal() { return imVal; }
+        public int getImVal() { return im; }
     }
 
     public class Jp extends Instruction{
@@ -285,7 +277,6 @@ public class Op {
             v.accept(this);
         }
 
-        public void setIm(int v) { imVal = v; }
-        public int getImVal() { return imVal; }
+        public int getImVal() { return im; }
     }
 }

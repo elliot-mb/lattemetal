@@ -43,3 +43,7 @@ It is a pipelined superscalar implementation which focuses on hardware-optimisat
 Instruction cache will be stored as integers! 
 an instruction may be 
 ``big end << [opcode 0-11 (5b)] [register_s 0-31 (5b)] [register_s 0-31 (5b)] [register_t 0-31 (5b)] [immediate 0-8192 (12b)] small end >>``
+
+# Interim
+
+Plan benchmarks for the interim etc.
