@@ -9,12 +9,16 @@ public class Processor {
     private int tally;
     private WriteBackUnit wb;
 
+    private enum pipeRegNames { IF_ID, ID_EX, EX_MEM, MEM_WB }
+    private final Instruction[] pipeReg = new Instruction[4];
+
+
     Processor(InstructionCache ic){
         this.ic = ic;
         this.pc = new ProgramCounter(ic.numInstrs());
         this.rf = new RegisterFile();
         this.mem = new Memory();
-        this.alu = new ArithmeticLogicUnit(this.mem, this.pc);
+        this.alu = new ArithmeticLogicUnit();
         this.de = new Decoder(this.rf);
         this.tally = 0;
         this.wb = new WriteBackUnit(this.rf);
@@ -25,19 +29,23 @@ public class Processor {
         System.out.println(ic);
         while(!pc.isDone()){
             Instruction fetched = ic.getInstruction(pc.getCount());
-        //    System.out.println(fetched);
-            Opcode code = fetched.visit(preDecoder);
+            //IF/ID
+            Opcode code = fetched.visit(preDecoder); //if at a branch, we stall until the operand is done
             Instruction decoded = de.decode(fetched);
+            //ID/EX
             alu.loadFilledOp(decoded);
             while(!alu.isDone()){
                 alu.clk();
                 tally++;
             }
             Instruction finished = alu.requestOp();
-            wb.go(finished);
+            //EX/MEM
             if(code != Opcode.br && code != Opcode.brlz && code != Opcode.jp && code != Opcode.jplz){
                 pc.incr();
             }
+            //load/store unit
+            //MEM/WB
+            wb.go(finished);
         }
         System.out.println("run: program finished in " + tally + " cycles");
         System.out.println("registers: " + rf);
