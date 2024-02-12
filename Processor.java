@@ -25,9 +25,11 @@ public class Processor {
         System.out.println(ic);
         while(!pc.isDone()){
             Instruction fetched = ic.getInstruction(pc.getCount());
+            tally++;
         //    System.out.println(fetched);
             Opcode code = fetched.visit(preDecoder);
             Instruction decoded = de.decode(fetched);
+            tally++;
             alu.loadFilledOp(decoded);
             while(!alu.isDone()){
                 alu.clk();
@@ -35,6 +37,7 @@ public class Processor {
             }
             Instruction finished = alu.requestOp();
             wb.go(finished);
+            tally++;
             if(code != Opcode.br && code != Opcode.brlz && code != Opcode.jp && code != Opcode.jplz){
                 pc.incr();
             }
