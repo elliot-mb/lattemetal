@@ -14,6 +14,8 @@ addi t0 zero #16            --A starts at [16]
 st t0 zero #3               --store at [3]
 addi t0 zero #32            --B starts at [32]
 st t0 zero #4               --store at [4]
+addi t0 zero #48            --C will start at [48]
+st t0 zero #5               --store at [5]
 
                             --define matrices (here they are both the 2x2 identity matrix)
 ld t1 zero #3               --load A's start address
@@ -36,3 +38,28 @@ st t0 t1 #2                 --store at t1 + 2
 addi t0 zero #1             --B_22
 st t0 t1 #3                 --store at t1 + 3
 
+                            -- addressing a row is simple:
+                            -- just run along the matrix block
+                            -- addressing a column means taking a
+                            -- stride of row length for each elem
+ld t0 zero #0               -- t0 = m (height of A)
+ld t1 zero #1               -- t1 = p (width of A, height of B)
+ld t2 zero #2               -- t2 = n (width of B, will be used for accessing columns of B)
+ld t3 zero #3               -- t3 = address of A_11
+ld t4 zero #4               -- t4 = address of B_11
+ld t5 zero #5               -- t5 = address of C_11
+addi t6 zero #0             -- i = 0
+addi s2 zero #0             -- s2 = accumulator for dot product (reset this)
+                            -- for(i = 0; i < p; i++) --we will used 'save registers' (sn) for calculations
+add s0 t3 t6                -- s0 = i + &A_11
+ld s0 s0 #0                 -- s0 = A_1i
+mul s1 t6 t2                -- s1 = i * n
+add s1 s1 t4                -- s1 += &B_11
+ld s1 s1 #0                 -- s1 = B_i1
+mul s0 s1 s0                -- s0 = A_1i * B_i1
+add s2 s2 s0                -- s2 += s0
+addi t6 t6 #1               -- i++
+cmp s0 t6 t1                -- i < p => s0 = -1
+addi s0 s0 #1               -- i < p => s0 = 0
+jplz s0 #-10                -- so just while i is less than p we jump round the loop
+st s2 t5 #0
