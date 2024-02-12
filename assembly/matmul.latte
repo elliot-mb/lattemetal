@@ -36,17 +36,17 @@ ld t4 zero #4               -- t4 = address of B_11
 ld t5 zero #5               -- t5 = address of C_11
 addi a0 zero #0             -- i = 0 counter for dot prod (all our counters will be 'a' registers)
 addi a1 zero #0             -- j = 0 row number in C (row number in A)
-addi a2 zero #0             -- k = 0 column number in C (column number in B) 
-addi a2 zero #0             -- k = 0; -- for(j = 0; j < m; j++) -- for(k = 0; k < n; k++) 
+addi a2 zero #0             -- k = 0 column number in C (column number in B)
+addi a2 zero #0
+    addi a2 zero #0
     addi a0 zero #0             -- i = 0;
     addi s2 zero #0             -- s2 = 0; accumulator for dot product (reset this)  -- for(i = 0; i < p; i++) --we will used 'save registers' (sn) for calculations
-        mul s3 t1 a1            -- s3 = row offset (m * j) 
-        add s0 s3 a0            -- s0 = i + (m * j)
+        mul s0 t0 a1            -- s0 = row offset (m * j)
+        add s0 s0 a0            -- s0 = i + (m * j)
         add s0 s0 t3            -- s0 += &A_11
         ld s0 s0 #0             -- s0 = A_ji
-        st s0 zero #63
         mul s1 a0 t1            -- s1 = row offset (i * p)
-        add s1 s1 a2            -- s1 += k      this moves the reference along the row j spaces
+        add s1 s1 a2            -- s1 += k
         add s1 s1 t4            -- s1 += &B_11
         ld s1 s1 #0             -- s1 = B_ik
         mul s0 s1 s0            -- s0 = A_ji * B_ik
@@ -54,15 +54,15 @@ addi a2 zero #0             -- k = 0; -- for(j = 0; j < m; j++) -- for(k = 0; k 
         addi a0 a0 #1           -- i++
         cmp s0 a0 t1            -- i < p => s0 = -1
         addi s0 s0 #1           -- i < p => s0 = 0
-        brlz s0 #42             -- so just while i is less than p we jump round the loop
-        add t5 t5 a2            -- t5 += column offset (k)
-        mul s3 t0 a1            -- s3 = row offset (m * j)
-        add t5 t5 s3            -- t5 += row offset (s3)
-        st s2 t5 #0             -- store the result in C_jk 
+        brlz s0 #43             -- so just while i is less than p we jump round the loop
+    mul s3 t0 a1            -- s3 = row offset (m * j)
+    add s3 s3 a2            -- s3 += k
+    add s3 s3 t5            -- s3 += &C_11
+    st s2 s3 #0             -- store the result in C_jk
     addi a2 a2 #1               -- k++
     cmp s4 a2 t2                -- k < n => s4 = -1
     addi s4 s4 #1               -- k < n => s4 = 0
-    brlz s4 #41                 -- go back to the start of the dot product loop 
+    brlz s4 #41                 -- go back to the start of the dot product loop
 addi a1 a1 #1                   -- j++
 cmp s4 a1 t0                    -- j < m => s4 = -1
 addi s4 s4 #1                   -- j < m => s4 = 0
