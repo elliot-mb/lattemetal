@@ -1,0 +1,33 @@
+--minimum element of an array (part of livermore suite)
+
+                    --just using temporary register zero to create the data
+                    --write required arguments: array start, array length
+addi t0 zero #3     --start (starts at [2])
+st t0 zero #0       --store start at [0]
+addi t0 zero #10    --length
+st t0 zero #1       --store length at [1]
+
+                    --write array: elements 0 to 9 [1, 10, 2, 4, 11, -2, -5, 4, 2, 1]
+ld t1 zero #0       --loads the start location into register t1
+addi t0 zero #1
+st t0 t1 #0
+addi t0 zero #10
+st t0 t1 #1
+addi t0 zero #2
+st t0 t1 #2
+addi t0 zero #4
+st t0 t1 #3
+addi t0 zero #11
+st t0 t1 #4
+addi t0 zero #-2
+st t0 t1 #5
+addi t0 zero #-5
+st t0 t1 #6
+addi t0 zero #4
+st t0 t1 #7
+addi t0 zero #2
+st t0 t1 #8
+addi t0 zero #1
+st t0 t1 #9
+
+                    --find min in this array (register t1 is set to start)
