@@ -152,7 +152,15 @@ public class Assembler {
                     }
                 }
 
-                try{program.add(makeInstr(code, regs, immediate));}
+                try{
+                    Instruction instr = makeInstr(code, regs, immediate);
+                    program.add(instr);
+//                    Id id = new Id();
+//                    Opcode visitedCode = instr.visit(id);
+//                    if(visitedCode == Opcode.jplz || visitedCode == Opcode.jp){
+//                        jumpOffset = 0; //jumps are all relative
+//                    }
+                }
                 catch(RuntimeException err){
                     throw new RuntimeException(errorPrefix(lnNo) + err.getMessage());
                 }
