@@ -19,7 +19,7 @@ public class RegisterFile extends Block{
     public String toString() {
         String builder = "";
         for(RegisterName reg : RegisterName.values()){
-            builder += "\r\n " + reg.name() + "\t" + getReg(reg);
+            if(isDirty(reg.ordinal())) builder += "\r\n " + reg.name() + "\t" + getReg(reg);
         }
         return builder;
     }

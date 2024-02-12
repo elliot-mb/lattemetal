@@ -7,7 +7,7 @@ public class Op {
         private static final int DURATION = 2;
 
         Add(RegisterName rd, RegisterName rs, RegisterName rt){
-            super(DURATION, Assembler.IMM_UNSET, rd, rs, rt);
+            super(DURATION, null, rd, rs, rt);
             checkShape(rd, rs, rt);
         }
 
@@ -58,7 +58,7 @@ public class Op {
         private static final int DURATION = 4;
 
         Mul(RegisterName rd, RegisterName rs, RegisterName rt){
-            super(DURATION, Assembler.IMM_UNSET, rd, rs, rt);
+            super(DURATION, null, rd, rs, rt);
             checkShape(rd, rs, rt);
         }
 
@@ -108,7 +108,7 @@ public class Op {
         private static final int DURATION = 2;
 
         Cmp(RegisterName rd, RegisterName rs, RegisterName rt){
-            super(DURATION, Assembler.IMM_UNSET, rd, rs, rt);
+            super(DURATION, null, rd, rs, rt);
             checkShape(rd, rs, rt);
         }
 
