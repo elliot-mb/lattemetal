@@ -11,7 +11,7 @@ public class Main {
 
 
     /**
-     * ISA
+     * ISA (register-memory)
      *
      *      * add  rd rs rt         --addition of two registers
      *      * addi rd rs #n        --addition of a register and an immediate
@@ -44,7 +44,7 @@ public class Main {
      * @param args
      */
     public static void main(String[] args){
-        String programPath = "./assembly/quot.latte";
+        String programPath = "./assembly/matmul.latte";
         if(args.length >= 1){
             System.out.println(args[0]);
             programPath = args[0];

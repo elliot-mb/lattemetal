@@ -1,7 +1,7 @@
 public class Memory extends Block{
 
     private static final int SIZE = 64;
-    private static final int MAX_ADDR_DIGIT = Integer.toHexString(SIZE).length();
+    private static final int MAX_ADDR_DIGIT = Utils.digitsInInt(SIZE);
 
     Memory(){
         super(SIZE);
@@ -31,13 +31,14 @@ public class Memory extends Block{
             String valPadding = (negative ? "-" : "");
             String padChar = !isDirty(j) ? "\s" : "0";
             for(int i = 0; i < padLen; i++) valPadding += padChar;
-            String addrName = Integer.toHexString(addr);
-            int addrDigits = addrName.length();
+            int addrDigits = Utils.digitsInInt(addr);
             int addrPadLen = MAX_ADDR_DIGIT - addrDigits;
-            String addrPadding = "\s";
-            for(int i = 0; i < addrPadLen; i++) addrPadding += "\s";
+            String addrPadding = "";
+            for(int i = 0; i < addrPadLen; i++) addrPadding += "0";
             result += (addr % PER_ROW == 0 ? "\r\n" : "");
-            result += "0x" + Integer.toHexString(addr) + addrPadding + (negative ? "" : "\s") + valPadding + (val == 0 ? "" : absVal) + "\s\s\s";
+            result += "[" + addrPadding + (addr == 0 ? "" : addr) + "]";
+            result += (negative ? "" : "\s");
+            result += valPadding + (val == 0 ? "" : absVal) + "\s\s\s";
             addr++;
         }
         return result;

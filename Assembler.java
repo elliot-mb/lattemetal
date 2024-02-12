@@ -117,16 +117,20 @@ public class Assembler {
         int lnNo = 1;
         for(String ln : this.rawLines){
             if(ln.length() != 0) { //add it just if it isnt blank!
-                String[] tokens = ln.split("\s");
-                String op = tokens[0];
+                String[] tokensEmpties = ln.split("\s");
+                ArrayList<String> tokens = new ArrayList<String>(){};
+                for(String tkn : tokensEmpties){
+                    if(!tkn.equals("")) tokens.add(tkn);
+                }
+                String op = tokens.get(0);
                 if (!Lookup.op.containsKey(op))
                     throw new RuntimeException(errorPrefix(lnNo) + "there is no such opcode '" + op + "'");
                 Opcode code = Lookup.op.get(op);
                 RegisterName[] regs = new RegisterName[ARG_REGS]; //between zero to three registers can be specified
                 int regI = 0;
                 int immediate = IMM_UNSET; //has it been set
-                for (int i = 1; i < tokens.length; i++) {
-                    String regOrImmediate = tokens[i];
+                for (int i = 1; i < tokens.size(); i++) {
+                    String regOrImmediate = tokens.get(i);
                     if (Lookup.reg.containsKey(regOrImmediate)) { //it must be a register
                         if (regI >= ARG_REGS)
                             throw new RuntimeException(errorPrefix(lnNo) + "more than three registers were provided to this operator");

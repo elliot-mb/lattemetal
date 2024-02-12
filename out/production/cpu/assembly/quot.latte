@@ -1,10 +1,19 @@
--- load operands
-addi t3 zero #10
-addi t4 zero #2
--- a quotient division t3 / t4 into t5
-muli t6 t4 #-1 --so we can subtract t4 by adding it
-add t3 t3 t6 -- loop head
-cmp t0 t4 t3 -- if we are less than what we're subtracting we shall not subtract no more
-jplz t0 #-2 -- loop tail
-st t5 zero #0 --output result in memory
+                    -- load operands
+addi t3 zero #134
+addi t4 zero #24
+st t3 zero #0       --numerator
+st t4 zero #1       --denominator
+
+                    -- a quotient division t3 / t4 into t5
+cmp t0 t3 t4        -- see if t3 is bigger than t4
+addi t0 t0 #1       -- so now, only if t3 was LESS than t4 the following branch will accept
+brlz t0 #100        --if t3 is less than t4
+addi t5 zero #0     -- zero our quotient counter (our result)
+muli t6 t4 #-1      --so we can subtract t4 by adding it
+addi t5 t5 #1       -- increment quotient loop starts here
+add t3 t3 t6        --
+cmp t0 t4 t3        -- if we are less than what we're subtracting we shall not subtract no more
+jplz t0 #-3         -- loop tail
+st t5 zero #2       --output result in memory
+st t3 zero #3       --remainder
 
