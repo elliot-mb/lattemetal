@@ -1,4 +1,4 @@
-const A = [1, 6, 6, 1];
+const A = [-1, 6, 6, 1];
 const B = [2, 3, 4, 5];
 const C = [null, null, null, null];
 let m = 2;
