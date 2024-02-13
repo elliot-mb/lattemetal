@@ -3,8 +3,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class Assembler {
     // this class contains the basic assembler that turns our raw instructions into machine readable objects
@@ -15,6 +17,7 @@ public class Assembler {
     private static final Boolean PASS = true;
     private static final int EOF = -1;
     private static final String DOT = ".";
+    private static final String LABEL = ":";
     private static final char IMMEDIATE = '#';
     public static final int IMM_UNSET = Integer.MIN_VALUE; //used globally
     private static final String EXT = "latte";
@@ -99,13 +102,56 @@ public class Assembler {
         return fileName + " @ ln " + lnNo + ": assemble: ";
     }
 
-    /**
-     * instruction format in IC
-     * one integer stores
-     // iiiii    rrrrr   rrrrr   rrrrr   iiiiiiiiiiiii
-     // opcode   destin  source  source  immediate
-     * @return an integer array that is the same length as the number of rawlines
-     */
+    private ArrayList<String> getTkns(String ln){
+        String[] tokensEmpties = ln.split("\s");
+        ArrayList<String> tokens = new ArrayList<String>(){};
+        for(String tkn : tokensEmpties){
+            if(!tkn.equals("")) tokens.add(tkn);
+        }
+        return tokens;
+    }
+
+    private void replaceLabels() throws RuntimeException{
+        int lnNum = 0;
+        int fileLnNum = 0;
+        AbstractMap<String, Integer> labelToLnNum = new HashMap<String, Integer>();
+        for(String ln : this.rawLines){
+            ArrayList<String> tkns = getTkns(ln);
+            if(tkns.size() > 0){
+                //if there is a label at the start
+                String maybeLabelReg = tkns.get(0);
+                int len = maybeLabelReg.length();
+                if(String.valueOf(maybeLabelReg.charAt(len - 1)).equals(LABEL)){
+                    String label = maybeLabelReg.substring(0, len - 1);
+                    if(Lookup.reg.containsKey(label) || Lookup.op.containsKey(label)) throw new RuntimeException(errorPrefix(lnNum + 1) + "replaceLabels: illegal label name '" + label + "'");
+                    labelToLnNum.put(label, lnNum + 1); //magic number baybee
+                    tkns.remove(0); //remove the label
+                }
+
+                //if there is a label not at the start (it is an argument)
+                if(Lookup.op.containsKey(maybeLabelReg) &&
+                        (Lookup.op.get(maybeLabelReg).equals(Opcode.br)
+                        || Lookup.op.get(maybeLabelReg).equals(Opcode.jp)
+                        || Lookup.op.get(maybeLabelReg).equals(Opcode.brlz)
+                        || Lookup.op.get(maybeLabelReg).equals(Opcode.jplz))){
+                    //now we can look for a label, but there does not /need/ to be one
+                    for(String label : labelToLnNum.keySet()){
+                        boolean containsLabel = tkns.contains(label);
+                        if(containsLabel){
+                            tkns.set(tkns.size() - 1, String.valueOf(IMMEDIATE) + labelToLnNum.get(label));
+                            break;
+                        }
+                    }
+                }
+                //rebuild line
+                String newLine = ""; for(String tkn : tkns) newLine += "\s" + tkn;
+                this.rawLines.set(fileLnNum, newLine);
+                lnNum++;
+            }
+            fileLnNum++;
+        }
+    }
+
     public ArrayList<Instruction> assemble() throws RuntimeException{
         // line by line
             // split up line on spaces
@@ -113,18 +159,16 @@ public class Assembler {
             // so the first register to appear is rd in the spec, the next is rs, finally rt, and any immediate fills the immediate slot
             // pack into objects
 
+        replaceLabels(); //mutates rawLines
+
         ArrayList<Instruction> program = new ArrayList<Instruction>();
-        int lnNo = 1;
+        int lnNum = 1;
         for(String ln : this.rawLines){
-            if(ln.length() != 0) { //add it just if it isnt blank!
-                String[] tokensEmpties = ln.split("\s");
-                ArrayList<String> tokens = new ArrayList<String>(){};
-                for(String tkn : tokensEmpties){
-                    if(!tkn.equals("")) tokens.add(tkn);
-                }
+            if(ln.length() != 0) { //add it just if it isnt blank! we dont remove them earlier because we need to know the actual line for syntax error messages
+                ArrayList<String> tokens = getTkns(ln);
                 String op = tokens.get(0);
                 if (!Lookup.op.containsKey(op))
-                    throw new RuntimeException(errorPrefix(lnNo) + "there is no such opcode '" + op + "'");
+                    throw new RuntimeException(errorPrefix(lnNum) + "there is no such opcode '" + op + "'");
                 Opcode code = Lookup.op.get(op);
                 RegisterName[] regs = new RegisterName[ARG_REGS]; //between zero to three registers can be specified
                 int regI = 0;
@@ -133,39 +177,34 @@ public class Assembler {
                     String regOrImmediate = tokens.get(i);
                     if (Lookup.reg.containsKey(regOrImmediate)) { //it must be a register
                         if (regI >= ARG_REGS)
-                            throw new RuntimeException(errorPrefix(lnNo) + "more than three registers were provided to this operator");
+                            throw new RuntimeException(errorPrefix(lnNum) + "more than three registers were provided to this operator");
                         regs[regI] = Lookup.reg.get(regOrImmediate);
                         regI++;
                     }else if (regOrImmediate.charAt(0) == IMMEDIATE) {
                         if (immediate != IMM_UNSET)
-                            throw new RuntimeException(errorPrefix(lnNo) + "more than one immediate isn't allowed");
+                            throw new RuntimeException(errorPrefix(lnNum) + "more than one immediate isn't allowed");
                         String imm = regOrImmediate.substring(1); //throw away the hash
                         int immNum;
                         try {
                             immNum = Integer.parseInt(imm);
                         } catch (NumberFormatException err) {
-                            throw new RuntimeException(errorPrefix(lnNo) + "immediate was not recognised as a number");
+                            throw new RuntimeException(errorPrefix(lnNum) + "immediate was not recognised as a number");
                         }
                         immediate = immNum;
                     }else{
-                        throw new RuntimeException(errorPrefix(lnNo) + "'" + code.name() +"' does not recognise argument " + i); //i is the 1-indexed argument, or just the plain argument number
+                        throw new RuntimeException(errorPrefix(lnNum) + "'" + code.name() +"' does not recognise argument " + i); //i is the 1-indexed argument, or just the plain argument number
                     }
                 }
 
                 try{
                     Instruction instr = makeInstr(code, regs, immediate);
                     program.add(instr);
-//                    Id id = new Id();
-//                    Opcode visitedCode = instr.visit(id);
-//                    if(visitedCode == Opcode.jplz || visitedCode == Opcode.jp){
-//                        jumpOffset = 0; //jumps are all relative
-//                    }
                 }
                 catch(RuntimeException err){
-                    throw new RuntimeException(errorPrefix(lnNo) + err.getMessage());
+                    throw new RuntimeException(errorPrefix(lnNum) + err.getMessage());
                 }
             }
-            lnNo++;
+            lnNum++;
         }
 
         return program;
