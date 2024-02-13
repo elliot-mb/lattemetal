@@ -81,6 +81,6 @@ dotc:       addi s2 zero #0             -- s2 = 0; accumulator for dot product (
         cmp s4 a1 t0                    -- j < m => s4 = -1
         addi s4 s4 #1                   -- j < m => s4 = 0
         brlz s4 colc                    -- go back to the start of the row loop (k loop)
-        br testbr
-testb:  addi t0 zero #-1000000
-testbr: st t0 zero #63
+--        br testbr
+--testb:  addi t0 zero #-1000000
+--testbr: st t0 zero #63

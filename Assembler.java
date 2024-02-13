@@ -130,7 +130,7 @@ public class Assembler {
                 if(String.valueOf(maybeLabelReg.charAt(len - 1)).equals(LABEL)){
                     String label = maybeLabelReg.substring(0, len - 1);
                     if(Lookup.reg.containsKey(label) || Lookup.op.containsKey(label)) throw new RuntimeException(errorPrefix(lnNum + 1) + "replaceLabels: illegal label name '" + label + "'");
-                    labelToLnNum.put(label, lnNum + 1); //magic number baybee
+                    labelToLnNum.put(label, lnNum); //magic number baybee
                     tkns.remove(0); //remove the label
                 }
 
@@ -150,17 +150,18 @@ public class Assembler {
             ArrayList<String> tkns = getTkns(ln);
             if(tkns.size() > 0){
                 String maybeLabelReg = tkns.get(0);
+                boolean br = Lookup.op.get(maybeLabelReg).equals(Opcode.br) || Lookup.op.get(maybeLabelReg).equals(Opcode.brlz);
+                boolean jp = Lookup.op.get(maybeLabelReg).equals(Opcode.jp) || Lookup.op.get(maybeLabelReg).equals(Opcode.jplz);
                 //if there is a label not at the start (it is an argument)
-                if(Lookup.op.containsKey(maybeLabelReg) &&
-                        (Lookup.op.get(maybeLabelReg).equals(Opcode.br)
-                                || Lookup.op.get(maybeLabelReg).equals(Opcode.jp)
-                                || Lookup.op.get(maybeLabelReg).equals(Opcode.brlz)
-                                || Lookup.op.get(maybeLabelReg).equals(Opcode.jplz))){
+                if(Lookup.op.containsKey(maybeLabelReg) && (jp || br)){
                     //now we can look for a label, but there does not /need/ to be one
                     String last = tkns.get(tkns.size() - 1);
                     for(String label : labelToLnNum.keySet()){
                         if(label.equals(last)){
-                            tkns.set(tkns.size() - 1, String.valueOf(IMMEDIATE) + labelToLnNum.get(label));
+                            int labelLoc = labelToLnNum.get(label);
+                            if(labelLoc < lnNum) labelLoc++; //increment if its going backwards (not entirely sure why it works but it does!)
+                            int pcChange = labelLoc - lnNum;
+                            tkns.set(tkns.size() - 1, String.valueOf(IMMEDIATE) + (jp ? pcChange : labelLoc));
                             break;
                         }
                     }
@@ -210,7 +211,7 @@ public class Assembler {
                         try {
                             immNum = Integer.parseInt(imm);
                         } catch (NumberFormatException err) {
-                            throw new RuntimeException(errorPrefix(lnNum) + "immediate was not recognised as a number");
+                            throw new RuntimeException(errorPrefix(lnNum) + "immediate was not recognised as an integer");
                         }
                         immediate = immNum;
                     }else{
