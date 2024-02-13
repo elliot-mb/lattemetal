@@ -111,7 +111,13 @@ public class Assembler {
         return tokens;
     }
 
-    private void replaceLabels() throws RuntimeException{
+    private String lineFromTokens(ArrayList<String> tkns){
+        String newLine = "";
+        for(String tkn : tkns) newLine += "\s" + tkn;
+        return newLine;
+    }
+
+    private AbstractMap<String, Integer> labelToLnNums(){
         int lnNum = 0;
         int fileLnNum = 0;
         AbstractMap<String, Integer> labelToLnNum = new HashMap<String, Integer>();
@@ -128,28 +134,44 @@ public class Assembler {
                     tkns.remove(0); //remove the label
                 }
 
+                this.rawLines.set(fileLnNum, lineFromTokens(tkns));
+                lnNum++;
+            }
+            fileLnNum++;
+        }
+        return labelToLnNum;
+    }
+
+    private void replaceLabels() throws RuntimeException{
+        int lnNum = 0;
+        int fileLnNum = 0;
+        AbstractMap<String, Integer> labelToLnNum = labelToLnNums();
+        for(String ln : this.rawLines){
+            ArrayList<String> tkns = getTkns(ln);
+            if(tkns.size() > 0){
+                String maybeLabelReg = tkns.get(0);
                 //if there is a label not at the start (it is an argument)
                 if(Lookup.op.containsKey(maybeLabelReg) &&
                         (Lookup.op.get(maybeLabelReg).equals(Opcode.br)
-                        || Lookup.op.get(maybeLabelReg).equals(Opcode.jp)
-                        || Lookup.op.get(maybeLabelReg).equals(Opcode.brlz)
-                        || Lookup.op.get(maybeLabelReg).equals(Opcode.jplz))){
+                                || Lookup.op.get(maybeLabelReg).equals(Opcode.jp)
+                                || Lookup.op.get(maybeLabelReg).equals(Opcode.brlz)
+                                || Lookup.op.get(maybeLabelReg).equals(Opcode.jplz))){
                     //now we can look for a label, but there does not /need/ to be one
+                    String last = tkns.get(tkns.size() - 1);
                     for(String label : labelToLnNum.keySet()){
-                        boolean containsLabel = tkns.contains(label);
-                        if(containsLabel){
+                        if(label.equals(last)){
                             tkns.set(tkns.size() - 1, String.valueOf(IMMEDIATE) + labelToLnNum.get(label));
                             break;
                         }
                     }
                 }
                 //rebuild line
-                String newLine = ""; for(String tkn : tkns) newLine += "\s" + tkn;
-                this.rawLines.set(fileLnNum, newLine);
+                this.rawLines.set(fileLnNum, lineFromTokens(tkns));
                 lnNum++;
             }
             fileLnNum++;
         }
+
     }
 
     public ArrayList<Instruction> assemble() throws RuntimeException{

@@ -42,12 +42,6 @@
         st t0 t1 #4
         addi t0 zero #9
         st t0 t1 #5
-        addi t0 zero #10
-        st t0 t1 #6
-        addi t0 zero #234954
-        st t0 t1 #7
-        addi t0 zero #4323234
-        st t0 t1 #8
         ld t0 zero #0               -- t0 = m (height of A)
         ld t1 zero #1               -- t1 = p (width of A, height of B)
         ld t2 zero #2               -- t2 = n (width of B, will be used for accessing columns of B)
@@ -87,3 +81,6 @@ dotc:       addi s2 zero #0             -- s2 = 0; accumulator for dot product (
         cmp s4 a1 t0                    -- j < m => s4 = -1
         addi s4 s4 #1                   -- j < m => s4 = 0
         brlz s4 colc                    -- go back to the start of the row loop (k loop)
+        br testbr
+testb:  addi t0 zero #-1000000
+testbr: st t0 zero #63
