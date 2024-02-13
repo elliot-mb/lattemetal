@@ -1,6 +1,3 @@
-import java.util.ArrayList;
-import java.util.function.BiFunction;
-
 public class Main {
 
 
@@ -20,7 +17,7 @@ public class Main {
      *      * cmp  rd rs rt         --compare rs and rt, returning -1 less, 0 eq, 1 greater
      *      * ld   rd (rs) #n    --if we have a constant zero register (or load a constant like below)
      *      *                  --we can use this for direct and indirect addressing
-     *      * ldc  rd #n        --load a constant
+     *      * ldc  rd #n        --load from a constant address
      *      *
      *      * st   rd (rs) #n   --store whats in register rd into address rs offset by n
      *      *
@@ -44,7 +41,7 @@ public class Main {
      * @param args
      */
     public static void main(String[] args){
-        String programPath = "./assembly/matmul.latte";
+        String programPath = "assembly/mat2mul.latte";
         if(args.length >= 1){
             System.out.println(args[0]);
             programPath = args[0];
