@@ -6,6 +6,7 @@ public class Processor {
     private final RegisterFile rf;
     private final Memory mem;
     private final Decoder de;
+    private final LoadStoreUnit lsu;
     private int tally;
     private WriteBackUnit wb;
 
@@ -14,10 +15,11 @@ public class Processor {
         this.pc = new ProgramCounter(ic.numInstrs());
         this.rf = new RegisterFile();
         this.mem = new Memory();
-        this.alu = new ArithmeticLogicUnit(this.mem, this.pc);
+        this.alu = new ArithmeticLogicUnit(this.pc);
         this.de = new Decoder(this.rf);
         this.tally = 0;
         this.wb = new WriteBackUnit(this.rf);
+        this.lsu = new LoadStoreUnit(this.mem);
     }
 
     public void run(){
