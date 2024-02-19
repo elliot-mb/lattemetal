@@ -42,9 +42,13 @@ public class Main {
      */
     public static void main(String[] args){
         String programPath = "assembly/mat2mul.latte";
+        int printWidth = 1;
         if(args.length >= 1){
             System.out.println(args[0]);
             programPath = args[0];
+        }
+        if(args.length >= 2){
+            printWidth = Integer.parseInt(args[1]);
         }
         Assembler assembler = new Assembler(programPath);
         boolean didRead = assembler.readFile();
@@ -52,7 +56,15 @@ public class Main {
             throw new RuntimeException("main: program assembler failed to read program");
         }
         InstructionCache ic = new InstructionCache(assembler.assemble());
-        Processor p = new Processor(ic);
+        Processor p = new Processor(ic, new Memory(
+                printWidth,
+                new int[]{
+                    -1, -1, -1, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 1, 1, 2, 3, 5, 8, 3, 1, 4,
+                    4, 1, 3, 8, 5, 3, 2, 1, 1, 0
+                }
+            )); //memory can be set if you like
         p.run();
 
     }

@@ -56,9 +56,12 @@ public class Assembler {
             BufferedReader br = new BufferedReader(reader)){
             String ln = br.readLine();
             while(ln != null){
-                String noComment = ln.split("--")[0];
-                String trimmed   = noComment.trim();
-                rawLines.add(trimmed); //should remove comments
+                String[] leftOfComment =  ln.split("--");
+                if(leftOfComment.length > 0){
+                    String noComment = ln.split("--")[0];
+                    String trimmed   = noComment.trim();
+                    rawLines.add(trimmed);
+                }
                 ln = br.readLine();
             }
         }catch(FileNotFoundException err){

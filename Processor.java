@@ -10,11 +10,12 @@ public class Processor {
     private int tally;
     private WriteBackUnit wb;
 
-    Processor(InstructionCache ic){
+    Processor(InstructionCache ic, Memory... mem) throws RuntimeException{
+        if(mem.length > 1) throw new RuntimeException("Processor: this constructor cannot have more than one memories");
         this.ic = ic;
         this.pc = new ProgramCounter(ic.numInstrs());
         this.rf = new RegisterFile();
-        this.mem = new Memory();
+        this.mem = mem.length > 0 ? mem[0] : new Memory();
         this.alu = new ArithmeticLogicUnit(this.pc);
         this.de = new Decoder(this.rf);
         this.tally = 0;
