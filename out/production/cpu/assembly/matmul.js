@@ -1,5 +1,5 @@
-const A = [4, 4, 4, 1];
-const B = [1, -10, 2, 1];
+const A = [-1, 6, 6, 1];
+const B = [2, 3, 4, 5];
 const C = [null, null, null, null];
 let m = 2;
 let p = 2;

@@ -1,0 +1,19 @@
+-- write a vector addition method (adding two arrays basically)
+-- adds arrays of length mem[00] at locations [mem[01]] and [mem[02]], result arriving at [mem[03]]
+-- nb square brackets around a number is an address, so [mem[n]] is indirect addressing
+-- we will set memory addresses here for repeatability
+
+            --setup
+            addi t0 zero #10        --LENGTH(s)
+            st t0 zero #0
+            addi t0 zero #20        --START OF ARRAY A
+            st t0 zero #1
+            addi t0 zero #30
+            st t0 zero #2           --START OF ARRAY B
+            addi t0 zero #40
+            st t0 zero #3           --LOC OF RESULT ARRAY
+
+            ld
+            addi t0 zero #0         --i = 0
+addloop
+            ld t1
