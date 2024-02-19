@@ -20,7 +20,7 @@ public class Memory extends Block{
         String result = "";
         int addr = 0;
         int MAX_DIGIT = 10;
-        int PER_ROW = 9;
+        int PER_ROW = 3;
 
         for(int j = 0; j < SIZE; j++){
             int val = read(j);

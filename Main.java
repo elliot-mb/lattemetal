@@ -21,12 +21,12 @@ public class Main {
      *      *
      *      * st   rd (rs) #n   --store whats in register rd into address rs offset by n
      *      *
-     *      * brlz rd #n      --branch; if rd is less than or equal to zero move to absolute instruction # n
-     *      * jplz rd #n      --branch; if rd is less than or equal to zero, relative branch by immediate operand
+     *      * brlz rd #n | label_name      --branch; if rd is less than or equal to zero move to absolute instruction # n
+     *      * jplz rd #n | label_name     --jump; if rd is less than or equal to zero, relative branch by immediate operand
      *      *
      *      *
-     *      * br   #n      --branch; sets the pc to absolute address (immediate/const)
-     *      * jp   #n      --branch; jumps n instructions down (relative branch with immediate)*
+     *      * br   #n | label_name     --branch; sets the pc to absolute address (immediate/const)
+     *      * jp   #n | label_name     --jump; jumps n instructions down (relative branch with immediate)*
      *      *                      --{pc} is a mandatory destination argument for branch instructions
      *      */
 

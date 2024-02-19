@@ -63,21 +63,21 @@ public abstract class Instruction extends HasDuration {
             throw new RuntimeException(visit(new Id()) + ": missing at least one register reference");
     }
 
-    protected void checkShape(RegisterName rd, RegisterName rs, int im){
+    protected void checkShape(RegisterName rd, RegisterName rs, Integer im){
         if(rd == null || rs == null)
             throw new RuntimeException(visit(new Id()) +": missing at least one register reference");
         if(this.im == null)
             throw new RuntimeException(visit(new Id()) +": missing immediate");
     }
 
-    protected void checkShape(RegisterName rd, int im){
+    protected void checkShape(RegisterName rd, Integer im){
         if(rd == null)
             throw new RuntimeException(visit(new Id()) +": missing the register reference");
         if(this.im == null)
             throw new RuntimeException(visit(new Id()) +": missing immediate");
     }
 
-    protected void checkShape(int im){
+    protected void checkShape(Integer im){
         if(this.im == null)
             throw new RuntimeException(visit(new Id()) +": missing immediate");
     }

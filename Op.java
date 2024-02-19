@@ -33,7 +33,7 @@ public class Op {
     public class AddI extends Instruction{
         private static final int DURATION = 2;
 
-        AddI(RegisterName rd, RegisterName rs, int immediate){
+        AddI(RegisterName rd, RegisterName rs, Integer immediate){
             super(DURATION, immediate, rd, rs);
             checkShape(rd, rs, immediate);
         }
@@ -82,7 +82,7 @@ public class Op {
     public class MulI extends Instruction{
         private static final int DURATION = 4;
 
-        MulI(RegisterName rd, RegisterName rs, int immediate){
+        MulI(RegisterName rd, RegisterName rs, Integer immediate){
             super(DURATION, immediate, rd, rs);
             checkShape(rd, rs, immediate);
         }
@@ -132,7 +132,7 @@ public class Op {
     public class Ld extends Instruction{
         private static final int DURATION = 2;
 
-        Ld(RegisterName rd, RegisterName rs, int immediate){
+        Ld(RegisterName rd, RegisterName rs, Integer immediate){
             super(DURATION, immediate, rd, rs);
             checkShape(rd, rs, immediate);
         }
@@ -154,7 +154,7 @@ public class Op {
     public class LdC extends Instruction{
         private static final int DURATION = 4;
 
-        LdC(RegisterName rd, int immediate){
+        LdC(RegisterName rd, Integer immediate){
             super(DURATION, immediate, rd);
             checkShape(rd, immediate);
         }
@@ -176,7 +176,7 @@ public class Op {
     public class St extends Instruction{
         private static final int DURATION = 4;
 
-        St(RegisterName rd, RegisterName rs, int immediate){
+        St(RegisterName rd, RegisterName rs, Integer immediate){
             super(DURATION, immediate, rd, rs);
             checkShape(rd, rs, immediate);
         }
@@ -201,7 +201,7 @@ public class Op {
 
         private static final int DURATION = 2;
 
-        BrLZ(RegisterName rd, int immediate){
+        BrLZ(RegisterName rd, Integer immediate){
             super(DURATION, immediate, rd);
             checkShape(rd, immediate);
         }
@@ -223,7 +223,7 @@ public class Op {
     public class JpLZ extends Instruction{
         private static final int DURATION = 2;
 
-        JpLZ(RegisterName rd, int immediate){
+        JpLZ(RegisterName rd, Integer immediate){
             super(DURATION, immediate, rd);
             checkShape(rd, immediate);
         }
@@ -243,7 +243,7 @@ public class Op {
     public class Br extends Instruction{
         private static final int DURATION = 1;
 
-        Br(int immediate){
+        Br(Integer immediate){
             super(DURATION, immediate);
             checkShape(immediate);
         }
@@ -263,7 +263,7 @@ public class Op {
     public class Jp extends Instruction{
         private static final int DURATION = 1;
 
-        Jp(int immediate){
+        Jp(Integer immediate){
             super(DURATION, immediate);
             checkShape(immediate);
         }

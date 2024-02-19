@@ -19,7 +19,7 @@ public class Assembler {
     private static final String DOT = ".";
     private static final String LABEL = ":";
     private static final char IMMEDIATE = '#';
-    public static final int IMM_UNSET = Integer.MIN_VALUE; //used globally
+    public static final Integer IMM_UNSET = null; //used globally
     private static final String EXT = "latte";
     private static final int ARG_REGS = 3; //rd, rs and rt
 
@@ -76,7 +76,7 @@ public class Assembler {
         return rawLines.size();
     }
 
-    private Instruction makeInstr(Opcode code, RegisterName[] regs, int immediate){
+    private Instruction makeInstr(Opcode code, RegisterName[] regs, Integer immediate){
         RegisterName rd = regs[0];
         RegisterName rs = regs[1];
         RegisterName rt = regs[2];
@@ -130,7 +130,7 @@ public class Assembler {
                 if(String.valueOf(maybeLabelReg.charAt(len - 1)).equals(LABEL)){
                     String label = maybeLabelReg.substring(0, len - 1);
                     if(Lookup.reg.containsKey(label) || Lookup.op.containsKey(label)) throw new RuntimeException(errorPrefix(lnNum + 1) + "replaceLabels: illegal label name '" + label + "'");
-                    labelToLnNum.put(label, lnNum); //magic number baybee
+                    labelToLnNum.put(label, lnNum);
                     tkns.remove(0); //remove the label
                 }
 
@@ -156,14 +156,11 @@ public class Assembler {
                 if(Lookup.op.containsKey(maybeLabelReg) && (jp || br)){
                     //now we can look for a label, but there does not /need/ to be one
                     String last = tkns.get(tkns.size() - 1);
-                    for(String label : labelToLnNum.keySet()){
-                        if(label.equals(last)){
-                            int labelLoc = labelToLnNum.get(label);
-                            if(labelLoc < lnNum) labelLoc++; //increment if its going backwards (not entirely sure why it works but it does!)
-                            int pcChange = labelLoc - lnNum;
-                            tkns.set(tkns.size() - 1, String.valueOf(IMMEDIATE) + (jp ? pcChange : labelLoc));
-                            break;
-                        }
+                    if (labelToLnNum.containsKey(last)) {
+                        int labelLoc = labelToLnNum.get(last);
+                        //if(labelLoc < lnNum) labelLoc++; //increment if its going backwards (not entirely sure why it works but it does!)
+                        int pcChange = labelLoc - lnNum;
+                        tkns.set(tkns.size() - 1, String.valueOf(IMMEDIATE) + (jp ? pcChange : labelLoc));
                     }
                 }
                 //rebuild line
@@ -195,7 +192,7 @@ public class Assembler {
                 Opcode code = Lookup.op.get(op);
                 RegisterName[] regs = new RegisterName[ARG_REGS]; //between zero to three registers can be specified
                 int regI = 0;
-                int immediate = IMM_UNSET; //has it been set
+                Integer immediate = IMM_UNSET; //has it been set
                 for (int i = 1; i < tokens.size(); i++) {
                     String regOrImmediate = tokens.get(i);
                     if (Lookup.reg.containsKey(regOrImmediate)) { //it must be a register
@@ -204,7 +201,7 @@ public class Assembler {
                         regs[regI] = Lookup.reg.get(regOrImmediate);
                         regI++;
                     }else if (regOrImmediate.charAt(0) == IMMEDIATE) {
-                        if (immediate != IMM_UNSET)
+                        if (immediate != null)
                             throw new RuntimeException(errorPrefix(lnNum) + "more than one immediate isn't allowed");
                         String imm = regOrImmediate.substring(1); //throw away the hash
                         int immNum;

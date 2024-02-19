@@ -1,19 +1,33 @@
 -- write a vector addition method (adding two arrays basically)
--- adds arrays of length mem[00] at locations [mem[01]] and [mem[02]], result arriving at [mem[03]]
--- nb square brackets around a number is an address, so [mem[n]] is indirect addressing
+-- adds arrays of length mem[00] at locations mem[01] and mem[02], result arriving at mem[03]
 -- we will set memory addresses here for repeatability
 
             --setup
-            addi t0 zero #10        --LENGTH(s)
+            addi t0 zero #10        --lengths of all arrays (mem[0])
             st t0 zero #0
-            addi t0 zero #20        --START OF ARRAY A
+            addi t0 zero #20        --START OF ARRAY A (mem[1])
             st t0 zero #1
             addi t0 zero #30
-            st t0 zero #2           --START OF ARRAY B
+            st t0 zero #2           --START OF ARRAY B (mem[2])
             addi t0 zero #40
-            st t0 zero #3           --LOC OF RESULT ARRAY
+            st t0 zero #3           --LOC OF RESULT ARRAY (mem[3])
 
-            ld
             addi t0 zero #0         --i = 0
-addloop
-            ld t1
+            ld s0 zero #0           --len
+            ld s1 zero #1           --loc of A
+            ld s2 zero #2           --loc of B
+            ld s3 zero #3           --loc of result
+            br isdone
+
+addnxt:     add s4 s1 t0           --offset to read from A[i]
+            ld s4 s4 #0            --A[i]
+            add s5 s2 t0           --offset to read from B[i]
+            ld s5 s5 #0            --B[i]
+            add s4 s4 s5           --A[i] + B[i]
+            add s5 s3 t0           --offset to write to C[i]
+            st s4 s5 #0
+            addi t0 t0 #1         --i++
+
+isdone:     cmp s11 t0 s0           --i < len ? -1 : 0, 1
+            addi s11 s11 #1        --i < len ? 0 : 1, 2
+            brlz s11 addnxt
