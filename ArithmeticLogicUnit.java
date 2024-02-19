@@ -105,7 +105,7 @@ public class ArithmeticLogicUnit implements InstructionVoidVisitor, Ticks {
     @Override
     public void accept(Op.LdC op) {
         if(op.isDone()){
-            //use imval
+            //use imval so no computation is done
             done = true;
             return;
         }
