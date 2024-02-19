@@ -27,9 +27,8 @@ public class Processor {
         System.out.println(ic);
         while(!pc.isDone()){
             Instruction fetched = ic.getInstruction(pc.getCount());
-            System.out.println("'" + fetched + "' @ cycle " + Integer.toString(tally));
+//            System.out.println("'" + fetched + "' @ cycle " + Integer.toString(tally));
             tally++;
-        //    System.out.println(fetched);
             Opcode code = fetched.visit(preDecoder);
             Instruction decoded = de.decode(fetched);
             tally++;
@@ -40,7 +39,7 @@ public class Processor {
             }
             decoded = alu.requestOp();
             decoded.rst(); //refill the duration for memory operations
-            System.out.println("lsu start for '" + decoded + "' @ cycle " + Integer.toString(tally));
+//            System.out.println("lsu start for '" + decoded + "' @ cycle " + Integer.toString(tally));
             lsu.loadFilledOp(decoded);
             while(!lsu.isDone()){
                 lsu.clk();
