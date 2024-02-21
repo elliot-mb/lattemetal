@@ -2,12 +2,10 @@ public class ArithmeticLogicUnit implements InstructionVoidVisitor, Ticks {
 
     private Instruction currentOp;
     private boolean done;
-    private final Memory mem;
     private final ProgramCounter pc;
 
-    ArithmeticLogicUnit(Memory mem, ProgramCounter pc){
+    ArithmeticLogicUnit(ProgramCounter pc){
         this.currentOp = null;
-        this.mem = mem;
         this.pc = pc;
         this.done = true;
     }
@@ -97,7 +95,7 @@ public class ArithmeticLogicUnit implements InstructionVoidVisitor, Ticks {
     @Override
     public void accept(Op.Ld op) {
         if(op.isDone()){
-            op.setRdVal(mem.read(op.getRsVal() + op.getImVal()));
+            op.setRdVal(op.getRsVal() + op.getImVal()); //calculate offset
             done = true;
             return;
         }
@@ -106,20 +104,21 @@ public class ArithmeticLogicUnit implements InstructionVoidVisitor, Ticks {
 
     @Override
     public void accept(Op.LdC op) {
-        if(op.isDone()){
-            //set register value to load from addr
-            op.setRdVal(mem.read(op.getImVal()));
-            done = true;
-            return;
-        }
+        done = true;
         op.clk();
+//        if(op.isDone()){
+//            //use imval so no computation is done
+//            done = true;
+//            return;
+//        }
+//        op.clk();
     }
 
     @Override
     public void accept(Op.St op) {
         if(op.isDone()){
             //store register value at offset address
-            mem.set(op.getRdVal(), op.getRsVal() + op.getImVal());
+            op.setRsVal(op.getRsVal() + op.getImVal()); //calculate offset, store it in RS
             done = true;
             return;
         }

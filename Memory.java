@@ -1,9 +1,14 @@
 public class Memory extends Block{
 
-    private static final int SIZE = 8;
+    private static final int SIZE = 64;
 
-    Memory(int... data){
-        super(SIZE, data);
+    Memory(){
+        super(SIZE, 1);
+    }
+
+    Memory(int printWidth, int[] contents){
+        super(SIZE, Math.max(printWidth, 1));
+        load(contents);
     }
 
     public int get(int addr){
@@ -12,16 +17,6 @@ public class Memory extends Block{
 
     public void set(int val, int addr){
         read(addr); //throw if addr is out of bounds
-        data[addr] = val;
-    }
-
-    public String toString(){
-        String result = "";
-        int addr = 0;
-        for(int val : data){
-            result += "\r\n 0x" + Integer.toHexString(addr) + "\t" + val;
-            addr++;
-        }
-        return result;
+        setDelegate(addr, val);
     }
 }

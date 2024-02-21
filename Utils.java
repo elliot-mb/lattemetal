@@ -27,5 +27,8 @@ public class Utils {
         return trimmed.length() == 0;
     }
 
+    public static int digitsInInt(int val){
+        return (int) Math.round(Math.floor(Math.log10(Math.abs(val))) + 1);
+    }
 
 }

@@ -3,13 +3,13 @@ public abstract class Instruction extends HasDuration {
     protected final RegisterName rd;
     protected final RegisterName rs;
     protected final RegisterName rt;
-    protected final int im;
+    protected final Integer im;
 
     protected int rdVal;
     protected int rsVal;
     protected int rtVal;
 
-    Instruction(int duration, int immediate,  RegisterName... regs){
+    Instruction(int duration, Integer immediate,  RegisterName... regs){
         super(duration);
         this.im = immediate;
         this.rd = regs.length > 0 ? regs[0] : null;
@@ -30,7 +30,7 @@ public abstract class Instruction extends HasDuration {
         return this.rt;
     }
     public int getIm() throws RuntimeException{
-        if(this.im == Assembler.IMM_UNSET) throw new RuntimeException("getImmediate: there is no immediate defined for this instruction");
+        if(this.im == null) throw new RuntimeException("getImmediate: there is no immediate defined for this instruction");
         return this.im;
     }
 
@@ -41,8 +41,8 @@ public abstract class Instruction extends HasDuration {
         return r == null ? "" : " " + r.name();
     }
 
-    protected String immToString(int immediate){
-        return immediate == Assembler.IMM_UNSET ? "" : " #" + immediate;
+    protected String immToString(Integer immediate){
+        return immediate == null ? "" : " #" + immediate;
     }
 
     @Override
@@ -63,22 +63,22 @@ public abstract class Instruction extends HasDuration {
             throw new RuntimeException(visit(new Id()) + ": missing at least one register reference");
     }
 
-    protected void checkShape(RegisterName rd, RegisterName rs, int im){
+    protected void checkShape(RegisterName rd, RegisterName rs, Integer im){
         if(rd == null || rs == null)
             throw new RuntimeException(visit(new Id()) +": missing at least one register reference");
-        if(im == Assembler.IMM_UNSET)
+        if(this.im == null)
             throw new RuntimeException(visit(new Id()) +": missing immediate");
     }
 
-    protected void checkShape(RegisterName rd, int im){
+    protected void checkShape(RegisterName rd, Integer im){
         if(rd == null)
             throw new RuntimeException(visit(new Id()) +": missing the register reference");
-        if(im == Assembler.IMM_UNSET)
+        if(this.im == null)
             throw new RuntimeException(visit(new Id()) +": missing immediate");
     }
 
-    protected void checkShape(int im){
-        if(im == Assembler.IMM_UNSET)
+    protected void checkShape(Integer im){
+        if(this.im == null)
             throw new RuntimeException(visit(new Id()) +": missing immediate");
     }
 
