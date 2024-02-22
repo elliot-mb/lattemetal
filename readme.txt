@@ -9,7 +9,9 @@ It is a pipelined superscalar implementation which focuses on hardware-optimisat
 This requires you have javac and java versions at least ``17.0.2``
 
 - ``$ ./run_noargs`` in this directory will run the processor with the default program (2x2 matrix multiplication) and some preset memory.
-- ``$ javac -d ./class Main.java && java -cp ./class Main [ASSEMBLY FILE PATH : string].latte [MEMORY ROW LENGTH : integer] `` in this directory will run the processor on a specified assembly program (all located in ./assembly) and will show the resulting memory with a row length MEMORY ROW LENGTH. 
+- ``$ javac -d ./class Main.java && java -cp ./class Main [ASSEMBLY FILE PATH : string].latte [MEMORY ROW LENGTH : integer] `` in this directory will run the processor on a specified assembly program (all located in ./assembly) and will show the resulting memory with a row length MEMORY ROW LENGTH.
+
+For example, to
 
 ### Lab 1 tips 
 
