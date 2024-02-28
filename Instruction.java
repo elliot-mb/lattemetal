@@ -82,4 +82,5 @@ public abstract class Instruction extends HasDuration {
             throw new RuntimeException(visit(new Id()) +": missing immediate");
     }
 
+    public abstract Instruction copy();
 }
