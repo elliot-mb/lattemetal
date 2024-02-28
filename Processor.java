@@ -8,7 +8,12 @@ public class Processor {
     private final Decoder de;
     private final LoadStoreUnit lsu;
     private int tally;
-    private WriteBackUnit wb;
+    private final WriteBackUnit wb;
+
+    private final PipelineRegister FetchDecode = new PipelineRegister();
+    private final PipelineRegister DecodeExecute = new PipelineRegister();
+    private final PipelineRegister ExecuteMemory = new PipelineRegister();
+    private final PipelineRegister MemoryWriteBack = new PipelineRegister();
 
     Processor(InstructionCache ic, Memory... mem) throws RuntimeException{
         if(mem.length > 1) throw new RuntimeException("Processor: this constructor cannot have more than one memories");
