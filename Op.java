@@ -364,4 +364,27 @@ public class Op {
             return jp;
         }
     }
+
+    public class No extends Instruction{
+        private static final int DURATION = 1;
+
+        No(){
+            super(DURATION, 0);
+        }
+
+        @Override
+        public Opcode visit(InstructionCodeVisitor v) {
+            return v.accept(this);
+        }
+
+        @Override
+        public void visit(InstructionVoidVisitor v) {
+            v.accept(this);
+        }
+
+        @Override
+        public Instruction copy() {
+            return new No();
+        }
+    }
 }

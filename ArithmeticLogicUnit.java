@@ -9,7 +9,7 @@ public class ArithmeticLogicUnit extends Unit {
 
     @Override
     protected void procInstruction() {
-        currentOp.clk();
+        currentOp.decr();
     }
 
     @Override
@@ -113,5 +113,6 @@ public class ArithmeticLogicUnit extends Unit {
     public void accept(Op.Jp op) {
         op.setResult(pcVal + op.getImVal());
     }
+
 
 }

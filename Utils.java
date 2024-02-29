@@ -7,6 +7,8 @@ public class Utils {
 
     private static final Id preDecoder = new Id();
 
+    public static final Op opFactory = new Op();
+
     public static <T> T last(ArrayList<T> xs) throws RuntimeException{
         int size = xs.size();
         if(size == 0) throw new RuntimeException("last: cannot take last element of the empty array");

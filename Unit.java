@@ -47,4 +47,9 @@ public abstract class Unit implements InstructionVoidVisitor {
         currentOp = null; //empty out our intermediate storage to accept the next one
     }
 
+    @Override
+    public void accept(Op.No op) {
+        //this method is uniform for all units because it does nothing
+    }
+
 }

@@ -1,13 +1,34 @@
-public class WriteBackUnit implements InstructionVoidVisitor{
+public class WriteBackUnit extends Unit{
 
+    private static final int REG_LATENCY = 1;
     private final RegisterFile rf;
 
-    WriteBackUnit(RegisterFile rf){
+    private final Durate counter = new Durate(REG_LATENCY);
+
+    WriteBackUnit(RegisterFile rf, PipelineRegister last, PipelineRegister next){
+        super(last, next);
         this.rf = rf;
     }
 
-    public void go(Instruction op){
-        op.visit(this);
+    @Override
+    protected void readOffPipeline(){
+        currentOp = last.pull();
+        counter.rst();
+    }
+
+    @Override
+    protected void writeOnPipeline(){
+        next.push(Utils.opFactory.new No());
+    }
+
+    @Override
+    protected void procInstruction() {
+        counter.decr();
+    }
+
+    @Override
+    protected boolean isUnfinished() {
+        return !counter.isDone();
     }
 
     // all the below methods write back to the registers correctly
@@ -70,4 +91,5 @@ public class WriteBackUnit implements InstructionVoidVisitor{
     public void accept(Op.Jp op) {
         //nothing
     }
+
 }

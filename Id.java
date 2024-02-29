@@ -60,4 +60,7 @@ public class Id implements InstructionCodeVisitor { //just returns the opcode (i
     public Opcode accept(Op.Jp op) {
         return Opcode.jp;
     }
+
+    @Override
+    public Opcode accept(Op.No op) { return Opcode.no; }
 }

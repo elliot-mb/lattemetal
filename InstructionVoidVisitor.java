@@ -23,4 +23,6 @@ public interface InstructionVoidVisitor {
     public void accept(Op.Br op);
 
     public void accept(Op.Jp op);
+
+    public void accept(Op.No op);
 }

@@ -83,20 +83,19 @@ public class Assembler {
         RegisterName rd = regs[0];
         RegisterName rs = regs[1];
         RegisterName rt = regs[2];
-        Op ops = new Op();
         switch(code){
-            case add: return ops.new Add(rd, rs, rt);
-            case addi: return ops.new AddI(rd, rs, immediate);
-            case mul: return ops.new Mul(rd, rs, rt);
-            case muli: return ops.new MulI(rd, rs, immediate);
-            case cmp: return ops.new Cmp(rd, rs, rt);
-            case ld: return ops.new Ld(rd, rs, immediate);
-            case ldc: return ops.new LdC(rd, immediate);
-            case st: return ops.new St(rd, rs, immediate);
-            case brlz: return ops.new BrLZ(rd, immediate);
-            case jplz: return ops.new JpLZ(rd, immediate);
-            case br: return ops.new Br(immediate);
-            default: return ops.new Jp(immediate); //jp
+            case add: return Utils.opFactory.new Add(rd, rs, rt);
+            case addi: return Utils.opFactory.new AddI(rd, rs, immediate);
+            case mul: return Utils.opFactory.new Mul(rd, rs, rt);
+            case muli: return Utils.opFactory.new MulI(rd, rs, immediate);
+            case cmp: return Utils.opFactory.new Cmp(rd, rs, rt);
+            case ld: return Utils.opFactory.new Ld(rd, rs, immediate);
+            case ldc: return Utils.opFactory.new LdC(rd, immediate);
+            case st: return Utils.opFactory.new St(rd, rs, immediate);
+            case brlz: return Utils.opFactory.new BrLZ(rd, immediate);
+            case jplz: return Utils.opFactory.new JpLZ(rd, immediate);
+            case br: return Utils.opFactory.new Br(immediate);
+            default: return Utils.opFactory.new Jp(immediate); //jp
         }
 
     }

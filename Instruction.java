@@ -1,4 +1,4 @@
-public abstract class Instruction extends HasDuration {
+public abstract class Instruction extends Durate {
 
     protected final RegisterName rd;
     protected final RegisterName rs;
