@@ -5,7 +5,7 @@ public class Processor {
     private final ArithmeticLogicUnit alu;
     private final RegisterFile rf;
     private final Memory mem;
-    private final Decoder de;
+    private final DecodeUnit de;
     private final LoadStoreUnit lsu;
     private int tally;
     private final WriteBackUnit wb;
@@ -22,7 +22,7 @@ public class Processor {
         this.rf = new RegisterFile();
         this.mem = mem.length > 0 ? mem[0] : new Memory();
         this.alu = new ArithmeticLogicUnit(decExe, exeMem);
-        this.de = new Decoder(this.rf);
+        this.de = new DecodeUnit(this.rf, fecDec, decExe);
         this.tally = 0;
         this.wb = new WriteBackUnit(this.rf);
         this.lsu = new LoadStoreUnit(this.mem, this.pc);
@@ -36,20 +36,19 @@ public class Processor {
             //System.out.println("'" + fetched + "' @ cycle " + Integer.toString(tally));
             tally++;
             Opcode code = fetched.visit(preDecoder);
-            Instruction decoded = de.decode(fetched);
-            tally++;
-
-            if(!decExe.canPush())
-                throw new RuntimeException("what");
-            decExe.push(decoded);
-            decExe.setPc(pc.getCount() + 1); //adder!
+            if(fecDec.canPush()) fecDec.push(fetched);
+            fecDec.setPc(pc.getCount() + 1);
+            while(!decExe.canPull()){
+                de.clk();
+                tally++;
+            }
             while(!exeMem.canPull()){
                 alu.clk();
                 tally++;
             }
             int pcVal = exeMem.getPc();
             boolean branchTaken = exeMem.isFlag();
-            decoded = exeMem.pull();
+            Instruction decoded = exeMem.pull();
             decoded.rst(); //refill the duration for memory operations
 //            System.out.println("lsu start for '" + decoded + "' @ cycle " + Integer.toString(tally));
             lsu.loadFilledOp(decoded, pcVal, branchTaken);

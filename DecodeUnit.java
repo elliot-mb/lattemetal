@@ -1,16 +1,35 @@
-public class Decoder implements InstructionVoidVisitor{
+public class DecodeUnit extends Unit{
 
     private final RegisterFile rf;
-    private Instruction currentInstruction;
 
-    Decoder(RegisterFile rf){
+    private boolean hasRun;
+
+    DecodeUnit(RegisterFile rf, PipelineRegister last, PipelineRegister next){
+        super(last, next);
         this.rf = rf;
     }
 
-    public Instruction decode(Instruction op){
-        currentInstruction = null;
-        op.visit(this);
-        return currentInstruction;
+    @Override
+    public boolean isDone() {
+        return currentOp == null;
+    }
+
+    @Override
+    public void readOffPipeline(){
+        hasRun = false;
+        pcVal = last.getPc();
+        flag = last.isFlag();
+        currentOp = last.pull();
+    }
+
+    @Override
+    protected void procInstruction() {
+        hasRun = true;
+    }
+
+    @Override
+    protected boolean isUnfinished() {
+        return !hasRun;
     }
 
     @Override
@@ -18,14 +37,14 @@ public class Decoder implements InstructionVoidVisitor{
         //op.setRdVal(rf.getReg(op.getRd()));
         op.setRsVal(rf.getReg(op.getRs()));
         op.setRtVal(rf.getReg(op.getRt()));
-        currentInstruction = op;
+        currentOp = op;
     }
 
     @Override
     public void accept(Op.AddI op) {
         //op.setRdVal(rf.getReg(op.getRd()));
         op.setRsVal(rf.getReg(op.getRs()));
-        currentInstruction = op;
+        currentOp = op;
     }
 
     @Override
@@ -33,60 +52,62 @@ public class Decoder implements InstructionVoidVisitor{
         //op.setRdVal(rf.getReg(op.getRd()));
         op.setRsVal(rf.getReg(op.getRs()));
         op.setRtVal(rf.getReg(op.getRt()));
-        currentInstruction = op;
+        currentOp = op;
     }
 
     @Override
     public void accept(Op.MulI op) {
         //op.setRdVal(rf.getReg(op.getRd()));
         op.setRsVal(rf.getReg(op.getRs()));
-        currentInstruction = op;
+        currentOp = op;
     }
 
     @Override
     public void accept(Op.Cmp op) {
         op.setRsVal(rf.getReg(op.getRs()));
         op.setRtVal(rf.getReg(op.getRt()));
-        currentInstruction = op;
+        currentOp = op;
     }
 
     @Override
     public void accept(Op.Ld op) {
         op.setRsVal(rf.getReg(op.getRs()));
-        currentInstruction = op;
+        currentOp = op;
     }
 
     @Override
     public void accept(Op.LdC op) {
-        currentInstruction = op;
+        currentOp = op;
     }
 
     @Override
     public void accept(Op.St op) {
         op.setRdVal(rf.getReg(op.getRd()));
         op.setRsVal(rf.getReg(op.getRs()));
-        currentInstruction = op;
+        currentOp = op;
     }
 
     @Override
     public void accept(Op.BrLZ op) {
         op.setRdVal(rf.getReg(op.getRd()));
-        currentInstruction = op;
+        currentOp = op;
     }
 
     @Override
     public void accept(Op.JpLZ op) {
         op.setRdVal(rf.getReg(op.getRd()));
-        currentInstruction = op;
+        currentOp = op;
     }
 
     @Override
     public void accept(Op.Br op) {
-        currentInstruction = op;
+        currentOp = op;
     }
 
     @Override
     public void accept(Op.Jp op) {
-        currentInstruction = op;
+        currentOp = op;
     }
+
+
 }

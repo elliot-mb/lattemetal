@@ -1,26 +1,10 @@
 
 
 public class ArithmeticLogicUnit extends Unit {
-
-    private boolean branchTaken = false;
-    private int pc;
-
+    
     ArithmeticLogicUnit(PipelineRegister last, PipelineRegister next){
         super(last, next);
         this.currentOp = null;
-    }
-
-    @Override
-    protected void readOffPipeline() {
-        pc = last.getPc();
-        currentOp = last.pull();
-    }
-
-    @Override
-    protected void writeOnPipeline() {
-        next.setFlag(branchTaken);
-        next.setPc(pc); //just pass it through
-        next.push(currentOp);
     }
 
     @Override
@@ -115,14 +99,14 @@ public class ArithmeticLogicUnit extends Unit {
     public void accept(Op.BrLZ op) {
         //pc.set(op.getImVal());
         //pc.incr();
-        branchTaken = op.getRdVal() <= 0;
+        flag = op.getRdVal() <= 0;
         op.setResult(op.getImVal());
     }
 
     @Override
     public void accept(Op.JpLZ op) {
-        branchTaken = op.getRdVal() <= 0;
-        op.setResult(last.getPc() + op.getImVal());
+        flag = op.getRdVal() <= 0;
+        op.setResult(pcVal + op.getImVal());
     }
 
     @Override
@@ -132,7 +116,7 @@ public class ArithmeticLogicUnit extends Unit {
 
     @Override
     public void accept(Op.Jp op) {
-        op.setResult(last.getPc() + op.getImVal());
+        op.setResult(pcVal + op.getImVal());
     }
 
 }
