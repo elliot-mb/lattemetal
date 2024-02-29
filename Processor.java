@@ -25,7 +25,7 @@ public class Processor {
         this.de = new DecodeUnit(this.rf, fecDec, decExe);
         this.tally = 0;
         this.wb = new WriteBackUnit(this.rf);
-        this.lsu = new LoadStoreUnit(this.mem, this.pc);
+        this.lsu = new LoadStoreUnit(this.mem, this.pc, exeMem, memWrt);
     }
 
     public void run(){
@@ -46,17 +46,16 @@ public class Processor {
                 alu.clk();
                 tally++;
             }
-            int pcVal = exeMem.getPc();
-            boolean branchTaken = exeMem.isFlag();
-            Instruction decoded = exeMem.pull();
-            decoded.rst(); //refill the duration for memory operations
+//            int pcVal = exeMem.getPc();
+//            boolean branchTaken = exeMem.isFlag();
+//            Instruction decoded = exeMem.pull();
+//            decoded.rst(); //refill the duration for memory operations
 //            System.out.println("lsu start for '" + decoded + "' @ cycle " + Integer.toString(tally));
-            lsu.loadFilledOp(decoded, pcVal, branchTaken);
-            while(!lsu.isDone()){
+            while(!memWrt.canPull()){
                 lsu.clk();
                 tally++;
             }
-            decoded = lsu.requestOp();
+            Instruction decoded = memWrt.pull();
             wb.go(decoded);
             tally++;
 //            if(code != Opcode.br && code != Opcode.brlz && code != Opcode.jp && code != Opcode.jplz){

@@ -29,15 +29,14 @@ public class PipelineRegister {
     }
 
     //push can stall (just if inFlight is not null)
-    public boolean push(Instruction op){
-        if(inFlight != null) return false;
+    public void push(Instruction op){
+        if(inFlight != null) throw new RuntimeException("push: pushing to a full pipereg");
         inFlight = op.copy(); //copy it in
-        return true;
     }
 
     //can return null, indicating a stall
     public Instruction pull(){
-        if(inFlight == null) throw new RuntimeException("pull: pulling from an empty buffer");
+        if(inFlight == null) throw new RuntimeException("pull: pulling from an empty pipereg");
         Instruction result = inFlight.copy(); //copy it out, meaning we cant mutate the instruction inside even if we pull it out
         inFlight = null; //reset
         pc = null;

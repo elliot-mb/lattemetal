@@ -35,11 +35,6 @@ public class ArithmeticLogicUnit extends Unit {
 //        currentOp = null; //empty out our intermediate storage to accept the next one
 //    }
 
-    @Override
-    public boolean isDone() {
-        return currentOp == null;
-    }
-
     //visitation
 
     @Override

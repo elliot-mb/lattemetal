@@ -5,6 +5,8 @@ public class Utils {
 
     private static final char[] WHITESPACE = new char[]{' ', '\n', '\r', '\t'};
 
+    private static final Id preDecoder = new Id();
+
     public static <T> T last(ArrayList<T> xs) throws RuntimeException{
         int size = xs.size();
         if(size == 0) throw new RuntimeException("last: cannot take last element of the empty array");
@@ -29,6 +31,16 @@ public class Utils {
 
     public static int digitsInInt(int val){
         return (int) Math.round(Math.floor(Math.log10(Math.abs(val))) + 1);
+    }
+
+    public static boolean isBranch(Instruction op){
+        Opcode code = op.visit(preDecoder);
+        return code == Opcode.br || code == Opcode.brlz || code == Opcode.jp || code == Opcode.jplz;
+    }
+
+    public static boolean isLoadStore(Instruction op){
+        Opcode code = op.visit(preDecoder);
+        return code == Opcode.ld || code == Opcode.ldc || code == Opcode.st;
     }
 
 }

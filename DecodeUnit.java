@@ -10,11 +10,6 @@ public class DecodeUnit extends Unit{
     }
 
     @Override
-    public boolean isDone() {
-        return currentOp == null;
-    }
-
-    @Override
     public void readOffPipeline(){
         hasRun = false;
         pcVal = last.getPc();

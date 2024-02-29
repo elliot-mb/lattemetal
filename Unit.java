@@ -1,4 +1,4 @@
-public abstract class Unit implements InstructionVoidVisitor, Ticks {
+public abstract class Unit implements InstructionVoidVisitor {
 
     /**
      * for any building block that reads from one pipeline register and writes to another
@@ -27,6 +27,10 @@ public abstract class Unit implements InstructionVoidVisitor, Ticks {
         next.setPc(pcVal); //just pass it through
         next.push(currentOp);
     }
+    protected boolean isDone(){
+        return currentOp == null;
+    }
+
     protected abstract void procInstruction(); //process instruction
     protected abstract boolean isUnfinished(); //when we need to count down instruction
 
