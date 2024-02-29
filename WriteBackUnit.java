@@ -13,37 +13,37 @@ public class WriteBackUnit implements InstructionVoidVisitor{
     // all the below methods write back to the registers correctly
     @Override
     public void accept(Op.Add op) {
-        rf.setReg(op.getRd(), op.getRdVal());
+        rf.setReg(op.getRd(), op.getResult());
     }
 
     @Override
     public void accept(Op.AddI op) {
-        rf.setReg(op.getRd(), op.getRdVal());
+        rf.setReg(op.getRd(), op.getResult());
     }
 
     @Override
     public void accept(Op.Mul op) {
-        rf.setReg(op.getRd(), op.getRdVal());
+        rf.setReg(op.getRd(), op.getResult());
     }
 
     @Override
     public void accept(Op.MulI op) {
-        rf.setReg(op.getRd(), op.getRdVal());
+        rf.setReg(op.getRd(), op.getResult());
     }
 
     @Override
     public void accept(Op.Cmp op) {
-        rf.setReg(op.getRd(), op.getRdVal());
+        rf.setReg(op.getRd(), op.getResult());
     }
 
     @Override
     public void accept(Op.Ld op) {
-        rf.setReg(op.getRd(), op.getRdVal());
+        rf.setReg(op.getRd(), op.getResult());
     }
 
     @Override
     public void accept(Op.LdC op) {
-        rf.setReg(op.getRd(), op.getRdVal());
+        rf.setReg(op.getRd(), op.getResult());
     }
 
     @Override

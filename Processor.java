@@ -10,10 +10,10 @@ public class Processor {
     private int tally;
     private final WriteBackUnit wb;
 
-    private final PipelineRegister FetchDecode = new PipelineRegister();
-    private final PipelineRegister DecodeExecute = new PipelineRegister();
-    private final PipelineRegister ExecuteMemory = new PipelineRegister();
-    private final PipelineRegister MemoryWriteBack = new PipelineRegister();
+    private final PipelineRegister fecDec = new PipelineRegister();
+    private final PipelineRegister decExe = new PipelineRegister();
+    private final PipelineRegister exeMem = new PipelineRegister();
+    private final PipelineRegister memWrt = new PipelineRegister();
 
     Processor(InstructionCache ic, Memory... mem) throws RuntimeException{
         if(mem.length > 1) throw new RuntimeException("Processor: this constructor cannot have more than one memories");
@@ -21,11 +21,11 @@ public class Processor {
         this.pc = new ProgramCounter(ic.numInstrs());
         this.rf = new RegisterFile();
         this.mem = mem.length > 0 ? mem[0] : new Memory();
-        this.alu = new ArithmeticLogicUnit(this.pc);
+        this.alu = new ArithmeticLogicUnit(decExe, exeMem);
         this.de = new Decoder(this.rf);
         this.tally = 0;
         this.wb = new WriteBackUnit(this.rf);
-        this.lsu = new LoadStoreUnit(this.mem);
+        this.lsu = new LoadStoreUnit(this.mem, this.pc, exeMem);
     }
 
     public void run(){
@@ -38,12 +38,13 @@ public class Processor {
             Opcode code = fetched.visit(preDecoder);
             Instruction decoded = de.decode(fetched);
             tally++;
-            alu.loadFilledOp(decoded);
+            decExe.setPc(pc.getCount());
+            decExe.push(decoded);
             while(!alu.isDone()){
                 alu.clk();
                 tally++;
             }
-            decoded = alu.requestOp();
+            decoded = exeMem.pull();
             decoded.rst(); //refill the duration for memory operations
 //            System.out.println("lsu start for '" + decoded + "' @ cycle " + Integer.toString(tally));
             lsu.loadFilledOp(decoded);

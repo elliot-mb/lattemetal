@@ -18,6 +18,7 @@ public class ArithmeticLogicUnit extends Unit {
     protected void writeOnPipeline() {
         next.push(currentOp);
         next.setFlag(branchTaken);
+        next.setPc(last.getPc()); //just pass it through
     }
 
     @Override
@@ -47,11 +48,6 @@ public class ArithmeticLogicUnit extends Unit {
 //
 //        currentOp = null; //empty out our intermediate storage to accept the next one
 //    }
-
-    //should be done just if op is 'done'
-    public Instruction requestOp(){
-        return currentOp;
-    }
 
     @Override
     public boolean isDone() {
@@ -110,7 +106,7 @@ public class ArithmeticLogicUnit extends Unit {
     @Override
     public void accept(Op.St op) {
         //store register value at offset address
-        op.setResult(op.getRsVal() + op.getImVal()); //calculate offset, store it in RS
+        op.setResult(op.getRsVal() + op.getImVal()); //calculate offset
     }
 
     @Override
