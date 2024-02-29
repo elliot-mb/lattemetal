@@ -9,7 +9,7 @@ public abstract class Instruction extends HasDuration {
     protected int rsVal;
     protected int rtVal;
 
-    private Integer result = null;
+    protected Integer result = null;
 
     Instruction(int duration, Integer immediate,  RegisterName... regs){
         super(duration);
@@ -39,7 +39,7 @@ public abstract class Instruction extends HasDuration {
     //this is abstract since even though most instructions will write their results to
     //rd, when they have no rd they can write them to whatever auxiliary storage variables
     //they want
-    public void setResult(int result){
+    public void setResult(Integer result){
         this.result = result;
     }
     public int getResult(){

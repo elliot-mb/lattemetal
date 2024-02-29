@@ -25,7 +25,7 @@ public class Processor {
         this.de = new Decoder(this.rf);
         this.tally = 0;
         this.wb = new WriteBackUnit(this.rf);
-        this.lsu = new LoadStoreUnit(this.mem, this.pc, exeMem);
+        this.lsu = new LoadStoreUnit(this.mem, this.pc);
     }
 
     public void run(){
@@ -38,16 +38,21 @@ public class Processor {
             Opcode code = fetched.visit(preDecoder);
             Instruction decoded = de.decode(fetched);
             tally++;
-            decExe.setPc(pc.getCount());
+
+            if(!decExe.canPush())
+                throw new RuntimeException("what");
             decExe.push(decoded);
-            while(!alu.isDone()){
+            decExe.setPc(pc.getCount() + 1); //adder!
+            while(!exeMem.canPull()){
                 alu.clk();
                 tally++;
             }
+            int pcVal = exeMem.getPc();
+            boolean branchTaken = exeMem.isFlag();
             decoded = exeMem.pull();
             decoded.rst(); //refill the duration for memory operations
 //            System.out.println("lsu start for '" + decoded + "' @ cycle " + Integer.toString(tally));
-            lsu.loadFilledOp(decoded);
+            lsu.loadFilledOp(decoded, pcVal, branchTaken);
             while(!lsu.isDone()){
                 lsu.clk();
                 tally++;
@@ -55,9 +60,9 @@ public class Processor {
             decoded = lsu.requestOp();
             wb.go(decoded);
             tally++;
-            if(code != Opcode.br && code != Opcode.brlz && code != Opcode.jp && code != Opcode.jplz){
-                pc.incr();
-            }
+//            if(code != Opcode.br && code != Opcode.brlz && code != Opcode.jp && code != Opcode.jplz){
+//                pc.incr();
+//            }
         }
         System.out.println("run: program finished in " + tally + " cycles");
         System.out.println("registers (dirty): " + rf);

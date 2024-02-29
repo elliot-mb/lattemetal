@@ -1,11 +1,15 @@
 public class PipelineRegister {
 
     //cannot be final because it MUST change
-    private Instruction inFlight = null;
-    private Integer pc = null;
-    private boolean flag = false; //used for a 'branch taken' bit
+    private Instruction inFlight;
+    private Integer pc;
+    private boolean flag; //used for a 'branch taken' bit
 
-    PipelineRegister(){}
+    PipelineRegister(){
+        inFlight = null;
+        pc = null;
+        flag = false;
+    }
 
     public void setPc(int count){
         pc = count;
@@ -33,8 +37,12 @@ public class PipelineRegister {
 
     //can return null, indicating a stall
     public Instruction pull(){
-        if(inFlight == null) return null; //this must be handled by the puller
-        return inFlight.copy(); //copy it out, meaning we cant mutate the instruction inside even if we pull it out
+        if(inFlight == null) throw new RuntimeException("pull: pulling from an empty buffer");
+        Instruction result = inFlight.copy(); //copy it out, meaning we cant mutate the instruction inside even if we pull it out
+        inFlight = null; //reset
+        pc = null;
+        flag = false;
+        return result;
     }
 
     public boolean canPush(){
@@ -42,6 +50,6 @@ public class PipelineRegister {
     }
 
     public boolean canPull(){
-        return pull() == null;
+        return inFlight != null;
     }
 }

@@ -3,6 +3,7 @@
 public class ArithmeticLogicUnit extends Unit {
 
     private boolean branchTaken = false;
+    private int pc;
 
     ArithmeticLogicUnit(PipelineRegister last, PipelineRegister next){
         super(last, next);
@@ -11,14 +12,15 @@ public class ArithmeticLogicUnit extends Unit {
 
     @Override
     protected void readOffPipeline() {
+        pc = last.getPc();
         currentOp = last.pull();
     }
 
     @Override
     protected void writeOnPipeline() {
-        next.push(currentOp);
         next.setFlag(branchTaken);
-        next.setPc(last.getPc()); //just pass it through
+        next.setPc(pc); //just pass it through
+        next.push(currentOp);
     }
 
     @Override

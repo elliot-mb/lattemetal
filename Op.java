@@ -32,6 +32,7 @@ public class Op {
             add.setRdVal(getRdVal());
             add.setRsVal(getRsVal());
             add.setRtVal(getRtVal());
+            add.setResult(result);
             return add;
         }
 
@@ -63,6 +64,7 @@ public class Op {
             AddI addi = new AddI(getRd(), getRs(), getImVal());
             addi.setRdVal(getRdVal());
             addi.setRsVal(getRsVal());
+            addi.setResult(result);
             return addi;
         }
 
@@ -96,6 +98,7 @@ public class Op {
             mul.setRdVal(getRdVal());
             mul.setRsVal(getRsVal());
             mul.setRtVal(getRtVal());
+            mul.setResult(result);
             return mul;
         }
 
@@ -127,6 +130,7 @@ public class Op {
             MulI muli = new MulI(getRd(), getRs(), getImVal());
             muli.setRdVal(getRdVal());
             muli.setRsVal(getRsVal());
+            muli.setResult(result);
             return muli;
         }
 
@@ -161,6 +165,7 @@ public class Op {
             cmp.setRdVal(getRdVal());
             cmp.setRsVal(getRsVal());
             cmp.setRtVal(getRtVal());
+            cmp.setResult(result);
             return cmp;
         }
 
@@ -190,6 +195,7 @@ public class Op {
             Ld ld = new Ld(getRd(), getRs(), getImVal());
             ld.setRdVal(getRdVal());
             ld.setRsVal(getRsVal());
+            ld.setResult(result);
             return ld;
         }
 
@@ -218,6 +224,7 @@ public class Op {
         public Instruction copy(){
             LdC ldc = new LdC(getRd(), getImVal());
             ldc.setRdVal(getRdVal());
+            ldc.setResult(result);
             return ldc;
         }
 
@@ -249,6 +256,7 @@ public class Op {
             St st = new St(getRd(), getRs(), getImVal());
             st.setRdVal(getRdVal());
             st.setRsVal(getRsVal());
+            st.setResult(result);
             return st;
         }
     }
@@ -277,6 +285,7 @@ public class Op {
         public Instruction copy() {
             BrLZ brlz = new BrLZ(getRd(), getImVal());
             brlz.setRdVal(getRdVal());
+            brlz.setResult(result);
             return brlz;
         }
     }
@@ -302,6 +311,7 @@ public class Op {
         public Instruction copy(){
             JpLZ jplz = new JpLZ(getRd(), getImVal());
             jplz.setRdVal(getRdVal());
+            jplz.setResult(result);
             return jplz;
         }
     }
@@ -325,7 +335,9 @@ public class Op {
 
         public int getImVal() { return im; }
         public Instruction copy(){
-            return new Br(getImVal());
+            Br br = new Br(getImVal());
+            br.setResult(result);
+            return br;
         }
     }
 
@@ -347,7 +359,9 @@ public class Op {
         }
         public int getImVal() { return im; }
         public Instruction copy(){
-            return new Jp(getImVal());
+            Jp jp = new Jp(getImVal());
+            jp.setResult(result);
+            return jp;
         }
     }
 }
