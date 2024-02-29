@@ -42,8 +42,6 @@ public class Processor {
                 fe.clk();
                 tally++;
             }
-//            if(fecDec.canPush()) fecDec.push(fetched);
-//            fecDec.setPc(pc.getCount() + 1);
             while(!decExe.canPull()){
                 de.clk();
                 tally++;
@@ -60,7 +58,7 @@ public class Processor {
                 wb.clk();
                 tally++;
             }
-            voided.pull(); //delete whats inside
+            voided.pull(); //delete whats inside (voided is used to detect when writebacks are finished)
         }
         System.out.println("run: program finished in " + tally + " cycles");
         System.out.println("registers (dirty): " + rf);
