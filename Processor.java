@@ -40,6 +40,7 @@ public class Processor {
 
     public void run(){
         System.out.println(ic);
+        voided.push(Utils.opFactory.new No());
         while(!pc.isDone()){
             if(voided.canPull()){
                 voided.pull();
