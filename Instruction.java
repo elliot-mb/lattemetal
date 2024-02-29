@@ -9,6 +9,8 @@ public abstract class Instruction extends HasDuration {
     protected int rsVal;
     protected int rtVal;
 
+    private Integer result = null;
+
     Instruction(int duration, Integer immediate,  RegisterName... regs){
         super(duration);
         this.im = immediate;
@@ -32,6 +34,17 @@ public abstract class Instruction extends HasDuration {
     public int getIm() throws RuntimeException{
         if(this.im == null) throw new RuntimeException("getImmediate: there is no immediate defined for this instruction");
         return this.im;
+    }
+
+    //this is abstract since even though most instructions will write their results to
+    //rd, when they have no rd they can write them to whatever auxiliary storage variables
+    //they want
+    public void setResult(int result){
+        this.result = result;
+    }
+    public int getResult(){
+        if(result == null) throw new RuntimeException("getResult: result is null and has not been set");
+        return result;
     }
 
     abstract public Opcode visit(InstructionCodeVisitor v);

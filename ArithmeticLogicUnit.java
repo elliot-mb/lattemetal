@@ -1,24 +1,52 @@
-public class ArithmeticLogicUnit implements InstructionVoidVisitor, Ticks {
 
-    private Instruction currentOp;
-    private boolean done;
-    private final ProgramCounter pc;
 
-    ArithmeticLogicUnit(ProgramCounter pc){
+public class ArithmeticLogicUnit extends Unit {
+
+    private boolean branchTaken = false;
+
+    ArithmeticLogicUnit(PipelineRegister last, PipelineRegister next){
+        super(last, next);
         this.currentOp = null;
-        this.pc = pc;
-        this.done = true;
     }
 
-    @Override //overriding because we need to delegate to whats inside
-    public void clk() { //effectively delegates to the instruction clk
-        if(!isDone()) currentOp.visit(this);
+    @Override
+    protected void readOffPipeline() {
+        currentOp = last.pull();
     }
 
-    public void loadFilledOp(Instruction op){
-        currentOp = op;
-        done = false;
+    @Override
+    protected void writeOnPipeline() {
+        next.push(currentOp);
+        next.setFlag(branchTaken);
     }
+
+    @Override
+    protected void procInstruction() {
+        currentOp.clk();
+    }
+
+    @Override
+    protected boolean isUnfinished() {
+        return !isDone() && !currentOp.isDone(); //if we arent done with the inner up, and its not blank
+    }
+
+    //    @Override
+//    public void clk() {
+//        //if we have finished processing this instruction but cant pull from last, we stall one cycle
+//        if(isDone() && !last.canPull()) return; //stall a clock cycle
+//        if(isDone()) currentOp = last.pull(); //dont re-copy if we are mid-processing
+//        if(!isDone() && !currentOp.isDone()) {
+//            currentOp.clk();
+//            return; //use up a clock cycle
+//        }
+//        currentOp.visit(this); //process operation
+//        if(!next.canPush()) return; //stall a clock cycle if we cant push the result
+//
+//        next.push(currentOp);
+//        next.setFlag(branchTaken);
+//
+//        currentOp = null; //empty out our intermediate storage to accept the next one
+//    }
 
     //should be done just if op is 'done'
     public Instruction requestOp(){
@@ -27,153 +55,86 @@ public class ArithmeticLogicUnit implements InstructionVoidVisitor, Ticks {
 
     @Override
     public boolean isDone() {
-        return done;
+        return currentOp == null;
     }
+
+    //visitation
 
     @Override
     public void accept(Op.Add op) {
-        if(op.isDone()){
-            //modify register value = op.getRsVal() + op.getRtVal(); // i guess we can just write into the instruction
-            //and then create a writeback stage
-            op.setRdVal(op.getRsVal() + op.getRtVal());
-            done = true;
-            return;
-        }
-        op.clk();
+        //modify register value = op.getRsVal() + op.getRtVal(); // i guess we can just write into the instruction
+        //and then create a writeback stage
+        op.setResult(op.getRsVal() + op.getRtVal());
     }
 
     @Override
     public void accept(Op.AddI op) {
-        if(op.isDone()){
-            // modify register value = op.getRsVal() + op.getImVal();
-            op.setRdVal(op.getRsVal() + op.getImVal());
-            done = true;
-            return;
-        }
-        op.clk();
+        // modify register value = op.getRsVal() + op.getImVal();
+        op.setResult(op.getRsVal() + op.getImVal());
     }
 
     @Override
     public void accept(Op.Mul op) {
-        if(op.isDone()){
-            // modify register value = op.getRsVal() * op.getRtVal();
-            op.setRdVal(op.getRsVal() * op.getRtVal());
-            done = true;
-            return;
-        }
-        op.clk();
+        // modify register value = op.getRsVal() * op.getRtVal();
+        op.setResult(op.getRsVal() * op.getRtVal());
     }
 
     @Override
     public void accept(Op.MulI op) {
-        if(op.isDone()){
-            // modify register value = op.getRsVal() * op.getImVal();
-            op.setRdVal(op.getRsVal() * op.getImVal());
-            done = true;
-            return;
-        }
-        op.clk();
+        // modify register value = op.getRsVal() * op.getImVal();
+        op.setResult(op.getRsVal() * op.getImVal());
     }
 
     @Override
     public void accept(Op.Cmp op) {
-        if(op.isDone()){
-            // modify rd value
-            final int a = op.getRsVal();
-            final int b = op.getRtVal();
-            int cmpResult;
-            if(a < b) cmpResult = -1;
-            else if(a == b) cmpResult = 0;
-            else cmpResult = 1;
-            op.setRdVal(cmpResult);
-            done = true;
-            return;
-        }
-        op.clk();
+        // modify rd value
+        final int a = op.getRsVal();
+        final int b = op.getRtVal();
+        int cmpResult;
+        if(a < b) cmpResult = -1;
+        else if(a == b) cmpResult = 0;
+        else cmpResult = 1;
+        op.setResult(cmpResult);
     }
 
     @Override
     public void accept(Op.Ld op) {
-        if(op.isDone()){
-            op.setRdVal(op.getRsVal() + op.getImVal()); //calculate offset
-            done = true;
-            return;
-        }
-        op.clk();
+        op.setResult(op.getRsVal() + op.getImVal()); //calculate offset
     }
 
     @Override
     public void accept(Op.LdC op) {
-        done = true;
-        op.clk();
-//        if(op.isDone()){
-//            //use imval so no computation is done
-//            done = true;
-//            return;
-//        }
-//        op.clk();
+        op.setResult(op.getImVal());
     }
 
     @Override
     public void accept(Op.St op) {
-        if(op.isDone()){
-            //store register value at offset address
-            op.setRsVal(op.getRsVal() + op.getImVal()); //calculate offset, store it in RS
-            done = true;
-            return;
-        }
-        op.clk();
+        //store register value at offset address
+        op.setResult(op.getRsVal() + op.getImVal()); //calculate offset, store it in RS
     }
 
     @Override
     public void accept(Op.BrLZ op) {
-        if(op.isDone()){
-            //modify program counter
-            if(op.getRdVal() <= 0) {
-                pc.set(op.getImVal());
-            }else{
-                pc.incr();
-            }
-            done = true;
-            return;
-        }
-        op.clk();
+        //pc.set(op.getImVal());
+        //pc.incr();
+        branchTaken = op.getRdVal() <= 0;
+        op.setResult(op.getImVal());
     }
 
     @Override
     public void accept(Op.JpLZ op) {
-        if(op.isDone()){
-            //modify program counter
-            if(op.getRdVal() <= 0){
-                pc.set(pc.getCount() + op.getImVal());
-            }else{
-                pc.incr();
-            }
-            done = true;
-            return;
-        }
-        op.clk();
+        branchTaken = op.getRdVal() <= 0;
+        op.setResult(last.getPc() + op.getImVal());
     }
 
     @Override
     public void accept(Op.Br op) {
-        if(op.isDone()){
-            pc.set(op.getImVal());
-            done = true;
-            return;
-        }
-        op.clk();
+        op.setResult(op.getImVal());
     }
 
     @Override
     public void accept(Op.Jp op) {
-        if(op.isDone()){
-            //modify program counter
-            pc.set(pc.getCount() + op.getImVal());
-            done = true;
-            return;
-        }
-        op.clk();
+        op.setResult(last.getPc() + op.getImVal());
     }
 
 }

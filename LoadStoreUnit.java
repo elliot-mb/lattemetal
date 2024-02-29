@@ -31,6 +31,8 @@ public class LoadStoreUnit implements InstructionVoidVisitor, Ticks{
         return done;
     }
 
+    //visitation
+
     @Override
     public void accept(Op.Add op) {
         done = true;

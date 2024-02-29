@@ -34,6 +34,7 @@ public class Op {
             add.setRtVal(getRtVal());
             return add;
         }
+
     }
 
     public class AddI extends Instruction{
@@ -64,6 +65,7 @@ public class Op {
             addi.setRsVal(getRsVal());
             return addi;
         }
+
     }
 
     public class Mul extends Instruction{
@@ -96,6 +98,7 @@ public class Op {
             mul.setRtVal(getRtVal());
             return mul;
         }
+
     }
 
     public class MulI extends Instruction{
@@ -126,6 +129,7 @@ public class Op {
             muli.setRsVal(getRsVal());
             return muli;
         }
+
     }
 
     public class Cmp extends Instruction{
@@ -159,6 +163,7 @@ public class Op {
             cmp.setRtVal(getRtVal());
             return cmp;
         }
+
     }
 
     public class Ld extends Instruction{
@@ -187,6 +192,7 @@ public class Op {
             ld.setRsVal(getRsVal());
             return ld;
         }
+
     }
 
     public class LdC extends Instruction{
@@ -214,6 +220,7 @@ public class Op {
             ldc.setRdVal(getRdVal());
             return ldc;
         }
+
     }
 
     public class St extends Instruction{
