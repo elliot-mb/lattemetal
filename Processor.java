@@ -32,33 +32,26 @@ public class Processor {
         this.lsu = new LoadStoreUnit(this.mem, this.pc, exeMem, memWrt);
     }
 
+    private void sendSingleInstruction(){
+        if(prefec.canPull()) prefec.pull(); //empty register
+        prefec.push(Utils.opFactory.new No());
+        prefec.setPc(pc.getCount());
+    }
+
     public void run(){
         System.out.println(ic);
         while(!pc.isDone()){
-            if(prefec.canPull()) prefec.pull(); //empty register
-            prefec.push(Utils.opFactory.new No());
-            prefec.setPc(pc.getCount());
-            while(!fecDec.canPull()) {
-                fe.clk();
-                tally++;
+            if(voided.canPull()){
+                voided.pull();
+                sendSingleInstruction();
             }
-            while(!decExe.canPull()){
-                de.clk();
-                tally++;
-            }
-            while(!exeMem.canPull()){
-                alu.clk();
-                tally++;
-            }
-            while(!memWrt.canPull()){
-                lsu.clk();
-                tally++;
-            }
-            while(!voided.canPull()){
-                wb.clk();
-                tally++;
-            }
-            voided.pull(); //delete whats inside (voided is used to detect when writebacks are finished)
+            fe.clk();
+            de.clk();
+            alu.clk();
+            lsu.clk();
+            wb.clk();
+            tally++;
+//            voided.pull(); //delete whats inside (voided is used to detect when writebacks are finished)
         }
         System.out.println("run: program finished in " + tally + " cycles");
         System.out.println("registers (dirty): " + rf);
