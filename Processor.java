@@ -33,6 +33,7 @@ public class Processor {
     }
 
     private void sendSingleInstruction(){
+        System.out.println("push");
         if(prefec.canPull()) prefec.pull(); //empty register
         prefec.push(Utils.opFactory.new No());
         prefec.setPc(pc.getCount());
@@ -52,6 +53,7 @@ public class Processor {
             lsu.clk();
             wb.clk();
             tally++;
+//            System.out.println(" pipe" + prefec + fecDec + decExe + exeMem + memWrt + voided);
 //            voided.pull(); //delete whats inside (voided is used to detect when writebacks are finished)
         }
         System.out.println("run: program finished in " + tally + " cycles");

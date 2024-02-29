@@ -51,4 +51,8 @@ public class PipelineRegister {
     public boolean canPull(){
         return inFlight != null;
     }
+
+    public String toString(){
+        return canPull() ? "#" : "_";
+    }
 }
