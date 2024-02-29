@@ -3,6 +3,7 @@ import java.nio.channels.Pipe;
 public class LoadStoreUnit extends Unit{
 
     private static final int L1_LATENCY = 4;
+    private static final int NOP_LATENCY = 1;
     private final Memory mem;
 
     private final ProgramCounter pc;
@@ -10,6 +11,7 @@ public class LoadStoreUnit extends Unit{
     private int pcVal;
 
     private Durate counter = new Durate(L1_LATENCY);
+    private Durate counterNop = new Durate(NOP_LATENCY);
 
 
     LoadStoreUnit(Memory mem, ProgramCounter pc, PipelineRegister last, PipelineRegister next){
@@ -24,6 +26,7 @@ public class LoadStoreUnit extends Unit{
         flag = last.isFlag();
         currentOp = last.pull();
         counter.rst();
+        counterNop.rst();
     }
 
     @Override
@@ -34,11 +37,12 @@ public class LoadStoreUnit extends Unit{
     @Override
     protected void procInstruction() {
         counter.decr();
+        if(!counterNop.isDone()) counterNop.decr();
     }
 
     @Override
     protected boolean isUnfinished() {
-        return !counter.isDone() && Utils.isLoadStore(currentOp); //if its not a load/store we're finished
+        return (!counter.isDone() && Utils.isLoadStore(currentOp)) || !counterNop.isDone(); //if its not a load/store we're finished
     }
 
     //visitation

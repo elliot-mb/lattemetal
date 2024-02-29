@@ -52,7 +52,7 @@ public class PipelineRegister {
         return inFlight != null;
     }
 
-    public String toString(){
-        return canPull() ? "#" : "_";
-    }
+//    public String toString(){
+//        return canPull() ? "#" : "_";
+//    }
 }
