@@ -33,7 +33,7 @@ public class Processor {
     }
 
     private void sendSingleInstruction(){
-        System.out.println("push");
+        //System.out.println("push");
         if(prefec.canPull()) prefec.pull(); //empty register
         prefec.push(Utils.opFactory.new No());
         prefec.setPc(pc.getCount());
