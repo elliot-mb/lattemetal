@@ -42,14 +42,15 @@ public class Processor {
     public void run(){
         System.out.println(ic);
         voided.push(Utils.opFactory.new No());
-        while(!voided.canPull() || !pc.isCountDone(voided.getPcVal())){
+        voided.setPcVal(0);
+        while(prefec.canPull() || fecDec.canPull() || decExe.canPull() || exeMem.canPull() || memWrt.canPull() || voided.canPull()){
             wb.clk();
             lsu.clk();
             alu.clk();
             de.clk();
             fe.clk();
             System.out.println("@" + tally + ":\t\t[" + fe + fecDec + de + decExe + alu + exeMem + lsu + memWrt + wb + "]");
-            if(prefec.canPush()) {
+            if(prefec.canPush() && !pc.isDone()) {
                 prefec.push(Utils.opFactory.new No());
                 prefec.setPcVal(pc.getCount());
                 pc.incr();
