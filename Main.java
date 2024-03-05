@@ -41,7 +41,7 @@ public class Main {
      * @param args
      */
     public static void main(String[] args){
-        String programPath = "./assembly/mat2_mul.latte";
+        String programPath = "./assembly/bubble_sort.latte";
         int printWidth = 1;
         if(args.length >= 1){
             System.out.println(args[0]);

@@ -23,4 +23,6 @@ public interface InstructionCodeVisitor {
     public Opcode accept(Op.Br op);
 
     public Opcode accept(Op.Jp op);
+
+    public Opcode accept(Op.No op);
 }

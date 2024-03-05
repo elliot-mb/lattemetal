@@ -37,33 +37,34 @@
             addi a0 zero #0             -- i = 0 counter for dot prod (all our counters will be 'a' registers)
             addi a1 zero #0             -- j = 0 row number in C (row number in A)
             addi a2 zero #0             -- k = 0 column number in C (column number in B)
-jincr:      addi a2 zero #0
-kincr:          addi a2 zero #0
-                addi a0 zero #0             -- i = 0;
-iincr:              addi s2 zero #0         -- s2 = 0; accumulator for dot product (reset this)  -- for(i = 0; i < p; i++) --we will used 'save registers' (sn) for calculations
-                    mul s0 t0 a1            -- s0 = row offset (m * j)
-                    add s0 s0 a0            -- s0 = i + (m * j)
-                    add s0 s0 t3            -- s0 += &A_11
-                    ld s0 s0 #0             -- s0 = A_ji
-                    mul s1 a0 t1            -- s1 = row offset (i * p)
-                    add s1 s1 a2            -- s1 += k
-                    add s1 s1 t4            -- s1 += &B_11
-                    ld s1 s1 #0             -- s1 = B_ik
-                    mul s0 s1 s0            -- s0 = A_ji * B_ik
-                    add s2 s2 s0            -- s2 += s0
-                    addi a0 a0 #1           -- i++
-                    cmp s0 a0 t1            -- i < p => s0 = -1
-                    addi s0 s0 #1           -- i < p => s0 = 0
-                    brlz s0 iincr           -- so just while i is less than p we jump round the loop
-                mul s3 t0 a1                -- s3 = row offset (m * j)
-                add s3 s3 a2                -- s3 += k
-                add s3 s3 t5                -- s3 += &C_11
-                st s2 s3 #0                 -- store the result in C_jk
-                addi a2 a2 #1               -- k++
-                cmp s4 a2 t2                -- k < n => s4 = -1
-                addi s4 s4 #1               -- k < n => s4 = 0
-                brlz s4 kincr               -- go back to the start of the dot product loop
-            addi a1 a1 #1                   -- j++
-            cmp s4 a1 t0                    -- j < m => s4 = -1
-            addi s4 s4 #1                   -- j < m => s4 = 0
-            brlz s4 jincr                   -- go back to the start of the row loop
+rowc:       addi a2 zero #0
+            addi a0 zero #0             -- i = 0;
+
+dotc:           addi s2 zero #0             -- s2 = 0; accumulator for dot product (reset this)  -- for(i = 0; i < p; i++) --we will used 'save registers' (sn) for calculations
+                addi a0 zero #0
+innerdotc:      mul s0 t0 a1            -- s0 = row offset (m * j)
+                add s0 s0 a0            -- s0 = i + (m * j)
+                add s0 s0 t3            -- s0 += &A_11
+                ld s0 s0 #0             -- s0 = A_ji
+                mul s1 a0 t1            -- s1 = row offset (i * p)
+                add s1 s1 a2            -- s1 += k
+                add s1 s1 t4            -- s1 += &B_11
+                ld s1 s1 #0             -- s1 = B_ik
+                mul s0 s1 s0            -- s0 = A_ji * B_ik
+                add s2 s2 s0            -- s2 += s0
+                addi a0 a0 #1           -- i++
+                cmp s0 a0 t1            -- i < p => s0 = -1
+                addi s0 s0 #1           -- i < p => s0 = 0
+                brlz s0 innerdotc       -- so just while i is less than p we jump round the loop
+            mul s3 t0 a1            -- s3 = row offset (m * j)
+            add s3 s3 a2            -- s3 += k
+            add s3 s3 t5            -- s3 += &C_11
+            st s2 s3 #0             -- store the result in C_jk
+            addi a2 a2 #1               -- k++
+            cmp s4 a2 t2                -- k < n => s4 = -1
+            addi s4 s4 #1               -- k < n => s4 = 0
+            brlz s4 dotc                -- go back to the start of the dot product loop
+        addi a1 a1 #1                   -- j++
+        cmp s4 a1 t0                    -- j < m => s4 = -1
+        addi s4 s4 #1                   -- j < m => s4 = 0
+        brlz s4 rowc                    -- go back to the start of the row loop (k loop)

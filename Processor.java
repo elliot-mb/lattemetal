@@ -5,10 +5,18 @@ public class Processor {
     private final ArithmeticLogicUnit alu;
     private final RegisterFile rf;
     private final Memory mem;
-    private final Decoder de;
+    private final FetchUnit fe;
+    private final DecodeUnit de;
     private final LoadStoreUnit lsu;
     private int tally;
-    private WriteBackUnit wb;
+    private final WriteBackUnit wb;
+
+    private final PipelineRegister prefec = new PipelineRegister(); //just to pass the pc value to the fetch unit, and increment it!
+    private final PipelineRegister fecDec = new PipelineRegister();
+    private final PipelineRegister decExe = new PipelineRegister();
+    private final PipelineRegister exeMem = new PipelineRegister();
+    private final PipelineRegister memWrt = new PipelineRegister();
+    private final PipelineRegister voided = new PipelineRegister(); //ignored pipe register to satisfy Unit inheritence
 
     Processor(InstructionCache ic, Memory... mem) throws RuntimeException{
         if(mem.length > 1) throw new RuntimeException("Processor: this constructor cannot have more than one memories");
@@ -16,42 +24,37 @@ public class Processor {
         this.pc = new ProgramCounter(ic.numInstrs());
         this.rf = new RegisterFile();
         this.mem = mem.length > 0 ? mem[0] : new Memory();
-        this.alu = new ArithmeticLogicUnit(this.pc);
-        this.de = new Decoder(this.rf);
+        this.alu = new ArithmeticLogicUnit(decExe, exeMem);
+        this.fe = new FetchUnit(ic, prefec, fecDec);
+        this.de = new DecodeUnit(this.rf, fecDec, decExe);
         this.tally = 0;
-        this.wb = new WriteBackUnit(this.rf);
-        this.lsu = new LoadStoreUnit(this.mem);
+        this.wb = new WriteBackUnit(this.rf, memWrt, voided);
+        this.lsu = new LoadStoreUnit(this.mem, this.pc, exeMem, memWrt);
+    }
+
+    private void sendSingleInstruction(){
+        //System.out.println("push");
+        if(prefec.canPull()) prefec.pull(); //empty register
+        prefec.push(Utils.opFactory.new No());
+        prefec.setPc(pc.getCount());
     }
 
     public void run(){
-        Id preDecoder = new Id();
         System.out.println(ic);
+        voided.push(Utils.opFactory.new No());
         while(!pc.isDone()){
-            Instruction fetched = ic.getInstruction(pc.getCount());
-            //System.out.println("'" + fetched + "' @ cycle " + Integer.toString(tally));
-            tally++;
-            Opcode code = fetched.visit(preDecoder);
-            Instruction decoded = de.decode(fetched);
-            tally++;
-            alu.loadFilledOp(decoded);
-            while(!alu.isDone()){
-                alu.clk();
-                tally++;
+            if(voided.canPull()){
+                voided.pull();
+                sendSingleInstruction();
             }
-            decoded = alu.requestOp();
-            decoded.rst(); //refill the duration for memory operations
-//            System.out.println("lsu start for '" + decoded + "' @ cycle " + Integer.toString(tally));
-            lsu.loadFilledOp(decoded);
-            while(!lsu.isDone()){
-                lsu.clk();
-                tally++;
-            }
-            decoded = lsu.requestOp();
-            wb.go(decoded);
+            fe.clk();
+            de.clk();
+            alu.clk(); //examples of good latencies can be found in the interim feedback slides from last year
+            lsu.clk();
+            wb.clk();
             tally++;
-            if(code != Opcode.br && code != Opcode.brlz && code != Opcode.jp && code != Opcode.jplz){
-                pc.incr();
-            }
+            System.out.println("" + fe + de + alu + lsu + wb);
+//            voided.pull(); //delete whats inside (voided is used to detect when writebacks are finished)
         }
         System.out.println("run: program finished in " + tally + " cycles");
         System.out.println("registers (dirty): " + rf);

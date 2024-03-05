@@ -1,118 +1,121 @@
-public class LoadStoreUnit implements InstructionVoidVisitor, Ticks{
+import java.nio.channels.Pipe;
 
-    private Instruction currentOp;
-    
+public class LoadStoreUnit extends Unit{
+
+    private static final int L1_LATENCY = 3;
+    private static final int NOP_LATENCY = 1;
     private final Memory mem;
-    
-    private boolean done;
 
-    LoadStoreUnit(Memory mem){
+    private final ProgramCounter pc;
+
+    private int pcVal;
+
+    private Durate counter = new Durate(L1_LATENCY);
+    private Durate counterNop = new Durate(NOP_LATENCY);
+
+
+    LoadStoreUnit(Memory mem, ProgramCounter pc, PipelineRegister last, PipelineRegister next){
+        super(last, next);
+        this.pc = pc;
         this.mem = mem;
     }
 
-    public void loadFilledOp(Instruction op){
-        currentOp = op;
-        done = false;
-    }
-
-    public Instruction requestOp(){
-        return currentOp;
+    @Override
+    protected void readOffPipeline(){
+        pcVal = last.getPc();
+        flag = last.isFlag();
+        currentOp = last.pull();
+        counter.rst();
+        counterNop.rst();
     }
 
     @Override
-    public void clk() {
-        if(!isDone()){
-            currentOp.visit(this);
-        }
+    protected void writeOnPipeline(){
+        next.push(currentOp);
     }
 
     @Override
-    public boolean isDone() {
-        return done;
+    protected void procInstruction() {
+        counter.decr();
+        if(!counterNop.isDone()) counterNop.decr();
     }
+
+    @Override
+    protected boolean isUnfinished() {
+        return (!counter.isDone() && Utils.isLoadStore(currentOp)) || !counterNop.isDone(); //if its not a load/store we're finished
+    }
+
+    //visitation
 
     @Override
     public void accept(Op.Add op) {
-        done = true;
-        //nothing
+        pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.AddI op) {
-        //nothing
-        done = true;
+        pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.Mul op) {
-        //nothing
-        done = true;
+        pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.MulI op) {
-        //nothing
-        done = true;
+        pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.Cmp op) {
-        //nothing
-        done = true;
+        pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.Ld op) {
-        if(op.isDone()){
-            op.setRdVal(mem.read(op.getRdVal()));
-            done = true;
-            return;
-        }
-        op.clk();
+        op.setResult(mem.read(op.getResult()));
+        pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.LdC op) {
-        if(op.isDone()){
-            op.setRdVal(mem.read(op.getImVal()));
-            done = true;
-            return;
-        }
-        op.clk();
+        op.setResult(mem.read(op.getResult()));
+        pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.St op) {
-        if(op.isDone()){
-            mem.set(op.getRdVal(), op.getRsVal());
-            done = true;
-            return;
-        }
-        op.clk();
+        mem.set(op.getRdVal(), op.getResult());
+        pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.BrLZ op) {
-        done = true;
-        //nothing
+        if(flag){
+            pc.set(op.getResult());
+        }else{
+            pc.set(pcVal);
+        }
     }
 
     @Override
     public void accept(Op.JpLZ op) {
-        done = true;
-        //nothing
+        if(flag){
+            pc.set(op.getResult());
+        } else{
+            pc.set(pcVal);
+        }//otherwise set it to the passed-through value
     }
 
     @Override
     public void accept(Op.Br op) {
-        done = true;
-        //nothing
+        pc.set(op.getResult());
     }
 
     @Override
     public void accept(Op.Jp op) {
-        done = true;
-        //nothing
+        pc.set(op.getResult());
     }
     
 }
