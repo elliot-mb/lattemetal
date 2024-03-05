@@ -53,6 +53,7 @@ public class PipelineRegister {
     }
 
     public String toString(){
-        return "" + (canPull() ? Integer.toHexString(inFlight.getId() % 16) : "_");
+        String pad = canPull() && inFlight.getId() < 17 ? "0" : "";
+        return "" + (canPull() ? pad + Integer.toHexString(inFlight.getId() % 256) : "__");
     }
 }

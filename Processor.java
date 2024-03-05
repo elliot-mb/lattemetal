@@ -41,12 +41,12 @@ public class Processor {
 
     public void run(){
         System.out.println(ic);
-        //voided.push(Utils.opFactory.new No());
+        voided.push(Utils.opFactory.new No());
         while(!pc.isDone()){
-//            if(voided.canPull()){
-//                voided.pull();
-//                sendSingleInstruction();
-//            }
+            if(voided.canPull()){
+                voided.pull();
+                sendSingleInstruction();
+            }
             //if(fecDec.canPush()) sendSingleInstruction();
 //            fe.clk();
 //            de.clk();
@@ -59,13 +59,13 @@ public class Processor {
             de.clk();
             fe.clk();
             System.out.println("@" + tally + ":\t\t[" + prefec + fe + fecDec + de + decExe + alu + exeMem + lsu + memWrt + wb + voided + "]");
-            if(prefec.canPush()) {
-                prefec.push(Utils.opFactory.new No());
-                prefec.setPcVal(pc.getCount());
-            }
+//            if(prefec.canPush()) {
+//                prefec.push(Utils.opFactory.new No());
+//                prefec.setPcVal(pc.getCount());
+//            }
             tally++;
             //System.out.println("@" + tally + ":" + prefec + fe + fecDec + de + decExe + alu + exeMem + lsu + memWrt + wb + voided);
-            if(voided.canPull()) voided.pull(); //delete whats inside (voided is used to detect when writebacks are finished)
+            //if(voided.canPull()) voided.pull(); //delete whats inside (voided is used to detect when writebacks are finished)
         }
         System.out.println("run: program finished in " + tally + " cycles");
         System.out.println("registers (dirty): " + rf);

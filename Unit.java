@@ -55,7 +55,7 @@ public abstract class Unit implements InstructionVoidVisitor {
     }
 
     public String toString(){
-        return currentOp == null ? "_" : "|";//(currentOp != null ? Integer.toHexString(currentOp.getId() % 16) : "_");
+        return currentOp == null ? ">" : "|";//(currentOp != null ? Integer.toHexString(currentOp.getId() % 16) : "_");
     }
 
 }
