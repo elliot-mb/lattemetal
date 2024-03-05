@@ -53,7 +53,7 @@ public class Processor {
             lsu.clk();
             wb.clk();
             tally++;
-            System.out.println("" + fe + de + alu + lsu + wb);
+            System.out.println("" + prefec + fe + fecDec + de + decExe + alu + exeMem + lsu + memWrt + wb + voided);
 //            voided.pull(); //delete whats inside (voided is used to detect when writebacks are finished)
         }
         System.out.println("run: program finished in " + tally + " cycles");

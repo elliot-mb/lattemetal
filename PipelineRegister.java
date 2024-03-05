@@ -1,5 +1,6 @@
 public class PipelineRegister {
 
+   // private int useCount = 0;
     //cannot be final because it MUST change
     private Instruction inFlight;
     private Integer pc;
@@ -30,6 +31,7 @@ public class PipelineRegister {
 
     //push can stall (just if inFlight is not null)
     public void push(Instruction op){
+        //useCount++;
         if(inFlight != null) throw new RuntimeException("push: pushing to a full pipereg");
         inFlight = op.copy(); //copy it in
     }
@@ -52,7 +54,7 @@ public class PipelineRegister {
         return inFlight != null;
     }
 
-//    public String toString(){
-//        return canPull() ? "#" : "_";
-//    }
+    public String toString(){
+        return canPull() ? "#" : " ";
+    }
 }
