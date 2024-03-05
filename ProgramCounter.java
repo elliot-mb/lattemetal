@@ -23,4 +23,6 @@ public class ProgramCounter {
     public int getCount(){
         return counter;
     }
+
+    public boolean isCountDone(int count) { return count >= icSize; }
 }

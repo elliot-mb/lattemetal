@@ -28,11 +28,6 @@ public class LoadStoreUnit extends Unit{
     }
 
     @Override
-    protected void writeOnPipeline(){
-        next.push(currentOp);
-    }
-
-    @Override
     protected void procInstruction() {
         counter.decr();
 

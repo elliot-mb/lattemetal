@@ -42,9 +42,7 @@ public class Processor {
     public void run(){
         System.out.println(ic);
         voided.push(Utils.opFactory.new No());
-        pc.set(-1);
-        while(!pc.isDone()){
-            pc.incr();
+        while(!voided.canPull() || !pc.isCountDone(voided.getPcVal())){
             wb.clk();
             lsu.clk();
             alu.clk();
@@ -54,6 +52,7 @@ public class Processor {
             if(prefec.canPush()) {
                 prefec.push(Utils.opFactory.new No());
                 prefec.setPcVal(pc.getCount());
+                pc.incr();
             }
             tally++;
             if(voided.canPull()) voided.pull(); //delete whats inside (voided is used to detect when writebacks are finished)
