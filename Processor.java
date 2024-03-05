@@ -42,26 +42,21 @@ public class Processor {
     public void run(){
         System.out.println(ic);
         voided.push(Utils.opFactory.new No());
-        //pc.set(-1);
+        pc.set(-1);
         while(!pc.isDone()){
-            //pc.incr();
-            if(voided.canPull()){
-                voided.pull();
-                sendSingleInstruction();
-                pc.incr();
-            }
+            pc.incr();
             wb.clk();
             lsu.clk();
             alu.clk();
             de.clk();
             fe.clk();
             System.out.println("@" + tally + ":\t\t[" + fe + fecDec + de + decExe + alu + exeMem + lsu + memWrt + wb + "]");
-//            if(prefec.canPush()) {
-//                prefec.push(Utils.opFactory.new No());
-//                prefec.setPcVal(pc.getCount());
-//            }
+            if(prefec.canPush()) {
+                prefec.push(Utils.opFactory.new No());
+                prefec.setPcVal(pc.getCount());
+            }
             tally++;
-            //if(voided.canPull()) voided.pull(); //delete whats inside (voided is used to detect when writebacks are finished)
+            if(voided.canPull()) voided.pull(); //delete whats inside (voided is used to detect when writebacks are finished)
         }
         System.out.println("run: program finished in " + tally + " cycles");
         System.out.println("registers (dirty): " + rf);
