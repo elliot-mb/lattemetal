@@ -19,14 +19,14 @@ public class FetchUnit extends Unit {
 
     @Override
     protected void readOffPipeline(){
-        pcVal = last.getPc();
+        pcVal = last.getPcVal();
         currentOp = last.pull();
         counter.rst();
     }
 
     @Override
     protected void writeOnPipeline() {
-        next.setPc(pcVal + 1); //INCREMENT HERE (adder like in the unit diagram!)
+        next.setPcVal(pcVal + 1); //INCREMENT HERE (adder like in the unit diagram!)
         next.push(currentOp);
     }
 

@@ -1,5 +1,3 @@
-import java.nio.channels.Pipe;
-
 public class LoadStoreUnit extends Unit{
 
     private static final int L1_LATENCY = 3;
@@ -22,7 +20,7 @@ public class LoadStoreUnit extends Unit{
 
     @Override
     protected void readOffPipeline(){
-        pcVal = last.getPc();
+        pcVal = last.getPcVal();
         flag = last.isFlag();
         currentOp = last.pull();
         counter.rst();

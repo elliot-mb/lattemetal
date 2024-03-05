@@ -1,24 +1,23 @@
 public class PipelineRegister {
 
-   // private int useCount = 0;
     //cannot be final because it MUST change
     private Instruction inFlight;
-    private Integer pc;
+    private Integer pcVal;
     private boolean flag; //used for a 'branch taken' bit
 
     PipelineRegister(){
         inFlight = null;
-        pc = null;
+        pcVal = null;
         flag = false;
     }
 
-    public void setPc(int count){
-        pc = count;
+    public void setPcVal(int count){
+        pcVal = count;
     }
 
-    public Integer getPc(){
-        if(pc == null) throw new RuntimeException("getPc: pc is null and was not set");
-        return pc;
+    public Integer getPcVal(){
+        if(pcVal == null) throw new RuntimeException("getPc: pc is null and was not set");
+        return pcVal;
     }
 
     public void setFlag(boolean val){
@@ -31,7 +30,6 @@ public class PipelineRegister {
 
     //push can stall (just if inFlight is not null)
     public void push(Instruction op){
-        //useCount++;
         if(inFlight != null) throw new RuntimeException("push: pushing to a full pipereg");
         inFlight = op.copy(); //copy it in
     }
@@ -41,7 +39,7 @@ public class PipelineRegister {
         if(inFlight == null) throw new RuntimeException("pull: pulling from an empty pipereg");
         Instruction result = inFlight.copy(); //copy it out, meaning we cant mutate the instruction inside even if we pull it out
         inFlight = null; //reset
-        pc = null;
+        pcVal = null;
         flag = false;
         return result;
     }
@@ -55,6 +53,6 @@ public class PipelineRegister {
     }
 
     public String toString(){
-        return canPull() ? "#" : " ";
+        return "" + (canPull() ? Integer.toHexString(inFlight.getId() % 16) : "_");
     }
 }

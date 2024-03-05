@@ -1,5 +1,7 @@
 public abstract class Instruction extends Durate {
 
+    private static int gId = 0;
+    private int id;
     protected final RegisterName rd;
     protected final RegisterName rs;
     protected final RegisterName rt;
@@ -17,6 +19,8 @@ public abstract class Instruction extends Durate {
         this.rd = regs.length > 0 ? regs[0] : null;
         this.rs = regs.length > 1 ? regs[1] : null;
         this.rt = regs.length > 2 ? regs[2] : null;
+        this.id = gId;
+        gId++;
     }
 
     public RegisterName getRd() throws RuntimeException{
@@ -96,4 +100,12 @@ public abstract class Instruction extends Durate {
     }
 
     public abstract Instruction copy();
+
+    public int getId(){
+        return id;
+    }
+
+    public void setId(int id){
+        this.id = id;
+    }
 }

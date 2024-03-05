@@ -12,7 +12,7 @@ public class DecodeUnit extends Unit{
     @Override
     public void readOffPipeline(){
         hasRun = false;
-        pcVal = last.getPc();
+        pcVal = last.getPcVal();
         flag = last.isFlag();
         currentOp = last.pull();
     }
