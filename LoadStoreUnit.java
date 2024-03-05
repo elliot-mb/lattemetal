@@ -47,53 +47,51 @@ public class LoadStoreUnit extends Unit{
 
     @Override
     public void accept(Op.Add op) {
-        pc.set(pcVal);
+        //pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.AddI op) {
-        pc.set(pcVal);
+        //pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.Mul op) {
-        pc.set(pcVal);
+        //pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.MulI op) {
-        pc.set(pcVal);
+        //pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.Cmp op) {
-        pc.set(pcVal);
+        //pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.Ld op) {
         op.setResult(mem.read(op.getResult()));
-        pc.set(pcVal);
+        //pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.LdC op) {
         op.setResult(mem.read(op.getResult()));
-        pc.set(pcVal);
+        //pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.St op) {
         mem.set(op.getRdVal(), op.getResult());
-        pc.set(pcVal);
+        //pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.BrLZ op) {
         if(flag){
             pc.set(op.getResult());
-        }else{
-            pc.set(pcVal);
         }
     }
 
@@ -101,9 +99,7 @@ public class LoadStoreUnit extends Unit{
     public void accept(Op.JpLZ op) {
         if(flag){
             pc.set(op.getResult());
-        } else{
-            pc.set(pcVal);
-        }//otherwise set it to the passed-through value
+        }
     }
 
     @Override
