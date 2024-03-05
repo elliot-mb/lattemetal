@@ -4,7 +4,7 @@ public class Op {
 
     public class Add extends Instruction{ //all operations extend hasduration also by proxy
 
-        private static final int DURATION = 2;
+        private static final int DURATION = 1;
 
         Add(RegisterName rd, RegisterName rs, RegisterName rt){
             super(DURATION, null, rd, rs, rt);
@@ -39,7 +39,7 @@ public class Op {
     }
 
     public class AddI extends Instruction{
-        private static final int DURATION = 2;
+        private static final int DURATION = 1;
 
         AddI(RegisterName rd, RegisterName rs, Integer immediate){
             super(DURATION, immediate, rd, rs);
@@ -71,7 +71,7 @@ public class Op {
     }
 
     public class Mul extends Instruction{
-        private static final int DURATION = 4;
+        private static final int DURATION = 3;
 
         Mul(RegisterName rd, RegisterName rs, RegisterName rt){
             super(DURATION, null, rd, rs, rt);
@@ -105,7 +105,7 @@ public class Op {
     }
 
     public class MulI extends Instruction{
-        private static final int DURATION = 4;
+        private static final int DURATION = 3;
 
         MulI(RegisterName rd, RegisterName rs, Integer immediate){
             super(DURATION, immediate, rd, rs);
@@ -172,7 +172,7 @@ public class Op {
     }
 
     public class Ld extends Instruction{
-        private static final int DURATION = 2;
+        private static final int DURATION = 1;
 
         Ld(RegisterName rd, RegisterName rs, Integer immediate){
             super(DURATION, immediate, rd, rs);
@@ -202,7 +202,7 @@ public class Op {
     }
 
     public class LdC extends Instruction{
-        private static final int DURATION = 4;
+        private static final int DURATION = 1;
 
         LdC(RegisterName rd, Integer immediate){
             super(DURATION, immediate, rd);
@@ -231,7 +231,7 @@ public class Op {
     }
 
     public class St extends Instruction{
-        private static final int DURATION = 4;
+        private static final int DURATION = 1;
 
         St(RegisterName rd, RegisterName rs, Integer immediate){
             super(DURATION, immediate, rd, rs);
@@ -263,7 +263,7 @@ public class Op {
 
     public class BrLZ extends Instruction{
 
-        private static final int DURATION = 2;
+        private static final int DURATION = 1;
 
         BrLZ(RegisterName rd, Integer immediate){
             super(DURATION, immediate, rd);
@@ -291,7 +291,7 @@ public class Op {
     }
 
     public class JpLZ extends Instruction{
-        private static final int DURATION = 2;
+        private static final int DURATION = 1;
 
         JpLZ(RegisterName rd, Integer immediate){
             super(DURATION, immediate, rd);

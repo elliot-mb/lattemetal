@@ -49,7 +49,7 @@ public class Processor {
             }
             fe.clk();
             de.clk();
-            alu.clk();
+            alu.clk(); //examples of good latencies can be found in the interim feedback slides from last year
             lsu.clk();
             wb.clk();
             tally++;

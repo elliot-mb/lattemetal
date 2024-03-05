@@ -2,7 +2,7 @@ import java.nio.channels.Pipe;
 
 public class LoadStoreUnit extends Unit{
 
-    private static final int L1_LATENCY = 4;
+    private static final int L1_LATENCY = 3;
     private static final int NOP_LATENCY = 1;
     private final Memory mem;
 
