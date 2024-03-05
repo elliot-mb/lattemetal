@@ -35,12 +35,11 @@ public abstract class Unit implements InstructionVoidVisitor {
     protected abstract boolean isUnfinished(); //when we need to count down instruction
 
     public void clk(){
-
         //if we have finished processing this instruction but cant pull from last, we stall one cycle
         if(isDone() && !last.canPull()) return; //stall a clock cycle
         if(isDone()) readOffPipeline(); //dont re-copy if we are mid-processing
         if(isUnfinished()) {
-            procInstruction();
+            procInstruction(); //always run at least once if isUnfinished is ever false
         }
         if(isUnfinished()) return;
         currentOp.visit(this); //process operation
@@ -55,7 +54,7 @@ public abstract class Unit implements InstructionVoidVisitor {
     }
 
     public String toString(){
-        return currentOp == null ? ">" : "|";//(currentOp != null ? Integer.toHexString(currentOp.getId() % 16) : "_");
+        return currentOp == null ? " " : "↓";//(currentOp != null ? Integer.toHexString(currentOp.getId() % 16) : "_");
     }
 
 }
