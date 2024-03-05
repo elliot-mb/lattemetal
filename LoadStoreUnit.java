@@ -35,6 +35,7 @@ public class LoadStoreUnit extends Unit{
     @Override
     protected void procInstruction() {
         counter.decr();
+
         if(!counterNop.isDone()) counterNop.decr();
     }
 

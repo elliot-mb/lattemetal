@@ -42,7 +42,9 @@ public class Processor {
     public void run(){
         System.out.println(ic);
         voided.push(Utils.opFactory.new No());
+        pc.set(-1);
         while(!pc.isDone()){
+            pc.incr();
 //            if(voided.canPull()){
 //                voided.pull();
 //                sendSingleInstruction();
@@ -58,7 +60,7 @@ public class Processor {
             alu.clk();
             de.clk();
             fe.clk();
-            System.out.println("@" + tally + ":\t\t[" + prefec + fe + fecDec + de + decExe + alu + exeMem + lsu + memWrt + wb + voided + "]");
+            System.out.println("@" + tally + ":\t\t[" + fe + fecDec + de + decExe + alu + exeMem + lsu + memWrt + wb + "]");
             if(prefec.canPush()) {
                 prefec.push(Utils.opFactory.new No());
                 prefec.setPcVal(pc.getCount());
