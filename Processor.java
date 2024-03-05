@@ -42,32 +42,26 @@ public class Processor {
     public void run(){
         System.out.println(ic);
         voided.push(Utils.opFactory.new No());
-        pc.set(-1);
+        //pc.set(-1);
         while(!pc.isDone()){
-            pc.incr();
-//            if(voided.canPull()){
-//                voided.pull();
-//                sendSingleInstruction();
-//            }
-            //if(fecDec.canPush()) sendSingleInstruction();
-//            fe.clk();
-//            de.clk();
-//            alu.clk(); //examples of good latencies can be found in the interim feedback slides from last year
-//            lsu.clk();
-//            wb.clk();
+            //pc.incr();
+            if(voided.canPull()){
+                voided.pull();
+                sendSingleInstruction();
+                pc.incr();
+            }
             wb.clk();
             lsu.clk();
             alu.clk();
             de.clk();
             fe.clk();
             System.out.println("@" + tally + ":\t\t[" + fe + fecDec + de + decExe + alu + exeMem + lsu + memWrt + wb + "]");
-            if(prefec.canPush()) {
-                prefec.push(Utils.opFactory.new No());
-                prefec.setPcVal(pc.getCount());
-            }
+//            if(prefec.canPush()) {
+//                prefec.push(Utils.opFactory.new No());
+//                prefec.setPcVal(pc.getCount());
+//            }
             tally++;
-            //System.out.println("@" + tally + ":" + prefec + fe + fecDec + de + decExe + alu + exeMem + lsu + memWrt + wb + voided);
-            if(voided.canPull()) voided.pull(); //delete whats inside (voided is used to detect when writebacks are finished)
+            //if(voided.canPull()) voided.pull(); //delete whats inside (voided is used to detect when writebacks are finished)
         }
         System.out.println("run: program finished in " + tally + " cycles");
         System.out.println("registers (dirty): " + rf);
