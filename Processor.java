@@ -39,18 +39,23 @@ public class Processor {
         prefec.setPcVal(pc.getCount());
     }
 
+    private boolean isPipelineBeingUsed(){
+        return prefec.canPull() || fecDec.canPull() || decExe.canPull() || exeMem.canPull() || memWrt.canPull() || voided.canPull() ||
+                !wb.isDone() || !lsu.isDone() || !alu.isDone() || !de.isDone() || !fe.isDone();
+    }
+
     public void run(){
         System.out.println(ic);
         voided.push(Utils.opFactory.new No());
         voided.setPcVal(0);
-        while(prefec.canPull() || fecDec.canPull() || decExe.canPull() || exeMem.canPull() || memWrt.canPull() || voided.canPull()){
+        while(isPipelineBeingUsed()){
             wb.clk();
             lsu.clk();
             alu.clk();
             de.clk();
             fe.clk();
             System.out.println("@" + tally + ":\t\t[" + fe + fecDec + de + decExe + alu + exeMem + lsu + memWrt + wb + "]");
-            if(prefec.canPush() && !pc.isDone()) {
+            if(voided.canPull() && prefec.canPush() && !pc.isDone()) {
                 prefec.push(Utils.opFactory.new No());
                 prefec.setPcVal(pc.getCount());
                 pc.incr();
