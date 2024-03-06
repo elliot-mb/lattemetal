@@ -64,9 +64,9 @@ public class Processor {
             tally++;
             if(voided.canPull()) voided.pull(); //delete whats inside (voided is used to detect when writebacks are finished)
         }
-        System.out.println("run: program finished in " + tally + " cycles");
         System.out.println("registers (dirty): " + rf);
         System.out.println("memory: " + mem);
+        System.out.println("run: program finished in " + tally + " cycles");
     }
 
 }
