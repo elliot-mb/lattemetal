@@ -3,8 +3,11 @@ import java.util.HashMap;
 
 public class IssueUnit extends Unit{
 
+    private final Scoreboard sb;
+
     IssueUnit(PipelineRegister last, PipelineRegister next){
         super(last, next);
+        this.sb = new Scoreboard();
     }
 
     @Override
@@ -14,9 +17,7 @@ public class IssueUnit extends Unit{
 
     @Override
     protected boolean isUnfinished() {
-        return scoreboard.get(currentOp.getRd()) &&
-                scoreboard.get(currentOp.getRs()) &&
-                scoreboard.get(currentOp.getRt());
+        return sb.useOrHasDeps(currentOp);
     }
 
     @Override

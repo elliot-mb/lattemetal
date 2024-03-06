@@ -22,13 +22,13 @@ public class Scoreboard implements InstructionVoidVisitor {
         return hasDependencies; //set in visitation
     }
 
-    public void useRegs(RegisterName ...rs){
+    private void useRegs(RegisterName ...rs){
         for(RegisterName r : rs){
             scoreboard.put(r, true);
         }
     }
 
-    public boolean regsInUse(RegisterName... rs){
+    private boolean regsInUse(RegisterName... rs){
         boolean inUse = false;
         for(RegisterName r : rs){
             inUse = inUse || scoreboard.get(r); //false or if any are being used we return true
