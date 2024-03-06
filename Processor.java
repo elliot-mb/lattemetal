@@ -52,6 +52,7 @@ public class Processor {
             wb.clk();
             lsu.clk();
             alu.clk();
+            //include some sort of issue stage that works from a scoreboard and tomasulos algorithm
             de.clk();
             fe.clk();
             System.out.println("@" + tally + ":\t\t[" + fe + fecDec + de + decExe + alu + exeMem + lsu + memWrt + wb + "]");
