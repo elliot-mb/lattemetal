@@ -4,8 +4,6 @@ public abstract class Unit implements InstructionVoidVisitor {
      * for any building block that reads from one pipeline register and writes to another
      */
 
-    private int useCount = 0;
-
     protected final PipelineRegister last;
     protected final PipelineRegister next;
 
@@ -20,13 +18,13 @@ public abstract class Unit implements InstructionVoidVisitor {
 
     //default implementations
     protected void readOffPipeline(){
-        pcVal = last.getPc();
+        pcVal = last.getPcVal();
         flag = last.isFlag();
         currentOp = last.pull();
     }
     protected void writeOnPipeline(){
         next.setFlag(flag);
-        next.setPc(pcVal); //just pass it through
+        next.setPcVal(pcVal); //just pass it through
         next.push(currentOp);
     }
     protected boolean isDone(){
@@ -41,14 +39,13 @@ public abstract class Unit implements InstructionVoidVisitor {
         if(isDone() && !last.canPull()) return; //stall a clock cycle
         if(isDone()) readOffPipeline(); //dont re-copy if we are mid-processing
         if(isUnfinished()) {
-            procInstruction();
-            return;
+            procInstruction(); //always run at least once if isUnfinished is ever false
         }
+        if(isUnfinished()) return;
         currentOp.visit(this); //process operation
         if(!next.canPush()) return; //stall a clock cycle if we cant push the result
         writeOnPipeline();
         currentOp = null; //empty out our intermediate storage to accept the next one
-        useCount++;
     }
 
     @Override
@@ -57,7 +54,7 @@ public abstract class Unit implements InstructionVoidVisitor {
     }
 
     public String toString(){
-        return isDone() ? "_" : Integer.toHexString(useCount % 16);
+        return currentOp == null ? " " : "↓";//(currentOp != null ? Integer.toHexString(currentOp.getId() % 16) : "_");
     }
 
 }

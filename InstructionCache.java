@@ -22,6 +22,7 @@ public class InstructionCache{
     }
 
     public Instruction getInstruction(int pcVal){
+        if(pcVal >= program.size()) throw new RuntimeException("getInstruction: cannot retrieve instruction " + pcVal + " because it exceeds the length of the ic");
         return program.get(pcVal);
     }
 

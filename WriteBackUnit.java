@@ -16,10 +16,10 @@ public class WriteBackUnit extends Unit{
         counter.rst();
     }
 
-    @Override
-    protected void writeOnPipeline(){
-        next.push(Utils.opFactory.new No());
-    }
+//    @Override
+//    protected void writeOnPipeline(){
+//        next.push();
+//    }
 
     @Override
     protected void procInstruction() {
