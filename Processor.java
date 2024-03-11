@@ -2,34 +2,39 @@ public class Processor {
 
     private final ProgramCounter pc;
     private final InstructionCache ic;
+    private final IssueUnit isu;
     private final ArithmeticLogicUnit alu;
     private final RegisterFile rf;
     private final Memory mem;
     private final FetchUnit fe;
     private final DecodeUnit de;
     private final LoadStoreUnit lsu;
+    private final Scoreboard sb;
     private int tally;
     private final WriteBackUnit wb;
 
     private final PipelineRegister prefec = new PipelineRegister(); //just to pass the pc value to the fetch unit, and increment it!
     private final PipelineRegister fecDec = new PipelineRegister();
-    private final PipelineRegister decExe = new PipelineRegister();
+    private final PipelineRegister decIsu = new PipelineRegister();
+    private final PipelineRegister isuExe = new PipelineRegister();
     private final PipelineRegister exeMem = new PipelineRegister();
     private final PipelineRegister memWrt = new PipelineRegister();
     private final PipelineRegister voided = new PipelineRegister(); //ignored pipe register to satisfy Unit inheritence
 
     Processor(InstructionCache ic, Memory... mem) throws RuntimeException{
         if(mem.length > 1) throw new RuntimeException("Processor: this constructor cannot have more than one memories");
+        this.sb = new Scoreboard();
         this.ic = ic;
         this.pc = new ProgramCounter(ic.numInstrs());
         this.rf = new RegisterFile();
         this.mem = mem.length > 0 ? mem[0] : new Memory();
-        this.alu = new ArithmeticLogicUnit(decExe, exeMem);
+        this.alu = new ArithmeticLogicUnit(isuExe, exeMem);
         this.fe = new FetchUnit(ic, prefec, fecDec);
-        this.de = new DecodeUnit(this.rf, fecDec, decExe);
+        this.de = new DecodeUnit(this.rf, fecDec, decIsu);
         this.tally = 0;
-        this.wb = new WriteBackUnit(this.rf, memWrt, voided);
+        this.wb = new WriteBackUnit(this.rf, this.sb, memWrt, voided);
         this.lsu = new LoadStoreUnit(this.mem, this.pc, exeMem, memWrt);
+        this.isu = new IssueUnit(this.sb, decIsu, isuExe);
     }
 
     private void sendSingleInstruction(){
@@ -40,8 +45,8 @@ public class Processor {
     }
 
     private boolean isPipelineBeingUsed(){
-        return prefec.canPull() || fecDec.canPull() || decExe.canPull() || exeMem.canPull() || memWrt.canPull() || voided.canPull() ||
-                !wb.isDone() || !lsu.isDone() || !alu.isDone() || !de.isDone() || !fe.isDone();
+        return prefec.canPull() || fecDec.canPull() || decIsu.canPull() || isuExe.canPull() || exeMem.canPull() || memWrt.canPull() || voided.canPull() ||
+                !wb.isDone() || !lsu.isDone() || !alu.isDone() || !de.isDone() || !fe.isDone() || !isu.isDone();
     }
 
     public void run(){
@@ -53,9 +58,10 @@ public class Processor {
             lsu.clk();
             alu.clk();
             //include some sort of issue stage that works from a scoreboard and tomasulos algorithm
+            isu.clk();
             de.clk();
             fe.clk();
-            System.out.println("@" + tally + ":\t\t[" + fe + fecDec + de + decExe + alu + exeMem + lsu + memWrt + wb + "]");
+            System.out.println("@" + tally + ":\t\t[" + fe + fecDec + de + decIsu + isu + isuExe + alu + exeMem + lsu + memWrt + wb + "]");
             if(voided.canPull() && prefec.canPush() && !pc.isDone()) {
                 prefec.push(Utils.opFactory.new No());
                 prefec.setPcVal(pc.getCount());

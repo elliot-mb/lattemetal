@@ -28,10 +28,14 @@ public class Scoreboard implements InstructionVoidVisitor {
         }
     }
 
+    public void validateReg(RegisterName r){
+        scoreboard.put(r, true);
+    }
+
     private boolean regsInUse(RegisterName... rs){
-        boolean inUse = true;
+        boolean inUse = false;
         for(RegisterName r : rs){
-            inUse = inUse && scoreboard.get(r); //false or if any are being used we return true
+            inUse = inUse || (!scoreboard.get(r));
         }
         return inUse;
     }
@@ -108,15 +112,18 @@ public class Scoreboard implements InstructionVoidVisitor {
     @Override
     public void accept(Op.Br op) {
         //changes nothing in register file
+        hasDependencies = false;
     }
 
     @Override
     public void accept(Op.Jp op) {
         //changes nothing in register file
+        hasDependencies = false;
     }
 
     @Override
     public void accept(Op.No op) {
         //changes nothing in register file
+        hasDependencies = false;
     }
 }

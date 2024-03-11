@@ -4,10 +4,18 @@ import java.util.HashMap;
 public class IssueUnit extends Unit{
 
     private final Scoreboard sb;
+    private boolean hasDeps = false;
 
-    IssueUnit(PipelineRegister last, PipelineRegister next){
+    IssueUnit(Scoreboard sb, PipelineRegister last, PipelineRegister next){
         super(last, next);
-        this.sb = new Scoreboard();
+        this.sb = sb;
+
+    }
+
+    @Override
+    protected void readOffPipeline(){
+        super.readOffPipeline();
+        hasDeps = sb.useOrHasDeps(currentOp); //must run just once to avoid false positive of trying to register the instruction twice
     }
 
     @Override
@@ -17,7 +25,7 @@ public class IssueUnit extends Unit{
 
     @Override
     protected boolean isUnfinished() {
-        return sb.useOrHasDeps(currentOp);
+        return hasDeps;
     }
 
     @Override
