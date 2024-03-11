@@ -1,3 +1,6 @@
+import java.util.AbstractMap;
+import java.util.HashMap;
+
 public class Processor {
 
     private final ProgramCounter pc;
@@ -21,6 +24,8 @@ public class Processor {
     private final PipelineRegister memWrt = new PipelineRegister();
     private final PipelineRegister voided = new PipelineRegister(); //ignored pipe register to satisfy Unit inheritence
 
+    private final int DP_ACC = 2;
+
     Processor(InstructionCache ic, Memory... mem) throws RuntimeException{
         if(mem.length > 1) throw new RuntimeException("Processor: this constructor cannot have more than one memories");
         this.sb = new Scoreboard();
@@ -30,19 +35,20 @@ public class Processor {
         this.mem = mem.length > 0 ? mem[0] : new Memory();
         this.alu = new ArithmeticLogicUnit(isuExe, exeMem);
         this.fe = new FetchUnit(ic, prefec, fecDec);
-        this.de = new DecodeUnit(this.rf, fecDec, decIsu);
+        this.de = new DecodeUnit(this.rf, fecDec, isuExe);
         this.tally = 0;
         this.wb = new WriteBackUnit(this.rf, this.sb, memWrt, voided);
         this.lsu = new LoadStoreUnit(this.mem, this.pc, exeMem, memWrt);
         this.isu = new IssueUnit(this.sb, decIsu, isuExe);
     }
 
-    private void sendSingleInstruction(){
-        //System.out.println("push");
-        if(prefec.canPull()) prefec.pull(); //empty register
-        prefec.push(Utils.opFactory.new No());
-        prefec.setPcVal(pc.getCount());
-    }
+//    private void sendSingleInstruction(){
+//        //System.out.println("push");
+//        if(prefec.canPull()) prefec.pull(); //empty register
+//        prefec.push(Utils.opFactory.new No());
+//        prefec.setPcVal(pc.getCount());
+//    }
+
 
     private boolean isPipelineBeingUsed(){
         return prefec.canPull() || fecDec.canPull() || decIsu.canPull() || isuExe.canPull() || exeMem.canPull() || memWrt.canPull() || voided.canPull() ||
@@ -53,26 +59,33 @@ public class Processor {
         System.out.println(ic);
         voided.push(Utils.opFactory.new No());
         voided.setPcVal(0);
+        int retiredInstrs = 0;
+        //AbstractMap<Instruction, Integer> inFlights = new HashMap<Instruction, Integer>();
         while(isPipelineBeingUsed()){
             wb.clk();
             lsu.clk();
             alu.clk();
             //include some sort of issue stage that works from a scoreboard and tomasulos algorithm
-            isu.clk();
+            //isu.clk();
             de.clk();
             fe.clk();
             System.out.println("@" + tally + ":\t\t[" + fe + fecDec + de + decIsu + isu + isuExe + alu + exeMem + lsu + memWrt + wb + "]");
-            if(voided.canPull() && prefec.canPush() && !pc.isDone()) {
+            if(prefec.canPush() && !pc.isDone()){//&& !(!voided.canPull() && fe.getIsBranch())) {
                 prefec.push(Utils.opFactory.new No());
                 prefec.setPcVal(pc.getCount());
                 pc.incr();
             }
             tally++;
-            if(voided.canPull()) voided.pull(); //delete whats inside (voided is used to detect when writebacks are finished)
+            if(voided.canPull()) {
+                voided.pull();
+                retiredInstrs++;
+            } //delete whats inside (voided is used to detect when writebacks are finished)
         }
         System.out.println("registers (dirty): " + rf);
         System.out.println("memory: " + mem);
         System.out.println("run: program finished in " + tally + " cycles");
+
+        System.out.println("run: instructions per cycle " + Utils.toDecimalPlaces((float) retiredInstrs / tally, DP_ACC));
     }
 
 }
