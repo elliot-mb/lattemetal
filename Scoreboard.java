@@ -9,7 +9,7 @@ public class Scoreboard implements InstructionVoidVisitor {
 
     Scoreboard(){
         for(RegisterName r : RegisterName.values()){
-            scoreboard.put(r, false); // false => not being updated
+            scoreboard.put(r, true); // register => valid
             // we can execute an instruction just if its dependencies aren't set true in here
         }
     }
@@ -24,14 +24,14 @@ public class Scoreboard implements InstructionVoidVisitor {
 
     private void useRegs(RegisterName ...rs){
         for(RegisterName r : rs){
-            scoreboard.put(r, true);
+            scoreboard.put(r, false);
         }
     }
 
     private boolean regsInUse(RegisterName... rs){
-        boolean inUse = false;
+        boolean inUse = true;
         for(RegisterName r : rs){
-            inUse = inUse || scoreboard.get(r); //false or if any are being used we return true
+            inUse = inUse && scoreboard.get(r); //false or if any are being used we return true
         }
         return inUse;
     }
