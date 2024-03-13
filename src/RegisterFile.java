@@ -1,3 +1,5 @@
+package src;
+
 public class RegisterFile extends Block{
 
     private static final int NUM_REGS = RegisterName.values().length;

@@ -1,3 +1,5 @@
+package src;
+
 public class FetchUnit extends Unit {
 
     private static final int FETCH_LATENCY = 1;

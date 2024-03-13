@@ -1,3 +1,5 @@
+
+package src;
 public class PipelineRegister {
 
     //cannot be final because it MUST change

@@ -1,3 +1,5 @@
+package src;
+
 class Forwarder implements InstructionVoidVisitor {
 
     private int slot = 0;

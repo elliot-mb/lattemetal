@@ -1,3 +1,5 @@
+package src;
+
 public class Memory extends Block{
 
     private static final int SIZE = 64;
