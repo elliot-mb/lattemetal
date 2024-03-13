@@ -1,3 +1,3 @@
 #!/bin/zsh
 
-javac -d ./class Main.java && java -cp ./class Main
+javac -d ./src/class Main.java && java -cp ./src/class Main
