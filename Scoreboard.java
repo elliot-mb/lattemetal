@@ -1,13 +1,14 @@
 
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Scoreboard implements InstructionVoidVisitor {
 
     private final AbstractMap<RegisterName, Boolean> scoreboard = new HashMap<RegisterName, Boolean>();
 
-    private boolean hasDependencies = false;
+    private ArrayList<RegisterName> dependencies;
 
     Scoreboard(){
         flush();
@@ -16,16 +17,16 @@ public class Scoreboard implements InstructionVoidVisitor {
     public void flush(){
         for(RegisterName r : RegisterName.values()){
             scoreboard.put(r, true); // register => valid
-            // we can execute an instruction just if its dependencies aren't set true in here
+            // we can execute an instruction just if its dependencies are set true in here
         }
     }
 
     //return true if we can execute this, and set its result as changing
     //otherwise return false as it is currently being used
-    public boolean useOrHasDeps(Instruction op){
-        hasDependencies = false;
+    public ArrayList<RegisterName> useOrHasDeps(Instruction op){
+        dependencies = new ArrayList<RegisterName>();
         op.visit(this);
-        return hasDependencies; //set in visitation
+        return dependencies; //set in visitation
     }
 
     private void useRegs(RegisterName ...rs){
@@ -35,101 +36,103 @@ public class Scoreboard implements InstructionVoidVisitor {
     }
 
     public void validateReg(RegisterName r){
+        System.out.println("freed '" + r.name() + "'");
         scoreboard.put(r, true);
     }
 
-    private boolean regsInUse(RegisterName... rs){
-        boolean inUse = false;
-        for(RegisterName r : rs){
-            inUse = inUse || (!scoreboard.get(r));
+    private void regsInUse(RegisterName... rs){
+        for(RegisterName r : rs) {
+            if (!scoreboard.get(r)) {
+                dependencies.add(r);
+            }
         }
-        return inUse;
+    }
+
+    private boolean hasDeps(){
+        return dependencies.size() > 0;
     }
 
     @Override
     public void accept(Op.Add op) {
         //hazards:                  WAW         RAW         RAW
-        hasDependencies = regsInUse(op.getRd(), op.getRs(), op.getRt());
-        if(hasDependencies) return;
+        regsInUse(op.getRd(), op.getRs(), op.getRt());
+        if(hasDeps()) return;
         useRegs(op.getRd());
     }
 
     @Override
     public void accept(Op.AddI op) {
-        hasDependencies = regsInUse(op.getRd(), op.getRs());
-        if(hasDependencies) return;
+        regsInUse(op.getRd(), op.getRs());
+        if(hasDeps()) return;
         useRegs(op.getRd());
     }
 
     @Override
     public void accept(Op.Mul op) {
-        hasDependencies = regsInUse(op.getRd(), op.getRs(), op.getRt());
-        if(hasDependencies) return;
+        regsInUse(op.getRd(), op.getRs(), op.getRt());
+        if(hasDeps()) return;
         useRegs(op.getRd());
     }
 
     @Override
     public void accept(Op.MulI op) {
-        hasDependencies = regsInUse(op.getRd(), op.getRs());
-        if(hasDependencies) return;
+        regsInUse(op.getRd(), op.getRs());
+        if(hasDeps()) return;
         useRegs(op.getRd());
     }
 
     @Override
     public void accept(Op.Cmp op) {
-        hasDependencies = regsInUse(op.getRd(), op.getRs(), op.getRt());
-        if(hasDependencies) return;
+        regsInUse(op.getRd(), op.getRs(), op.getRt());
+        if(hasDeps()) return;
         useRegs(op.getRd());
     }
 
     @Override
     public void accept(Op.Ld op) {
-        hasDependencies = regsInUse(op.getRd(), op.getRs());
-        if(hasDependencies) return;
+        regsInUse(op.getRd(), op.getRs());
+        if(hasDeps()) return;
         useRegs(op.getRd());
     }
 
     @Override
     public void accept(Op.LdC op) {
-        hasDependencies = regsInUse(op.getRd());
-        if(hasDependencies) return;
+        regsInUse(op.getRd());
+        if(hasDeps()) return;
         useRegs(op.getRd());
     }
 
     @Override
     public void accept(Op.St op) {
         //                          WAW         RAW
-        hasDependencies = regsInUse(op.getRd(), op.getRs());
+        regsInUse(op.getRd(), op.getRs());
         //changes nothing in register file
     }
 
     @Override
     public void accept(Op.BrLZ op) {
-        hasDependencies = regsInUse(op.getRd());
+        regsInUse(op.getRd());
         //changes nothing in register file
     }
 
     @Override
     public void accept(Op.JpLZ op) {
-        hasDependencies = regsInUse(op.getRd());
+        regsInUse(op.getRd());
         //changes nothing in register file
     }
 
     @Override
     public void accept(Op.Br op) {
         //changes nothing in register file
-        hasDependencies = false;
     }
 
     @Override
     public void accept(Op.Jp op) {
         //changes nothing in register file
-        hasDependencies = false;
     }
 
     @Override
     public void accept(Op.No op) {
         //changes nothing in register file
-        hasDependencies = false;
     }
 }

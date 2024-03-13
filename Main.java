@@ -43,7 +43,7 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) throws FileNotFoundException {
-        String programPath = "./assembly/bubble_sort.latte";
+        String programPath = "./assembly/quot.latte";
         int printWidth = 1;
         boolean testing = false;
         if(args.length >= 1){
@@ -67,7 +67,7 @@ public class Main {
 
         // run a specific program in debug mode
 
-        System.out.println(args[0]);
+        System.out.println(programPath);
         Memory exampleMemory = new Memory(
                 printWidth,
                 new int[]{

@@ -58,6 +58,23 @@ public class Processor {
                 !wb.isDone() || !lsu.isDone() || !alu.isDone() || !de.isDone() || !fe.isDone() || !isu.isDone();
     }
 
+    private void flushPipeline(){
+        System.out.println("flush");
+        fe.flush();
+        de.flush();
+        isu.flush();
+        alu.flush();
+        lsu.flush();
+        wb.flush();
+        prefec.flush();
+        fecDec.flush();
+        decIsu.flush();
+        isuExe.flush();
+        exeMem.flush();
+        memWrt.flush();
+        voided.flush();
+    }
+
     public Memory run(PrintStream debugOut){
         debugOut.println(ic);
         voided.push(Utils.opFactory.new No());
@@ -67,13 +84,14 @@ public class Processor {
         while(isPipelineBeingUsed()){
             wb.clk();
             lsu.clk();
+            if(lsu.needsFlushing()) flushPipeline();
             alu.clk();
             //include some sort of issue stage that works from a scoreboard and tomasulos algorithm
             isu.clk();
             de.clk();
             fe.clk();
-            debugOut.println("@" + tally + ":\t\t[" + fe + fecDec + de + decIsu + isu + isuExe + alu + exeMem + lsu + memWrt + wb + "]");
-            if(prefec.canPush() && !pc.isDone() && voided.canPull()){//&& !(!voided.canPull() && fe.getIsBranch())) {
+            debugOut.println("\t[" + fe + fecDec + de + decIsu + isu + isuExe + alu + exeMem + lsu + memWrt + wb + "]\t@" + tally + "\tpc " + pc.getCount());
+            if(prefec.canPush() && !pc.isDone()){//&& !(!voided.canPull() && fe.getIsBranch())) {
                 prefec.push(Utils.opFactory.new No());
                 prefec.setPcVal(pc.getCount());
                 pc.incr();

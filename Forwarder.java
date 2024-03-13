@@ -32,7 +32,7 @@ class Forwarder implements InstructionVoidVisitor {
     }
 
     private int fwdIfEqual(RegisterName dest, int val){
-        if(slotReg.equals(dest)) {
+        if(slotReg.ordinal() == dest.ordinal()) {
             return this.slot;
         }else{
             return val;
@@ -87,12 +87,12 @@ class Forwarder implements InstructionVoidVisitor {
 
     @Override
     public void accept(Op.BrLZ op) {
-        //none
+        op.setRdVal(fwdIfEqual(op.getRd(), op.getRdVal())); //rd is the register that branches use, so we check if it is in the slot
     }
 
     @Override
     public void accept(Op.JpLZ op) {
-        //none
+        op.setRdVal(fwdIfEqual(op.getRd(), op.getRdVal()));
     }
 
     @Override
@@ -108,5 +108,9 @@ class Forwarder implements InstructionVoidVisitor {
     @Override
     public void accept(Op.No op) {
         //none
+    }
+
+    public String toString(){
+        return "" + (slotReg == null ? "none" : slotReg.name()) + "<-" + slot;
     }
 }

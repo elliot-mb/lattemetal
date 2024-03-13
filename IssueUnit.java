@@ -1,12 +1,14 @@
 
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class IssueUnit extends Unit{
 
     private final Scoreboard sb;
-    private boolean hasDeps = false;
+    private ArrayList<RegisterName> dependencies = new ArrayList<RegisterName>();
 
     IssueUnit(Scoreboard sb, PipelineRegister last, PipelineRegister next){
         super(last, next);
@@ -17,25 +19,34 @@ public class IssueUnit extends Unit{
     @Override
     protected void readOffPipeline(){
         super.readOffPipeline();
-        hasDeps = sb.useOrHasDeps(currentOp); //must run just once to avoid false positive of trying to register the instruction twice
+        dependencies = new ArrayList<RegisterName>();
+        dependencies.add(Lookup.reg.get("zero")); // initial fake dependency just to get it to check
+    }
+
+    private boolean hasDeps(){
+        return dependencies.size() > 0;
     }
 
     @Override
     protected void procInstruction() {
-        //nothing
+        //must run just once to avoid false positive of trying to register the instruction twice
+        //...once we realise it doesnt have deps, we dont try to register it again
+        if(hasDeps()) dependencies = sb.useOrHasDeps(currentOp);
     }
 
     @Override
     public void flush(){
         super.flush();
-        hasDeps = false;
+        dependencies = new ArrayList<RegisterName>();
         sb.flush();
     }
 
     @Override
     protected boolean isUnfinished() {
-        return hasDeps;
+        return hasDeps();
     }
+
+    // write the required dependencies into
 
     @Override
     public void accept(Op.Add op) {
