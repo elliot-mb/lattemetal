@@ -1,4 +1,6 @@
 
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +51,19 @@ public class Utils {
     public static double toDecimalPlaces(float n, int dp){
         double factor = Math.pow(10, dp);
         return Math.round(n * factor) / factor;
+    }
+
+    public static Memory runKern(String filePath, Memory mem, boolean quiet) throws FileNotFoundException {
+        System.out.println(filePath);
+        PrintStream silencer = new PrintStream("/dev/null");
+        Assembler assembler = new Assembler(filePath);
+        boolean didRead = assembler.readFile();
+        if(!didRead){
+            throw new RuntimeException("runKern: program assembler failed to read program '" + filePath + "'");
+        }
+        InstructionCache ic = new InstructionCache(assembler.assemble());
+        Processor p = new Processor(ic, mem); //memory can be set if you like
+        return p.run(quiet ? silencer : System.out);
     }
 
     public static void assertTrue(boolean b){

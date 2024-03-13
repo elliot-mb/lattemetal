@@ -68,13 +68,7 @@ public class Main {
         // run a specific program in debug mode
 
         System.out.println(args[0]);
-        Assembler assembler = new Assembler(programPath);
-        boolean didRead = assembler.readFile();
-        if(!didRead){
-            throw new RuntimeException("main: program assembler failed to read program");
-        }
-        InstructionCache ic = new InstructionCache(assembler.assemble());
-        Processor p = new Processor(ic, new Memory(
+        Memory exampleMemory = new Memory(
                 printWidth,
                 new int[]{
                         40, 10, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -83,8 +77,8 @@ public class Main {
                         48, 12, -8, 24, 20, 25, 31, 10, 19, 25,
                         148, 15, -81, 31, -4, 54, 14, 23, 41, 4,
                 }
-            )); //memory can be set if you like
-        p.run(System.out);
+        );
+        Utils.runKern(programPath, exampleMemory, false);
 
     }
 
