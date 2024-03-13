@@ -1,3 +1,4 @@
+
 public abstract class Unit implements InstructionVoidVisitor {
 
     /**
@@ -54,7 +55,13 @@ public abstract class Unit implements InstructionVoidVisitor {
     }
 
     public String toString(){
-        return currentOp == null ? " " : "↓";//(currentOp != null ? Integer.toHexString(currentOp.getId() % 16) : "_");
+        return currentOp == null ? " " : isUnfinished() ? "v" : "|";//(currentOp != null ? Integer.toHexString(currentOp.getId() % 16) : "_");
+    }
+
+    public void flush(){
+        currentOp = null;
+        pcVal = 0;
+        flag = false;
     }
 
 }

@@ -1,6 +1,10 @@
+
+
 public class FetchUnit extends Unit {
 
     private static final int FETCH_LATENCY = 1;
+    
+    private Integer whatBranchID = null; //
 
     private final InstructionCache ic;
 
@@ -13,7 +17,6 @@ public class FetchUnit extends Unit {
 
     @Override
     protected void procInstruction() {
-        currentOp = ic.getInstruction(pcVal); //fetching happens in procInstruction
         counter.decr();
     }
 
@@ -22,17 +25,39 @@ public class FetchUnit extends Unit {
         pcVal = last.getPcVal();
         currentOp = last.pull();
         counter.rst();
+        if(Utils.isBranch(currentOp)){
+            whatBranchID = currentOp.getId();
+        }else{
+            whatBranchID = null;
+        }
+
     }
 
     @Override
     protected void writeOnPipeline() {
+        currentOp = ic.getInstruction(pcVal); //fetching happens finally in writeOnPipeline
         next.setPcVal(pcVal + 1); //INCREMENT HERE (adder like in the unit diagram!)
         next.push(currentOp);
     }
 
     @Override
+    public void flush(){
+        super.flush();
+        whatBranchID = null;
+    }
+//
+//    // returns null if this is not a branch
+//    public Integer getBranch(){
+//        return isBranch ? whatBranchID : null;
+//    }
+
+//    private boolean isBranch(){
+//        return whatBranchID != null;
+//    }
+    
+    @Override
     protected boolean isUnfinished() {
-        return !counter.isDone();
+        return !counter.isDone();// && !isBranch();
     }
 
 

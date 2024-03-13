@@ -1,3 +1,5 @@
+
+
 class Forwarder implements InstructionVoidVisitor {
 
     private int slot = 0;
@@ -6,6 +8,11 @@ class Forwarder implements InstructionVoidVisitor {
     Forwarder(){
         slot = 0;
         slotReg = null;
+    }
+
+    public void flush(){
+        setSlot(0);
+        setSlotReg(null);
     }
 
     public void setSlot(int slot){

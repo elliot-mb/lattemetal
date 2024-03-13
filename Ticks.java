@@ -1,3 +1,5 @@
+package src;
+
 public interface Ticks {
 
     public void clk(); //recieve a clock input
