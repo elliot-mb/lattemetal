@@ -19,4 +19,9 @@ public class Memory extends Block{
         read(addr); //throw if addr is out of bounds
         setDelegate(addr, val);
     }
+
+    @Override
+    public String toString(){
+        return toListString();
+    }
 }

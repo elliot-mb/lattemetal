@@ -62,6 +62,10 @@ public abstract class Block {
         dirty[addr] = true;
     }
 
+    public String toListString(){
+        return Arrays.toString(data);
+    }
+
     public String toString(){
         String result = "";
         int addr = 0;

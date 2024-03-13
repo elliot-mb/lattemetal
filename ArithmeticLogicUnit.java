@@ -90,6 +90,7 @@ public class ArithmeticLogicUnit extends Unit {
         if(a < b) cmpResult = -1;
         else if(a == b) cmpResult = 0;
         else cmpResult = 1;
+        System.out.println(cmpResult);
         op.setResult(cmpResult);
         fwd.setSlotReg(op.getRd());
     }
