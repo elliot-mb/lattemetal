@@ -25,7 +25,7 @@ class Forwarder implements InstructionVoidVisitor {
 
     public Instruction forward(Instruction op){
         if(slotReg != null) {
-            System.out.println("forwards for " + op);
+            //System.out.println("forwards for " + op);
             op.visit(this);
         }
         return op;

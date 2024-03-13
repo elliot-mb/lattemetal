@@ -50,4 +50,8 @@ public class Utils {
         double factor = Math.pow(10, dp);
         return Math.round(n * factor) / factor;
     }
+
+    public static void assertTrue(boolean b){
+        if(!b) throw new AssertionError("assertTrue: provided false argument");
+    }
 }

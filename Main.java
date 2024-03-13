@@ -1,4 +1,4 @@
-
+import java.io.FileNotFoundException;
 
 public class Main {
 
@@ -42,16 +42,32 @@ public class Main {
      *
      * @param args
      */
-    public static void main(String[] args){
+    public static void main(String[] args) throws FileNotFoundException {
         String programPath = "./assembly/bubble_sort.latte";
         int printWidth = 1;
+        boolean testing = false;
         if(args.length >= 1){
-            System.out.println(args[0]);
             programPath = args[0];
         }
         if(args.length >= 2){
             printWidth = Integer.parseInt(args[1]);
         }
+        if(args.length >= 3){
+            testing = args[2].equals("testing");
+            System.out.println("is testing? " + testing);
+        }
+
+        // do testing
+
+        if(testing){
+            Test.test();
+            System.out.println("tests passed");
+            return;
+        }
+
+        // run a specific program in debug mode
+
+        System.out.println(args[0]);
         Assembler assembler = new Assembler(programPath);
         boolean didRead = assembler.readFile();
         if(!didRead){
@@ -68,7 +84,7 @@ public class Main {
                         148, 15, -81, 31, -4, 54, 14, 23, 41, 4,
                 }
             )); //memory can be set if you like
-        p.run();
+        p.run(System.out);
 
     }
 

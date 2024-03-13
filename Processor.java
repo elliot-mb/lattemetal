@@ -1,5 +1,6 @@
 
 
+import java.io.PrintStream;
 import java.util.AbstractMap;
 import java.util.HashMap;
 
@@ -57,8 +58,8 @@ public class Processor {
                 !wb.isDone() || !lsu.isDone() || !alu.isDone() || !de.isDone() || !fe.isDone() || !isu.isDone();
     }
 
-    public void run(){
-        System.out.println(ic);
+    public Memory run(PrintStream debugOut){
+        debugOut.println(ic);
         voided.push(Utils.opFactory.new No());
         voided.setPcVal(0);
         int retiredInstrs = 0;
@@ -71,8 +72,8 @@ public class Processor {
             isu.clk();
             de.clk();
             fe.clk();
-            System.out.println("@" + tally + ":\t\t[" + fe + fecDec + de + decIsu + isu + isuExe + alu + exeMem + lsu + memWrt + wb + "]");
-            if(prefec.canPush() && !pc.isDone()){//&& !(!voided.canPull() && fe.getIsBranch())) {
+            debugOut.println("@" + tally + ":\t\t[" + fe + fecDec + de + decIsu + isu + isuExe + alu + exeMem + lsu + memWrt + wb + "]");
+            if(prefec.canPush() && !pc.isDone() && voided.canPull()){//&& !(!voided.canPull() && fe.getIsBranch())) {
                 prefec.push(Utils.opFactory.new No());
                 prefec.setPcVal(pc.getCount());
                 pc.incr();
@@ -83,11 +84,11 @@ public class Processor {
                 retiredInstrs++;
             } //delete whats inside (voided is used to detect when writebacks are finished)
         }
-        System.out.println("registers (dirty): " + rf);
-        System.out.println("memory: " + mem);
-        System.out.println("run: program finished in " + tally + " cycles");
-
-        System.out.println("run: instructions per cycle " + Utils.toDecimalPlaces((float) retiredInstrs / tally, DP_ACC));
+        debugOut.println("registers (dirty): " + rf);
+        debugOut.println("memory: " + mem);
+        debugOut.println("run: program finished in " + tally + " cycles");
+        debugOut.println("run: instructions per cycle " + Utils.toDecimalPlaces((float) retiredInstrs / tally, DP_ACC));
+        return mem;
     }
 
 }

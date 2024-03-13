@@ -33,6 +33,10 @@ public abstract class Block {
         this.printWidth = printWidth;
     }
 
+    protected int[] getData(){
+        return data;
+    }
+
     protected void load(int[] in) throws RuntimeException{
         if(in.length > 0){
             if(in.length > size) throw new RuntimeException("load: data block passed in was too large");
@@ -91,6 +95,10 @@ public abstract class Block {
             addr++;
         }
         return result;
+    }
+
+    public boolean equals(Block mem){
+        return Arrays.equals(data, mem.getData());
     }
 
 }
