@@ -24,6 +24,13 @@ public class IssueUnit extends Unit{
     }
 
     @Override
+    public void flush(){
+        super.flush();
+        hasDeps = false;
+        sb.flush();
+    }
+
+    @Override
     protected boolean isUnfinished() {
         return hasDeps;
     }

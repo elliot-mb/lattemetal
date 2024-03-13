@@ -11,6 +11,10 @@ public class PipelineRegister {
         flag = false;
     }
 
+    public void flush(){
+        if(canPull()) pull();
+    }
+
     public void setPcVal(int count){
         pcVal = count;
     }

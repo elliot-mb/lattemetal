@@ -30,27 +30,11 @@ public class ArithmeticLogicUnit extends Unit {
         fwd.setSlot(currentOp.getResult());
     }
 
-
-
-    //    @Override
-//    public void clk() {
-//        //if we have finished processing this instruction but cant pull from last, we stall one cycle
-//        if(isDone() && !last.canPull()) return; //stall a clock cycle
-//        if(isDone()) currentOp = last.pull(); //dont re-copy if we are mid-processing
-//        if(!isDone() && !currentOp.isDone()) {
-//            currentOp.clk();
-//            return; //use up a clock cycle
-//        }
-//        currentOp.visit(this); //process operation
-//        if(!next.canPush()) return; //stall a clock cycle if we cant push the result
-//
-//        next.push(currentOp);
-//        next.setFlag(branchTaken);
-//
-//        currentOp = null; //empty out our intermediate storage to accept the next one
-//    }
-
-    //visitation
+    @Override
+    public void flush(){
+        super.flush();
+        fwd.flush();
+    }
 
     @Override
     public void accept(Op.Add op) {

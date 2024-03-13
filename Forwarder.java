@@ -8,6 +8,11 @@ class Forwarder implements InstructionVoidVisitor {
         slotReg = null;
     }
 
+    public void flush(){
+        setSlot(0);
+        setSlotReg(null);
+    }
+
     public void setSlot(int slot){
         this.slot = slot;
     }

@@ -8,6 +8,10 @@ public class Scoreboard implements InstructionVoidVisitor {
     private boolean hasDependencies = false;
 
     Scoreboard(){
+        flush();
+    }
+
+    public void flush(){
         for(RegisterName r : RegisterName.values()){
             scoreboard.put(r, true); // register => valid
             // we can execute an instruction just if its dependencies aren't set true in here

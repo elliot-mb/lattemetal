@@ -28,6 +28,12 @@ public class DecodeUnit extends Unit{
     }
 
     @Override
+    public void flush() {
+        super.flush();
+        hasRun = false;
+    }
+
+    @Override
     public void accept(Op.Add op) {
         //op.setRdVal(rf.getReg(op.getRd()));
         op.setRsVal(rf.getReg(op.getRs()));
