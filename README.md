@@ -84,3 +84,14 @@ an instruction may be
 # Interim
 
 Plan benchmarks for the interim etc.
+
+# Feedback
+
+Feedback on interrim and current submission.
+
+- Choose three experiments, including the most complex one (branch predictor), one of the first two in your powerpoint for
+their classic-ness, and the last one because it is unusual.
+- Add **indexed loads and stores**
+- Add a connection from the ALU that goes straight to WB for instructions which are not loads or stores.
+- Add a branch unit (start as part of the execution unit) so once the instruction leaves this unit it should end up flushing the pipeline if its wrong and starts
+executing from the branched location

@@ -30,13 +30,13 @@ public class Processor {
         if(mem.length > 1) throw new RuntimeException("Processor: this constructor cannot have more than one memories");
         this.sb = new Scoreboard();
         this.ic = ic;
+        this.tally = 0;
         this.pc = new ProgramCounter(ic.numInstrs());
         this.rf = new RegisterFile();
         this.mem = mem.length > 0 ? mem[0] : new Memory();
         this.alu = new ArithmeticLogicUnit(isuExe, exeMem);
         this.fe = new FetchUnit(ic, prefec, fecDec);
-        this.de = new DecodeUnit(this.rf, fecDec, isuExe);
-        this.tally = 0;
+        this.de = new DecodeUnit(this.rf, fecDec, decIsu);
         this.wb = new WriteBackUnit(this.rf, this.sb, memWrt, voided);
         this.lsu = new LoadStoreUnit(this.mem, this.pc, exeMem, memWrt);
         this.isu = new IssueUnit(this.sb, decIsu, isuExe);
@@ -66,7 +66,7 @@ public class Processor {
             lsu.clk();
             alu.clk();
             //include some sort of issue stage that works from a scoreboard and tomasulos algorithm
-            //isu.clk();
+            isu.clk();
             de.clk();
             fe.clk();
             System.out.println("@" + tally + ":\t\t[" + fe + fecDec + de + decIsu + isu + isuExe + alu + exeMem + lsu + memWrt + wb + "]");
