@@ -100,7 +100,7 @@ public class LoadStoreUnit extends Unit{
             pc.set(op.getResult());
         }
         //if we got it wrong we flush
-        if(flag != STATIC_PREDICT_BR_TAKEN){
+        if(op.getResult() != pcVal){
             shouldFlush = true;
         }
     }
@@ -110,7 +110,7 @@ public class LoadStoreUnit extends Unit{
         if(flag){
             pc.set(op.getResult());
         }
-        if(flag != STATIC_PREDICT_BR_TAKEN){
+        if(op.getResult() != pcVal){ //we mispredicted!
             shouldFlush = true;
         }
     }

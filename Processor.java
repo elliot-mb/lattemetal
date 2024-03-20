@@ -40,7 +40,7 @@ public class Processor {
         this.rf = new RegisterFile();
         this.mem = mem.length > 0 ? mem[0] : new Memory();
         this.alu = new ArithmeticLogicUnit(isuExe, exeMem);
-        this.fe = new FetchUnit(ic, prefec, fecDec);
+        this.fe = new FetchUnit(ic, pc, prefec, fecDec);
         this.de = new DecodeUnit(this.rf, fecDec, decIsu);
         this.wb = new WriteBackUnit(this.rf, this.sb, memWrt, voided);
         this.lsu = new LoadStoreUnit(this.mem, this.pc, exeMem, memWrt);

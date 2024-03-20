@@ -8,11 +8,14 @@ public class FetchUnit extends Unit {
 
     private final InstructionCache ic;
 
+    private final ProgramCounter pc;
+
     private final Durate counter = new Durate(FETCH_LATENCY);
 
-    FetchUnit(InstructionCache ic, PipelineRegister last, PipelineRegister next){
+    FetchUnit(InstructionCache ic, ProgramCounter pc, PipelineRegister last, PipelineRegister next){
         super(last, next);
         this.ic = ic;
+        this.pc = pc;
     }
 
     @Override
@@ -23,23 +26,14 @@ public class FetchUnit extends Unit {
     @Override
     protected void readOffPipeline(){
         pcVal = last.getPcVal();
-        currentOp = last.pull();
+        currentOp = ic.getInstruction(pcVal);
+        last.pull();
         counter.rst();
-        if(Utils.isBranch(currentOp)){
-            whatBranchID = currentOp.getId();
-        }else{
-            whatBranchID = null;
-        }
-
     }
 
     @Override
     protected void writeOnPipeline() {
-        currentOp = ic.getInstruction(pcVal); //fetching happens finally in writeOnPipeline
-        if(STATIC_PREDICT_BR_TAKEN){ //then the branches are all predicted taken
-
-        }
-        next.setPcVal(pcVal + 1); //INCREMENT HERE (adder like in the unit diagram!)
+    //  this is now set in the visitor methods        next.setPcVal(pcVal + 1); //INCREMENT HERE (adder like in the unit diagram!)
         next.push(currentOp);
     }
 
@@ -67,61 +61,71 @@ public class FetchUnit extends Unit {
     //nothing happens in visitation because fetching happens in procInstruction
     @Override
     public void accept(Op.Add op) {
-
+        next.setPcVal(pcVal + 1);
     }
 
     @Override
     public void accept(Op.AddI op) {
-
+        next.setPcVal(pcVal + 1);
     }
 
     @Override
     public void accept(Op.Mul op) {
-
+        next.setPcVal(pcVal + 1);
     }
 
     @Override
     public void accept(Op.MulI op) {
-
+        next.setPcVal(pcVal + 1);
     }
 
     @Override
     public void accept(Op.Cmp op) {
-
+        next.setPcVal(pcVal + 1);
     }
 
     @Override
     public void accept(Op.Ld op) {
-
+        next.setPcVal(pcVal + 1);
     }
 
     @Override
     public void accept(Op.LdC op) {
-
+        next.setPcVal(pcVal + 1);
     }
 
     @Override
     public void accept(Op.St op) {
-
+        next.setPcVal(pcVal + 1);
     }
 
     @Override
     public void accept(Op.BrLZ op) {
-
+        if(STATIC_PREDICT_BR_TAKEN){
+            next.setPcVal(op.getImVal());
+            pc.set(op.getImVal()); //static prediciton
+        }else{
+            next.setPcVal(pcVal + 1);
+        }
     }
 
     @Override
     public void accept(Op.JpLZ op) {
-
+        if(STATIC_PREDICT_BR_TAKEN){
+            next.setPcVal(op.getImVal());
+            pc.set(op.getImVal());
+        }else {
+            next.setPcVal(pcVal + 1);
+        }
     }
 
     @Override
     public void accept(Op.Br op) {
-
+        next.setPcVal(op.getImVal());
     }
 
     @Override
     public void accept(Op.Jp op) {
-
+        next.setPcVal(op.getImVal());
     }
 }
