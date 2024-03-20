@@ -36,6 +36,9 @@ public class FetchUnit extends Unit {
     @Override
     protected void writeOnPipeline() {
         currentOp = ic.getInstruction(pcVal); //fetching happens finally in writeOnPipeline
+        if(STATIC_PREDICT_BR_TAKEN){ //then the branches are all predicted taken
+
+        }
         next.setPcVal(pcVal + 1); //INCREMENT HERE (adder like in the unit diagram!)
         next.push(currentOp);
     }

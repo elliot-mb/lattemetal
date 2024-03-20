@@ -5,6 +5,8 @@ public abstract class Unit implements InstructionVoidVisitor {
      * for any building block that reads from one pipeline register and writes to another
      */
 
+    protected static final boolean STATIC_PREDICT_BR_TAKEN = false;
+
     protected final PipelineRegister last;
     protected final PipelineRegister next;
 
