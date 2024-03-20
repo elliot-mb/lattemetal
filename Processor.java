@@ -2,7 +2,9 @@
 
 import java.io.PrintStream;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class Processor {
 
@@ -79,9 +81,11 @@ public class Processor {
         debugOut.println(ic);
         voided.push(Utils.opFactory.new No());
         voided.setPcVal(0);
-        int retiredInstrs = 0;
+        int retiredInstrCount = 0;
+        List<Instruction> retiredInstrs = new ArrayList<Instruction>();
+
         //AbstractMap<Instruction, Integer> inFlights = new HashMap<Instruction, Integer>();
-        while(isPipelineBeingUsed()){
+        while(isPipelineBeingUsed() || !pc.isDone()){
             wb.clk();
             lsu.clk();
             if(lsu.needsFlushing()) flushPipeline();
@@ -98,14 +102,14 @@ public class Processor {
             }
             tally++;
             if(voided.canPull()) {
-                voided.pull();
-                retiredInstrs++;
+                retiredInstrs.add(voided.pull());
+                retiredInstrCount++;
             } //delete whats inside (voided is used to detect when writebacks are finished)
         }
         debugOut.println("registers (dirty): " + rf);
         debugOut.println("memory: " + mem);
         debugOut.println("run: program finished in " + tally + " cycles");
-        debugOut.println("run: instructions per cycle " + Utils.toDecimalPlaces((float) retiredInstrs / tally, DP_ACC));
+        debugOut.println("run: instructions per cycle " + Utils.toDecimalPlaces((float) retiredInstrCount / tally, DP_ACC));
         return mem;
     }
 

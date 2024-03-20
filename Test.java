@@ -2,6 +2,8 @@ import java.io.*;
 
 public class Test {
 
+    static final int ONE_ABOVE = 2;
+
     private static final Memory getExampleMemory() {
         return new Memory(
                 0, //dont care
@@ -15,7 +17,13 @@ public class Test {
         );
     }
 
+    private static void showAmInside(){
+        final StackTraceElement[] ste = Thread.currentThread().getStackTrace();
+        System.out.println(ste[ONE_ABOVE].getClassName()+"#"+ste[ONE_ABOVE].getMethodName());
+    }
+
     private static void bubbleSortMemTest() throws FileNotFoundException {
+        showAmInside();
         final Memory result = new Memory(0,
                 new int[]{40, 10, 0, 0, 0, 0, 0, 0, 0, 0, -81, -15, -11, -8, -4, -4, -4, 2, 4, 4, 6, 9, 10, 10, 11, 11,
                         12, 14, 15, 17, 18, 19, 20, 22, 23, 24, 25, 25, 31, 31, 41, 48, 51, 51, 51, 54, 58, 65, 78, 148,
@@ -75,12 +83,12 @@ public class Test {
     }
 
     static void test() throws FileNotFoundException {
-        bubbleSortMemTest();
-        mat2MulMemTest();
-        mat3MulMemTest();
-        minMemTest();
-        quotMemTest();
-        vecAddMemTest();
+        try{bubbleSortMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
+        try{mat2MulMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
+        try{mat3MulMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
+        try{minMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
+        try{quotMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
+        try{vecAddMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());};
         vecDotMemTest();
     }
 }

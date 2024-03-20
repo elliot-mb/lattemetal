@@ -4,6 +4,7 @@ public class LoadStoreUnit extends Unit{
 
     private static final int L1_LATENCY = 3;
     private static final int NOP_LATENCY = 1;
+    private static final boolean STATIC_PREDICT_BR_TAKEN = true;
     private final Memory mem;
 
     private final ProgramCounter pc;
