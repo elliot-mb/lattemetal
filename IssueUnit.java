@@ -108,4 +108,8 @@ public class IssueUnit extends Unit{
 
     }
 
+    @Override
+    public String toString(){
+        return currentOp == null ? " " : "|";//(currentOp != null ? Integer.toHexString(currentOp.getId() % 16) : "_");
+    }
 }

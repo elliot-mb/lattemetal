@@ -36,7 +36,7 @@ public class Scoreboard implements InstructionVoidVisitor {
     }
 
     public void validateReg(RegisterName r){
-        System.out.println("freed '" + r.name() + "'");
+        //System.out.println("freed '" + r.name() + "'");
         scoreboard.put(r, true);
     }
 

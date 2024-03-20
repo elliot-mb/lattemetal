@@ -98,9 +98,11 @@ public class LoadStoreUnit extends Unit{
     public void accept(Op.BrLZ op) {
         if(flag){
             pc.set(op.getResult());
+        }else{
+            pc.set(pcVal);
         }
         //if we got it wrong we flush
-        if(op.getResult() != pcVal){
+        if(flag != STATIC_PREDICT_BR_TAKEN){
             shouldFlush = true;
         }
     }
@@ -109,8 +111,10 @@ public class LoadStoreUnit extends Unit{
     public void accept(Op.JpLZ op) {
         if(flag){
             pc.set(op.getResult());
+        }else{
+            pc.set(pcVal);
         }
-        if(op.getResult() != pcVal){ //we mispredicted!
+        if(flag != STATIC_PREDICT_BR_TAKEN){
             shouldFlush = true;
         }
     }
@@ -118,13 +122,11 @@ public class LoadStoreUnit extends Unit{
     @Override
     public void accept(Op.Br op) {
         pc.set(op.getResult());
-        shouldFlush = true;
     }
 
     @Override
     public void accept(Op.Jp op) {
         pc.set(op.getResult());
-        shouldFlush = true;
     }
 
     /**

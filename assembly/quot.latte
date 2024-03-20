@@ -10,11 +10,13 @@ st t4 zero #1       --denominator
 --        brlz t0 #100        --if t3 is less than t4
         addi t5 zero #0     -- zero our quotient counter (our result)
         muli t6 t4 #-1      --so we can subtract t4 by adding it
+        --addi t5 zero #0
 loop:   addi t5 t5 #1       -- increment quotient loop starts here
         addi a7 a7 #1
-        add t3 t3 t6        --
+        add t3 t3 t6        -- ln 08
         cmp t0 t4 t3        -- if t3 (what we're subtacting from) is less than what we're subtracting we stop
         --addi t0 t0 #-1
         jplz t0 loop        -- loop tail
         st a7 zero #2       --output result in memory
         st t3 zero #3       --remainder
+

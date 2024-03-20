@@ -4,6 +4,7 @@ class Forwarder implements InstructionVoidVisitor {
 
     private int slot = 0;
     private RegisterName slotReg = null;
+    private boolean didSlot = false;
 
     Forwarder(){
         slot = 0;
@@ -16,6 +17,7 @@ class Forwarder implements InstructionVoidVisitor {
     }
 
     public void setSlot(int slot){
+        System.out.println("set slot " + slot);
         this.slot = slot;
     }
 
@@ -24,6 +26,7 @@ class Forwarder implements InstructionVoidVisitor {
     }
 
     public Instruction forward(Instruction op){
+        didSlot = false;
         if(slotReg != null) {
             //System.out.println("forwards for " + op);
             op.visit(this);
@@ -31,8 +34,13 @@ class Forwarder implements InstructionVoidVisitor {
         return op;
     }
 
+    public boolean didForward(){
+        return didSlot;
+    }
+
     private int fwdIfEqual(RegisterName dest, int val){
         if(slotReg.ordinal() == dest.ordinal()) {
+            didSlot = true;
             return this.slot;
         }else{
             return val;
@@ -111,6 +119,6 @@ class Forwarder implements InstructionVoidVisitor {
     }
 
     public String toString(){
-        return "" + (slotReg == null ? "none" : slotReg.name()) + "<-" + slot;
+        return "" + (slotReg == null ? "none" : slotReg.name()) + "\t<-\t" + slot;
     }
 }

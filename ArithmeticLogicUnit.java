@@ -1,6 +1,7 @@
 public class ArithmeticLogicUnit extends Unit {
 
     private final Forwarder fwd;
+
     ArithmeticLogicUnit(PipelineRegister last, PipelineRegister next){
         super(last, next);
         this.currentOp = null;
@@ -11,8 +12,10 @@ public class ArithmeticLogicUnit extends Unit {
     protected void procInstruction() {
         currentOp.decr();
         if(!isUnfinished()){ //this is the final procInstruction call
-            System.out.println("forward " + fwd);
             currentOp = fwd.forward(currentOp);
+            if(fwd.didForward()){
+                System.out.println("forward: " + fwd);
+            }
         }
     }
 

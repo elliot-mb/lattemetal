@@ -61,7 +61,7 @@ public class Processor {
     }
 
     private void flushPipeline(){
-        System.out.println("flush");
+        //System.out.println("flush");
         fe.flush();
         de.flush();
         isu.flush();
@@ -94,11 +94,11 @@ public class Processor {
             isu.clk();
             de.clk();
             fe.clk();
-            debugOut.println("\t[" + fe + fecDec + de + decIsu + isu + isuExe + alu + exeMem + lsu + memWrt + wb + "]\t@" + tally + "\tpc " + pc.getCount());
+            debugOut.println("\t[" + fe + fecDec + de + decIsu + isu + isuExe + alu + exeMem + lsu + memWrt + wb + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + rf);
             if(prefec.canPush() && !pc.isDone()){//&& !(!voided.canPull() && fe.getIsBranch())) {
                 prefec.push(Utils.opFactory.new No());
                 prefec.setPcVal(pc.getCount());
-                pc.incr();
+                //pc.incr();
             }
             tally++;
             if(voided.canPull()) {
