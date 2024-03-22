@@ -1,43 +1,61 @@
 
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 public class IssueUnit extends Unit{
 
     private final Scoreboard sb;
-    private ArrayList<RegisterName> dependencies = new ArrayList<RegisterName>();
+    private ArrayList<RegisterName> deps;
+    private ArrayList<RegisterName> depsInital;
 
     IssueUnit(Scoreboard sb, PipelineRegister last, PipelineRegister next){
         super(last, next);
         this.sb = sb;
-
+        this.deps = new ArrayList<>();
+        this.depsInital = new ArrayList<>();
     }
 
     @Override
     protected void readOffPipeline(){
         super.readOffPipeline();
-        dependencies = new ArrayList<RegisterName>();
-        dependencies.add(Lookup.reg.get("zero")); // initial fake dependency just to get it to check
+        deps = sb.useOrHasDeps(currentOp);
+        copyToDepsC(deps);
+        //dependencies.add(Lookup.reg.get("zero")); // initial fake dependency just to get it to check
+    }
+
+    //we fetch the latest operands from the rf because they were updated since we decoded if we block here
+    //for a few cycles!
+    @Override
+    protected void writeOnPipeline(){
+        Forwarder f = new Forwarder();
+        for(RegisterName d : depsInital){
+            f.setSlot(regis);
+        }
+        super.writeOnPipeline();
     }
 
     private boolean hasDeps(){
-        return dependencies.size() > 0;
+        return deps.size() > 0;
+    }
+
+    private void copyToDepsC(ArrayList<RegisterName> deps) {
+        depsInital.clear();
+        for(RegisterName d : deps){
+            depsInital.add(d);
+        }
     }
 
     @Override
     protected void procInstruction() {
         //must run just once to avoid false positive of trying to register the instruction twice
         //...once we realise it doesnt have deps, we dont try to register it again
-        if(hasDeps()) dependencies = sb.useOrHasDeps(currentOp);
+        if(hasDeps()) deps = sb.useOrHasDeps(currentOp);
     }
 
     @Override
     public void flush(){
         super.flush();
-        dependencies = new ArrayList<RegisterName>();
+        deps = new ArrayList<RegisterName>();
         sb.flush();
     }
 
