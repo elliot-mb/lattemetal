@@ -45,7 +45,7 @@ public class Processor {
         this.de = new DecodeUnit(this.rf, fecDec, decIsu);
         this.wb = new WriteBackUnit(this.rf, this.sb, memWrt, voided);
         this.lsu = new LoadStoreUnit(this.mem, this.pc, exeMem, memWrt);
-        this.isu = new IssueUnit(this.sb, decIsu, isuExe);
+        this.isu = new IssueUnit(this.sb, this.rf, decIsu, isuExe);
     }
 
 //    private void sendSingleInstruction(){

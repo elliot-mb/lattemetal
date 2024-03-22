@@ -5,12 +5,14 @@ import java.util.ArrayList;
 public class IssueUnit extends Unit{
 
     private final Scoreboard sb;
+    private final RegisterFile rf;
     private ArrayList<RegisterName> deps;
     private ArrayList<RegisterName> depsInital;
 
-    IssueUnit(Scoreboard sb, PipelineRegister last, PipelineRegister next){
+    IssueUnit(Scoreboard sb, RegisterFile rf, PipelineRegister last, PipelineRegister next){
         super(last, next);
         this.sb = sb;
+        this.rf = rf;
         this.deps = new ArrayList<>();
         this.depsInital = new ArrayList<>();
     }
@@ -27,10 +29,12 @@ public class IssueUnit extends Unit{
     //for a few cycles!
     @Override
     protected void writeOnPipeline(){
-        Forwarder f = new Forwarder();
-        for(RegisterName d : depsInital){
-            f.setSlot(regis);
-        }
+//        Forwarder f = new Forwarder(); // mini forwarder just used for updating dependencies
+//        for(RegisterName d : depsInital){
+//            f.setSlot(rf.getReg(d));
+//            f.setSlotReg(d);
+//            currentOp = f.forward(currentOp);
+//        }
         super.writeOnPipeline();
     }
 
