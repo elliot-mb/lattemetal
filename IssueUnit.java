@@ -21,7 +21,7 @@ public class IssueUnit extends Unit{
     protected void readOffPipeline(){
         super.readOffPipeline();
         deps = sb.useOrHasDeps(currentOp);
-        copyToDepsC(deps);
+        //copyToDepsC(deps);
         //dependencies.add(Lookup.reg.get("zero")); // initial fake dependency just to get it to check
     }
 

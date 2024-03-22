@@ -1,9 +1,7 @@
 
 
 import java.io.PrintStream;
-import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.function.BinaryOperator;
 
@@ -23,9 +21,9 @@ public class Processor {
     private final WriteBackUnit wb;
 
     private final PipelineRegister prefec = new PipelineRegister(); //just to pass the pc value to the fetch unit, and increment it!
-    private final PipelineRegister fecDec = new PipelineRegister();
-    private final PipelineRegister decIsu = new PipelineRegister();
-    private final PipelineRegister isuExe = new PipelineRegister();
+    private final PipelineRegister fecIsu = new PipelineRegister();
+    private final PipelineRegister isuDec = new PipelineRegister();
+    private final PipelineRegister decExe = new PipelineRegister();
     private final PipelineRegister exeMem = new PipelineRegister();
     private final PipelineRegister memWrt = new PipelineRegister();
     private final PipelineRegister voided = new PipelineRegister(); //ignored pipe register to satisfy Unit inheritence
@@ -40,12 +38,12 @@ public class Processor {
         this.pc = new ProgramCounter(ic.numInstrs());
         this.rf = new RegisterFile();
         this.mem = mem.length > 0 ? mem[0] : new Memory();
-        this.alu = new ArithmeticLogicUnit(isuExe, exeMem);
-        this.fe = new FetchUnit(ic, pc, prefec, fecDec);
-        this.de = new DecodeUnit(this.rf, fecDec, decIsu);
+        this.alu = new ArithmeticLogicUnit(decExe, exeMem);
+        this.fe = new FetchUnit(ic, pc, prefec, fecIsu);
+        this.de = new DecodeUnit(this.rf, fecIsu, isuDec);
         this.wb = new WriteBackUnit(this.rf, this.sb, memWrt, voided);
         this.lsu = new LoadStoreUnit(this.mem, this.pc, exeMem, memWrt);
-        this.isu = new IssueUnit(this.sb, this.rf, decIsu, isuExe);
+        this.isu = new IssueUnit(this.sb, this.rf, isuDec, decExe);
     }
 
 //    private void sendSingleInstruction(){
@@ -57,7 +55,7 @@ public class Processor {
 
 
     private boolean isPipelineBeingUsed(){
-        return prefec.canPull() || fecDec.canPull() || decIsu.canPull() || isuExe.canPull() || exeMem.canPull() || memWrt.canPull() || voided.canPull() ||
+        return prefec.canPull() || fecIsu.canPull() || isuDec.canPull() || decExe.canPull() || exeMem.canPull() || memWrt.canPull() || voided.canPull() ||
                 !wb.isDone() || !lsu.isDone() || !alu.isDone() || !de.isDone() || !fe.isDone() || !isu.isDone();
     }
 
@@ -70,9 +68,9 @@ public class Processor {
         lsu.flush();
         wb.flush();
         prefec.flush();
-        fecDec.flush();
-        decIsu.flush();
-        isuExe.flush();
+        fecIsu.flush();
+        isuDec.flush();
+        decExe.flush();
         exeMem.flush();
         memWrt.flush();
         voided.flush();
@@ -95,7 +93,7 @@ public class Processor {
             isu.clk();
             de.clk();
             fe.clk();
-            debugOut.println("\t[" + fe + fecDec + de + decIsu + isu + isuExe + alu + exeMem + lsu + memWrt + wb + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + rf);
+            debugOut.println("\t[" + fe + fecIsu + de + isuDec + isu + decExe + alu + exeMem + lsu + memWrt + wb + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + rf);
             if(prefec.canPush() && !pc.isDone()){//&& !(!voided.canPull() && fe.getIsBranch())) {
                 prefec.push(Utils.opFactory.new No());
                 prefec.setPcVal(pc.getCount());
