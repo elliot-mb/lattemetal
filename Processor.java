@@ -5,6 +5,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.BinaryOperator;
 
 public class Processor {
 
@@ -110,6 +111,13 @@ public class Processor {
         debugOut.println("memory: " + mem);
         debugOut.println("run: program finished in " + tally + " cycles");
         debugOut.println("run: instructions per cycle " + Utils.toDecimalPlaces((float) retiredInstrCount / tally, DP_ACC));
+        BinaryOperator<String> newLnConn = new BinaryOperator<String>() {
+            @Override
+            public String apply(String s, String s2) {
+                return s + '\n' + s2;
+            }
+        };
+        debugOut.println("run: instructions completed like " + retiredInstrs.stream().map(Instruction::toString).reduce(newLnConn));
         return mem;
     }
 
