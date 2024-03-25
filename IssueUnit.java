@@ -7,14 +7,12 @@ public class IssueUnit extends Unit{
     private final Scoreboard sb;
     private final RegisterFile rf;
     private ArrayList<RegisterName> deps;
-    private ArrayList<RegisterName> depsInital;
 
     IssueUnit(Scoreboard sb, RegisterFile rf, PipelineRegister last, PipelineRegister next){
         super(last, next);
         this.sb = sb;
         this.rf = rf;
         this.deps = new ArrayList<>();
-        this.depsInital = new ArrayList<>();
     }
 
     @Override
@@ -25,28 +23,8 @@ public class IssueUnit extends Unit{
         //dependencies.add(Lookup.reg.get("zero")); // initial fake dependency just to get it to check
     }
 
-    //we fetch the latest operands from the rf because they were updated since we decoded if we block here
-    //for a few cycles!
-    @Override
-    protected void writeOnPipeline(){
-//        Forwarder f = new Forwarder(); // mini forwarder just used for updating dependencies
-//        for(RegisterName d : depsInital){
-//            f.setSlot(rf.getReg(d));
-//            f.setSlotReg(d);
-//            currentOp = f.forward(currentOp);
-//        }
-        super.writeOnPipeline();
-    }
-
     private boolean hasDeps(){
         return deps.size() > 0;
-    }
-
-    private void copyToDepsC(ArrayList<RegisterName> deps) {
-        depsInital.clear();
-        for(RegisterName d : deps){
-            depsInital.add(d);
-        }
     }
 
     @Override
@@ -130,8 +108,8 @@ public class IssueUnit extends Unit{
 
     }
 
-    @Override
-    public String toString(){
-        return currentOp == null ? " " : "|";//(currentOp != null ? Integer.toHexString(currentOp.getId() % 16) : "_");
-    }
+//    @Override
+//    public String toString(){
+//        return currentOp == null ? " " : "|";//(currentOp != null ? Integer.toHexString(currentOp.getId() % 16) : "_");
+//    }
 }

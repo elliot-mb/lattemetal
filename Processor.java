@@ -89,11 +89,10 @@ public class Processor {
             lsu.clk();
             if(lsu.needsFlushing()) flushPipeline();
             alu.clk();
-            //include some sort of issue stage that works from a scoreboard and tomasulos algorithm
             deu.clk();
             isu.clk();
             feu.clk();
-            debugOut.println("\t[" + feu + feuIsu + deu + isuDeu + isu + deuAlu + alu + aluLsu + lsu + lsuWbu + wbu + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + rf);
+            //debugOut.println("\t[" + feu + feuIsu + isu + isuDeu + deu + deuAlu + alu + aluLsu + lsu + lsuWbu + wbu + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + rf);
             if(prefec.canPush() && !pc.isDone()){//&& !(!voided.canPull() && fe.getIsBranch())) {
                 prefec.push(Utils.opFactory.new No());
                 prefec.setPcVal(pc.getCount());
@@ -115,7 +114,7 @@ public class Processor {
                 return s + '\n' + s2;
             }
         };
-        debugOut.println("run: instructions completed like " + retiredInstrs.stream().map(Instruction::toString).reduce(newLnConn));
+        //debugOut.println("run: instructions completed like " + retiredInstrs.stream().map(Instruction::toString).reduce(newLnConn));
         return mem;
     }
 
