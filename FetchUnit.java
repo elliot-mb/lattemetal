@@ -25,7 +25,11 @@ public class FetchUnit extends Unit {
 
     @Override
     protected void readOffPipeline(){
-        super.readOffPipeline();
+        getActiveIn();
+        PipelineRegister in = ins[inActive];
+        pcVal = in.getPcVal();
+        currentOp = ic.getInstruction(pcVal);
+        in.pull();
         counter.rst();
     }
 

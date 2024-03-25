@@ -8,8 +8,6 @@ public class LoadStoreUnit extends Unit{
 
     private final ProgramCounter pc;
 
-    private int pcVal;
-
     private Durate counter = new Durate(L1_LATENCY);
     private Durate counterNop = new Durate(NOP_LATENCY);
 
@@ -94,7 +92,9 @@ public class LoadStoreUnit extends Unit{
 
     @Override
     public void accept(Op.BrLZ op) {
-        if(flag){
+        if(flag && !STATIC_PREDICT_BR_TAKEN){
+            //we only need to reset to destination if we didnt set it correctly
+            //(if we predicted wrong)
             pc.set(op.getResult());
         }else{
             pc.set(pcVal);
@@ -107,7 +107,7 @@ public class LoadStoreUnit extends Unit{
 
     @Override
     public void accept(Op.JpLZ op) {
-        if(flag){
+        if(flag && !STATIC_PREDICT_BR_TAKEN){
             pc.set(op.getResult());
         }else{
             pc.set(pcVal);

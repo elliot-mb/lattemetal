@@ -25,7 +25,7 @@ public abstract class Unit implements InstructionVoidVisitor {
         this.outsChoice = new boolean[this.outs.length];
     }
 
-    private void getActiveIn(){
+    protected void getActiveIn(){
         boolean hasSet = false;
         int i = 0;
         for(PipelineRegister in : ins){

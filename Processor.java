@@ -113,7 +113,7 @@ public class Processor {
             deu.clk();
             isu.clk();
             feu.clk();
-            //debugOut.println("\t[" + feu + feuIsu + isu + isuDeu + deu + deuAlu + alu + aluLsu + lsu + lsuWbu + wbu + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + rf);
+            debugOut.println("\t[" + feu + feuIsu + isu + isuDeu + deu + deuAlu + alu + aluLsu + lsu + lsuWbu + wbu + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + rf);
             if(prefec.canPush() && !pc.isDone()){//&& !(!voided.canPull() && fe.getIsBranch())) {
                 prefec.push(Utils.opFactory.new No());
                 prefec.setPcVal(pc.getCount());
