@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.function.BinaryOperator;
 
 public class Processor {
-
     private final ProgramCounter pc;
     private final InstructionCache ic;
     private final IssueUnit isu;
@@ -38,12 +37,33 @@ public class Processor {
         this.pc = new ProgramCounter(ic.numInstrs());
         this.rf = new RegisterFile();
         this.mem = mem.length > 0 ? mem[0] : new Memory();
-        this.feu = new FetchUnit(ic, pc, prefec, feuIsu);
-        this.isu = new IssueUnit(this.sb, this.rf, feuIsu, isuDeu);
-        this.deu = new DecodeUnit(this.rf, isuDeu, deuAlu);
-        this.alu = new ArithmeticLogicUnit(deuAlu, aluLsu);
-        this.lsu = new LoadStoreUnit(this.mem, this.pc, aluLsu, lsuWbu);
-        this.wbu = new WriteBackUnit(this.rf, this.sb, lsuWbu, voided);
+        this.feu = new FetchUnit(
+                this.ic,
+                this.pc,
+                new PipelineRegister[]{prefec},
+                new PipelineRegister[]{feuIsu});
+        this.isu = new IssueUnit(
+                this.sb,
+                this.rf,
+                new PipelineRegister[]{feuIsu},
+                new PipelineRegister[]{isuDeu});
+        this.deu = new DecodeUnit(
+                this.rf,
+                new PipelineRegister[]{isuDeu},
+                new PipelineRegister[]{deuAlu});
+        this.alu = new ArithmeticLogicUnit(
+                new PipelineRegister[]{deuAlu},
+                new PipelineRegister[]{aluLsu});
+        this.lsu = new LoadStoreUnit(
+                this.mem,
+                this.pc,
+                new PipelineRegister[]{aluLsu},
+                new PipelineRegister[]{lsuWbu});
+        this.wbu = new WriteBackUnit(
+                this.rf,
+                this.sb,
+                new PipelineRegister[]{lsuWbu},
+                new PipelineRegister[]{voided});
     }
 
 //    private void sendSingleInstruction(){
@@ -92,7 +112,7 @@ public class Processor {
             deu.clk();
             isu.clk();
             feu.clk();
-            //debugOut.println("\t[" + feu + feuIsu + isu + isuDeu + deu + deuAlu + alu + aluLsu + lsu + lsuWbu + wbu + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + rf);
+            debugOut.println("\t[" + feu + feuIsu + isu + isuDeu + deu + deuAlu + alu + aluLsu + lsu + lsuWbu + wbu + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + rf);
             if(prefec.canPush() && !pc.isDone()){//&& !(!voided.canPull() && fe.getIsBranch())) {
                 prefec.push(Utils.opFactory.new No());
                 prefec.setPcVal(pc.getCount());
@@ -103,6 +123,7 @@ public class Processor {
                 retiredInstrs.add(voided.pull());
                 retiredInstrCount++;
             } //delete whats inside (voided is used to detect when writebacks are finished)
+            if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");
         }
         debugOut.println("registers (dirty): " + rf);
         debugOut.println("memory: " + mem);

@@ -2,8 +2,8 @@ public class ArithmeticLogicUnit extends Unit {
 
     private final Forwarder fwd;
 
-    ArithmeticLogicUnit(PipelineRegister last, PipelineRegister next){
-        super(last, next);
+    ArithmeticLogicUnit(PipelineRegister[] ins, PipelineRegister[] outs){
+        super(ins, outs);
         this.currentOp = null;
         this.fwd = new Forwarder();
     }
@@ -13,23 +13,15 @@ public class ArithmeticLogicUnit extends Unit {
         currentOp.decr();
         if(!isUnfinished()){ //this is the final procInstruction call
             currentOp = fwd.forward(currentOp);
-            if(fwd.didForward()){
-                System.out.println("forward: " + fwd);
-            }
+//            if(fwd.didForward()){
+//                //System.out.println("forward: " + fwd);
+//            }
         }
     }
 
     @Override
     protected boolean isUnfinished() {
         return !isDone() && !currentOp.isDone(); //if we arent done with the inner up, and its not blank
-    }
-
-    @Override
-    protected void writeOnPipeline(){
-        next.setFlag(flag);
-        next.setPcVal(pcVal); //just pass it through
-        next.push(currentOp);
-        fwd.setSlot(currentOp.getResult());
     }
 
     @Override
@@ -44,6 +36,7 @@ public class ArithmeticLogicUnit extends Unit {
         //and then create a writeback stage
         op.setResult(op.getRsVal() + op.getRtVal());
         fwd.setSlotReg(op.getRd());
+        fwd.setSlot(currentOp.getResult());
     }
 
     @Override
@@ -51,6 +44,7 @@ public class ArithmeticLogicUnit extends Unit {
         // modify register value = op.getRsVal() + op.getImVal();
         op.setResult(op.getRsVal() + op.getImVal());
         fwd.setSlotReg(op.getRd());
+        fwd.setSlot(currentOp.getResult());
     }
 
     @Override
@@ -58,6 +52,7 @@ public class ArithmeticLogicUnit extends Unit {
         // modify register value = op.getRsVal() * op.getRtVal();
         op.setResult(op.getRsVal() * op.getRtVal());
         fwd.setSlotReg(op.getRd());
+        fwd.setSlot(currentOp.getResult());
     }
 
     @Override
@@ -65,6 +60,7 @@ public class ArithmeticLogicUnit extends Unit {
         // modify register value = op.getRsVal() * op.getImVal();
         op.setResult(op.getRsVal() * op.getImVal());
         fwd.setSlotReg(op.getRd());
+        fwd.setSlot(currentOp.getResult());
     }
 
     @Override
@@ -78,18 +74,21 @@ public class ArithmeticLogicUnit extends Unit {
         else cmpResult = 1;
         op.setResult(cmpResult);
         fwd.setSlotReg(op.getRd());
+        fwd.setSlot(currentOp.getResult());
     }
 
     @Override
     public void accept(Op.Ld op) {
         op.setResult(op.getRsVal() + op.getImVal()); //calculate offset
         fwd.setSlotReg(null); //doesnt correspond to a register because the result comes from the LSU
+        fwd.setSlot(currentOp.getResult());
     }
 
     @Override
     public void accept(Op.LdC op) {
         op.setResult(op.getImVal());
-        fwd.setSlotReg(null); //doesnt correspond to a register
+        fwd.setSlotReg(op.getRd());
+        fwd.setSlot(currentOp.getResult());
     }
 
     @Override
@@ -125,5 +124,9 @@ public class ArithmeticLogicUnit extends Unit {
     public void accept(Op.Jp op) {
         op.setResult(pcVal + op.getImVal());
         fwd.setSlotReg(null); //doesnt correspond to a register
+    }
+
+    protected String showUnit(){
+        return "EX";
     }
 }

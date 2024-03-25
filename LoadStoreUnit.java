@@ -8,16 +8,14 @@ public class LoadStoreUnit extends Unit{
 
     private final ProgramCounter pc;
 
-    private int pcVal;
-
     private Durate counter = new Durate(L1_LATENCY);
     private Durate counterNop = new Durate(NOP_LATENCY);
 
     private boolean shouldFlush = false;
 
 
-    LoadStoreUnit(Memory mem, ProgramCounter pc, PipelineRegister last, PipelineRegister next){
-        super(last, next);
+    LoadStoreUnit(Memory mem, ProgramCounter pc, PipelineRegister[] ins, PipelineRegister[] outs){
+        super(ins, outs);
         this.pc = pc;
         this.mem = mem;
     }
@@ -30,9 +28,7 @@ public class LoadStoreUnit extends Unit{
 
     @Override
     protected void readOffPipeline(){
-        pcVal = last.getPcVal();
-        flag = last.isFlag();
-        currentOp = last.pull();
+        super.readOffPipeline();
         counter.rst();
         counterNop.rst();
     }
@@ -97,6 +93,8 @@ public class LoadStoreUnit extends Unit{
     @Override
     public void accept(Op.BrLZ op) {
         if(flag){
+            //we only need to reset to destination if we didnt set it correctly
+            //(if we predicted wrong)
             pc.set(op.getResult());
         }else{
             pc.set(pcVal);
@@ -139,4 +137,7 @@ public class LoadStoreUnit extends Unit{
         return shouldFlush;
     }
 
+    protected String showUnit(){
+        return "LS";
+    }
 }

@@ -12,8 +12,8 @@ public class FetchUnit extends Unit {
 
     private final Durate counter = new Durate(FETCH_LATENCY);
 
-    FetchUnit(InstructionCache ic, ProgramCounter pc, PipelineRegister last, PipelineRegister next){
-        super(last, next);
+    FetchUnit(InstructionCache ic, ProgramCounter pc, PipelineRegister[] ins, PipelineRegister[] outs){
+        super(ins, outs);
         this.ic = ic;
         this.pc = pc;
     }
@@ -25,16 +25,18 @@ public class FetchUnit extends Unit {
 
     @Override
     protected void readOffPipeline(){
-        pcVal = last.getPcVal();
+        getActiveIn();
+        PipelineRegister in = ins[inActive];
+        pcVal = in.getPcVal();
         currentOp = ic.getInstruction(pcVal);
-        last.pull();
+        in.pull();
         counter.rst();
     }
 
     @Override
     protected void writeOnPipeline() {
-        next.setPcVal(pcVal + 1); //INCREMENT HERE (adder like in the unit diagram!)
-        next.push(currentOp);
+        pcVal++; //incr then write the incremented value on pipeline
+        super.writeOnPipeline();
     }
 
     @Override
@@ -127,5 +129,9 @@ public class FetchUnit extends Unit {
     public void accept(Op.Jp op) {
 //        next.setPcVal(op.getImVal());
         pc.set(pcVal + 1 + op.getImVal());
+    }
+
+    protected String showUnit(){
+        return "FE";
     }
 }

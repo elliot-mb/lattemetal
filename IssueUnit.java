@@ -8,8 +8,8 @@ public class IssueUnit extends Unit{
     private final RegisterFile rf;
     private ArrayList<RegisterName> deps;
 
-    IssueUnit(Scoreboard sb, RegisterFile rf, PipelineRegister last, PipelineRegister next){
-        super(last, next);
+    IssueUnit(Scoreboard sb, RegisterFile rf, PipelineRegister[] ins, PipelineRegister[] outs){
+        super(ins, outs);
         this.sb = sb;
         this.rf = rf;
         this.deps = new ArrayList<>();
@@ -108,6 +108,9 @@ public class IssueUnit extends Unit{
 
     }
 
+    protected String showUnit(){
+        return "IS";
+    }
 //    @Override
 //    public String toString(){
 //        return currentOp == null ? " " : "|";//(currentOp != null ? Integer.toHexString(currentOp.getId() % 16) : "_");

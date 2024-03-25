@@ -6,15 +6,15 @@ public class WriteBackUnit extends Unit{
     private final Scoreboard sb;
     private final Durate counter = new Durate(REG_LATENCY);
 
-    WriteBackUnit(RegisterFile rf, Scoreboard sb, PipelineRegister last, PipelineRegister next){
-        super(last, next);
+    WriteBackUnit(RegisterFile rf, Scoreboard sb, PipelineRegister[] ins, PipelineRegister[] outs){
+        super(ins, outs);
         this.rf = rf;
         this.sb = sb;
     }
 
     @Override
     protected void readOffPipeline(){
-        currentOp = last.pull();
+        super.readOffPipeline();
         counter.rst();
     }
 
@@ -99,4 +99,7 @@ public class WriteBackUnit extends Unit{
         //nothing
     }
 
+    protected String showUnit(){
+        return "WB";
+    }
 }
