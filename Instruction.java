@@ -1,3 +1,4 @@
+
 public abstract class Instruction extends Durate {
 
     private static int gId = 0;

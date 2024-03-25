@@ -1,3 +1,4 @@
+
 public interface InstructionVoidVisitor {
 
     public void accept(Op.Add op);

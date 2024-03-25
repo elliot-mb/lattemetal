@@ -1,3 +1,5 @@
+
+
 public class DecodeUnit extends Unit{
 
     private final RegisterFile rf;
@@ -25,6 +27,12 @@ public class DecodeUnit extends Unit{
     @Override
     protected boolean isUnfinished() {
         return !hasRun;
+    }
+
+    @Override
+    public void flush() {
+        super.flush();
+        hasRun = false;
     }
 
     @Override

@@ -1,3 +1,5 @@
+
+
 public class PipelineRegister {
 
     //cannot be final because it MUST change
@@ -9,6 +11,10 @@ public class PipelineRegister {
         inFlight = null;
         pcVal = null;
         flag = false;
+    }
+
+    public void flush(){
+        if(canPull()) pull();
     }
 
     public void setPcVal(int count){

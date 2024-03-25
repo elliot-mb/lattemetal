@@ -1,3 +1,5 @@
+
+
 import java.util.Arrays;
 
 public abstract class Block {
@@ -29,6 +31,10 @@ public abstract class Block {
         this.dirty = new boolean[size];
         this.maxDigits = Utils.digitsInInt(size);
         this.printWidth = printWidth;
+    }
+
+    protected int[] getData(){
+        return data;
     }
 
     protected void load(int[] in) throws RuntimeException{
@@ -89,6 +95,10 @@ public abstract class Block {
             addr++;
         }
         return result;
+    }
+
+    public boolean equals(Block mem){
+        return Arrays.equals(data, mem.getData());
     }
 
 }

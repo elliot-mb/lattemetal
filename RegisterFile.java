@@ -1,3 +1,4 @@
+
 public class RegisterFile extends Block{
 
     private static final int NUM_REGS = RegisterName.values().length;
@@ -19,7 +20,7 @@ public class RegisterFile extends Block{
     public String toString() {
         String builder = "";
         for(RegisterName reg : RegisterName.values()){
-            if(isDirty(reg.ordinal())) builder += "\r\n " + reg.name() + "\t" + getReg(reg);
+            if(isDirty(reg.ordinal())) builder += "\t" + reg.name() + ":" + getReg(reg);
         }
         return builder;
     }

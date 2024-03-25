@@ -1,3 +1,5 @@
+import java.io.FileNotFoundException;
+
 public class Main {
 
 
@@ -40,23 +42,33 @@ public class Main {
      *
      * @param args
      */
-    public static void main(String[] args){
-        String programPath = "./assembly/bubble_sort.latte";
+    public static void main(String[] args) throws FileNotFoundException {
+        String programPath = "./assembly/quot.latte";
         int printWidth = 1;
+        boolean testing = false;
         if(args.length >= 1){
-            System.out.println(args[0]);
             programPath = args[0];
         }
         if(args.length >= 2){
             printWidth = Integer.parseInt(args[1]);
         }
-        Assembler assembler = new Assembler(programPath);
-        boolean didRead = assembler.readFile();
-        if(!didRead){
-            throw new RuntimeException("main: program assembler failed to read program");
+        if(args.length >= 3){
+            testing = args[2].equals("testing");
+            System.out.println("is testing? " + testing);
         }
-        InstructionCache ic = new InstructionCache(assembler.assemble());
-        Processor p = new Processor(ic, new Memory(
+
+        // do testing
+
+        if(testing){
+            Test.test();
+            System.out.println("tests passed");
+            return;
+        }
+
+        // run a specific program in debug mode
+
+        System.out.println(programPath);
+        Memory exampleMemory = new Memory(
                 printWidth,
                 new int[]{
                         40, 10, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -65,8 +77,8 @@ public class Main {
                         48, 12, -8, 24, 20, 25, 31, 10, 19, 25,
                         148, 15, -81, 31, -4, 54, 14, 23, 41, 4,
                 }
-            )); //memory can be set if you like
-        p.run();
+        );
+        Utils.runKern(programPath, exampleMemory, false);
 
     }
 

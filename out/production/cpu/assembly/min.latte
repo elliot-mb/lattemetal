@@ -11,7 +11,7 @@ st t0 zero #1               --store length at [1]
 ld t1 zero #0               --loads the start location into register t1
 addi t0 zero #-1
 st t0 t1 #0
-addi t0 zero #10
+addi t0 zero #-5
 st t0 t1 #1
 addi t0 zero #2
 st t0 t1 #2
@@ -45,6 +45,6 @@ addi t2 t5 #0               --set min to current
 add a0 t3 t0                --a0 ::= i - length
 addi a0 a0 #2               --a0 ::= i - length + 1      which is 1 just when i - length = -1 (stopping condition)
 addi t3 t3 #1               --i++
-jplz a0 #-8                 --jump to loop start
+jplz a0 #-9                 --jump to loop start
 st t2 zero #2               --store t2 at 0x2
 

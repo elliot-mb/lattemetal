@@ -1,3 +1,5 @@
+
+
 public class Durate {
     // provides an interface/update method for classes that have update methods and tick down with a cycle of the clock
     // this includes micro-ops like stores, decodes, issues etc.

@@ -1,3 +1,4 @@
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -7,7 +8,6 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-
 public class Assembler {
     // this class contains the basic assembler that turns our raw instructions into machine readable objects
 
@@ -161,7 +161,7 @@ public class Assembler {
                     if (labelToLnNum.containsKey(last)) {
                         int labelLoc = labelToLnNum.get(last);
                         //if(labelLoc < lnNum) labelLoc++; //increment if its going backwards (not entirely sure why it works but it does!)
-                        int pcChange = labelLoc - lnNum;
+                        int pcChange = labelLoc - lnNum - 1;
                         tkns.set(tkns.size() - 1, String.valueOf(IMMEDIATE) + (jp ? pcChange : labelLoc));
                     }
                 }

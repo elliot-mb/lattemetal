@@ -1,8 +1,11 @@
+
 public abstract class Unit implements InstructionVoidVisitor {
 
     /**
      * for any building block that reads from one pipeline register and writes to another
      */
+
+    protected static final boolean STATIC_PREDICT_BR_TAKEN = true;
 
     protected final PipelineRegister last;
     protected final PipelineRegister next;
@@ -36,7 +39,7 @@ public abstract class Unit implements InstructionVoidVisitor {
 
     public void clk(){
         //if we have finished processing this instruction but cant pull from last, we stall one cycle
-        if(isDone() && !last.canPull()) return; //stall a clock cycle
+        if(isDone() && (!last.canPull() || !next.canPush())) return; //stall a clock cycle
         if(isDone()) readOffPipeline(); //dont re-copy if we are mid-processing
         if(isUnfinished()) {
             procInstruction(); //always run at least once if isUnfinished is ever false
@@ -54,7 +57,13 @@ public abstract class Unit implements InstructionVoidVisitor {
     }
 
     public String toString(){
-        return currentOp == null ? " " : "↓";//(currentOp != null ? Integer.toHexString(currentOp.getId() % 16) : "_");
+        return currentOp == null ? " " : isUnfinished() ? "v" : "|";//(currentOp != null ? Integer.toHexString(currentOp.getId() % 16) : "_");
+    }
+
+    public void flush(){
+        currentOp = null;
+        pcVal = 0;
+        flag = false;
     }
 
 }
