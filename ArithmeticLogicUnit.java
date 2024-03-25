@@ -79,23 +79,24 @@ public class ArithmeticLogicUnit extends Unit {
 
     @Override
     public void accept(Op.Ld op) {
-        op.setResult(op.getRsVal() + op.getImVal()); //calculate offset
-        fwd.setSlotReg(null); //doesnt correspond to a register because the result comes from the LSU
-        fwd.setSlot(currentOp.getResult());
+//        op.setResult(op.getRsVal() + op.getImVal()); //calculate offset
+//        fwd.setSlotReg(null); //doesnt correspond to a register because the result comes from the LSU
+//        fwd.setSlot(currentOp.getResult());
     }
 
     @Override
     public void accept(Op.LdC op) {
-        op.setResult(op.getImVal());
-        fwd.setSlotReg(op.getRd());
-        fwd.setSlot(currentOp.getResult());
+//        op.setResult(op.getImVal());
+//        fwd.setSlotReg(op.getRd());
+//        fwd.setSlot(currentOp.getResult());
     }
 
     @Override
     public void accept(Op.St op) {
-        //store register value at offset address
-        op.setResult(op.getRsVal() + op.getImVal()); //calculate offset
-        fwd.setSlotReg(null); //doesnt correspond to a register
+        //throw new RuntimeException("ArithmeticLogicUnit.accept: cannot accept a store instruction!");
+        //  store register value at offset address
+        //op.setResult(op.getRsVal() + op.getImVal()); //calculate offset
+        //fwd.setSlotReg(null); //doesnt correspond to a register
     }
 
     @Override
@@ -103,7 +104,7 @@ public class ArithmeticLogicUnit extends Unit {
         //pc.set(op.getImVal());
         //pc.incr();
         flag = op.getRdVal() <= 0;
-        op.setResult(op.getImVal()); //result is just set to imval?
+        op.setResult(op.getImVal()); //result is just set to imval
         fwd.setSlotReg(null); //doesnt correspond to a register
     }
 
