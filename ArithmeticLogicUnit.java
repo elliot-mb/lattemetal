@@ -13,9 +13,9 @@ public class ArithmeticLogicUnit extends Unit {
         currentOp.decr();
         if(!isUnfinished()){ //this is the final procInstruction call
             currentOp = fwd.forward(currentOp);
-            if(fwd.didForward()){
-                System.out.println("forward: " + fwd);
-            }
+//            if(fwd.didForward()){
+//                //System.out.println("forward: " + fwd);
+//            }
         }
     }
 

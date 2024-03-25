@@ -17,7 +17,7 @@ class Forwarder implements InstructionVoidVisitor {
     }
 
     public void setSlot(int slot){
-        System.out.println("set slot " + slot);
+        //System.out.println("set slot " + slot);
         this.slot = slot;
     }
 
