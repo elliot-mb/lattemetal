@@ -13,19 +13,19 @@ public class Processor {
     private final ArithmeticLogicUnit alu;
     private final RegisterFile rf;
     private final Memory mem;
-    private final FetchUnit fe;
-    private final DecodeUnit de;
+    private final FetchUnit feu;
+    private final DecodeUnit deu;
     private final LoadStoreUnit lsu;
     private final Scoreboard sb;
     private int tally;
-    private final WriteBackUnit wb;
+    private final WriteBackUnit wbu;
 
     private final PipelineRegister prefec = new PipelineRegister(); //just to pass the pc value to the fetch unit, and increment it!
-    private final PipelineRegister fecIsu = new PipelineRegister();
-    private final PipelineRegister isuDec = new PipelineRegister();
-    private final PipelineRegister decExe = new PipelineRegister();
-    private final PipelineRegister exeMem = new PipelineRegister();
-    private final PipelineRegister memWrt = new PipelineRegister();
+    private final PipelineRegister feuIsu = new PipelineRegister();
+    private final PipelineRegister isuDeu = new PipelineRegister();
+    private final PipelineRegister deuAlu = new PipelineRegister();
+    private final PipelineRegister aluLsu = new PipelineRegister();
+    private final PipelineRegister lsuWbu = new PipelineRegister();
     private final PipelineRegister voided = new PipelineRegister(); //ignored pipe register to satisfy Unit inheritence
 
     private final int DP_ACC = 2;
@@ -38,12 +38,12 @@ public class Processor {
         this.pc = new ProgramCounter(ic.numInstrs());
         this.rf = new RegisterFile();
         this.mem = mem.length > 0 ? mem[0] : new Memory();
-        this.alu = new ArithmeticLogicUnit(decExe, exeMem);
-        this.fe = new FetchUnit(ic, pc, prefec, fecIsu);
-        this.de = new DecodeUnit(this.rf, fecIsu, isuDec);
-        this.wb = new WriteBackUnit(this.rf, this.sb, memWrt, voided);
-        this.lsu = new LoadStoreUnit(this.mem, this.pc, exeMem, memWrt);
-        this.isu = new IssueUnit(this.sb, this.rf, isuDec, decExe);
+        this.feu = new FetchUnit(ic, pc, prefec, feuIsu);
+        this.isu = new IssueUnit(this.sb, this.rf, feuIsu, isuDeu);
+        this.deu = new DecodeUnit(this.rf, isuDeu, deuAlu);
+        this.alu = new ArithmeticLogicUnit(deuAlu, aluLsu);
+        this.lsu = new LoadStoreUnit(this.mem, this.pc, aluLsu, lsuWbu);
+        this.wbu = new WriteBackUnit(this.rf, this.sb, lsuWbu, voided);
     }
 
 //    private void sendSingleInstruction(){
@@ -55,24 +55,24 @@ public class Processor {
 
 
     private boolean isPipelineBeingUsed(){
-        return prefec.canPull() || fecIsu.canPull() || isuDec.canPull() || decExe.canPull() || exeMem.canPull() || memWrt.canPull() || voided.canPull() ||
-                !wb.isDone() || !lsu.isDone() || !alu.isDone() || !de.isDone() || !fe.isDone() || !isu.isDone();
+        return prefec.canPull() || feuIsu.canPull() || isuDeu.canPull() || deuAlu.canPull() || aluLsu.canPull() || lsuWbu.canPull() || voided.canPull() ||
+                !wbu.isDone() || !lsu.isDone() || !alu.isDone() || !deu.isDone() || !feu.isDone() || !isu.isDone();
     }
 
     private void flushPipeline(){
         //System.out.println("flush");
-        fe.flush();
-        de.flush();
+        feu.flush();
+        deu.flush();
         isu.flush();
         alu.flush();
         lsu.flush();
-        wb.flush();
+        wbu.flush();
         prefec.flush();
-        fecIsu.flush();
-        isuDec.flush();
-        decExe.flush();
-        exeMem.flush();
-        memWrt.flush();
+        feuIsu.flush();
+        isuDeu.flush();
+        deuAlu.flush();
+        aluLsu.flush();
+        lsuWbu.flush();
         voided.flush();
     }
 
@@ -85,15 +85,15 @@ public class Processor {
 
         //AbstractMap<Instruction, Integer> inFlights = new HashMap<Instruction, Integer>();
         while(isPipelineBeingUsed() || !pc.isDone()){
-            wb.clk();
+            wbu.clk();
             lsu.clk();
             if(lsu.needsFlushing()) flushPipeline();
             alu.clk();
             //include some sort of issue stage that works from a scoreboard and tomasulos algorithm
+            deu.clk();
             isu.clk();
-            de.clk();
-            fe.clk();
-            debugOut.println("\t[" + fe + fecIsu + de + isuDec + isu + decExe + alu + exeMem + lsu + memWrt + wb + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + rf);
+            feu.clk();
+            debugOut.println("\t[" + feu + feuIsu + deu + isuDeu + isu + deuAlu + alu + aluLsu + lsu + lsuWbu + wbu + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + rf);
             if(prefec.canPush() && !pc.isDone()){//&& !(!voided.canPull() && fe.getIsBranch())) {
                 prefec.push(Utils.opFactory.new No());
                 prefec.setPcVal(pc.getCount());
