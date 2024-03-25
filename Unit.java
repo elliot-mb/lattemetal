@@ -123,7 +123,7 @@ public abstract class Unit implements InstructionVoidVisitor {
     }
 
     public String toString(){
-        return currentOp == null ? " " : isUnfinished() ? "v" : "|";//(currentOp != null ? Integer.toHexString(currentOp.getId() % 16) : "_");
+        return currentOp == null ? " " : isUnfinished() ? "↻" : "|";//(currentOp != null ? Integer.toHexString(currentOp.getId() % 16) : "_");
     }
 
     public void flush(){

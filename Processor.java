@@ -124,6 +124,7 @@ public class Processor {
                 retiredInstrs.add(voided.pull());
                 retiredInstrCount++;
             } //delete whats inside (voided is used to detect when writebacks are finished)
+            if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");
         }
         debugOut.println("registers (dirty): " + rf);
         debugOut.println("memory: " + mem);

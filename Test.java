@@ -83,12 +83,12 @@ public class Test {
     }
 
     static void test() throws FileNotFoundException {
-        try{bubbleSortMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
         try{mat2MulMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
         try{mat3MulMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
         try{minMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
         try{quotMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
         try{vecAddMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
         try{vecDotMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
+        try{bubbleSortMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
     }
 }
