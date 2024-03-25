@@ -25,16 +25,16 @@ public class FetchUnit extends Unit {
 
     @Override
     protected void readOffPipeline(){
-        pcVal = last.getPcVal();
+        pcVal = ins.getPcVal();
         currentOp = ic.getInstruction(pcVal);
-        last.pull();
+        ins.pull();
         counter.rst();
     }
 
     @Override
     protected void writeOnPipeline() {
-        next.setPcVal(pcVal + 1); //INCREMENT HERE (adder like in the unit diagram!)
-        next.push(currentOp);
+        outs.setPcVal(pcVal + 1); //INCREMENT HERE (adder like in the unit diagram!)
+        outs.push(currentOp);
     }
 
     @Override

@@ -30,9 +30,9 @@ public class LoadStoreUnit extends Unit{
 
     @Override
     protected void readOffPipeline(){
-        pcVal = last.getPcVal();
-        flag = last.isFlag();
-        currentOp = last.pull();
+        pcVal = ins.getPcVal();
+        flag = ins.isFlag();
+        currentOp = ins.pull();
         counter.rst();
         counterNop.rst();
     }

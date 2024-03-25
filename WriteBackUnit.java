@@ -14,7 +14,7 @@ public class WriteBackUnit extends Unit{
 
     @Override
     protected void readOffPipeline(){
-        currentOp = last.pull();
+        currentOp = ins.pull();
         counter.rst();
     }
 

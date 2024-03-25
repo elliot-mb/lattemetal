@@ -14,9 +14,9 @@ public class DecodeUnit extends Unit{
     @Override
     public void readOffPipeline(){
         hasRun = false;
-        pcVal = last.getPcVal();
-        flag = last.isFlag();
-        currentOp = last.pull();
+        pcVal = ins.getPcVal();
+        flag = ins.isFlag();
+        currentOp = ins.pull();
     }
 
     @Override
