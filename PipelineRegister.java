@@ -60,6 +60,6 @@ public class PipelineRegister {
 
     public String toString(){
         String pad = canPull() && (inFlight.getId() % 100) < 10 ? "0" : "";
-        return "" + (canPull() ? pad + (inFlight.getId() % 100) : "__"); //+ "::" + pcVal;
+        return "" + (canPull() ? pad + (inFlight.getId() % 100) : "\s\s"); //+ "::" + pcVal;
     }
 }
