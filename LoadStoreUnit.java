@@ -92,7 +92,7 @@ public class LoadStoreUnit extends Unit{
 
     @Override
     public void accept(Op.BrLZ op) {
-        if(flag && !STATIC_PREDICT_BR_TAKEN){
+        if(flag){
             //we only need to reset to destination if we didnt set it correctly
             //(if we predicted wrong)
             pc.set(op.getResult());
@@ -107,7 +107,7 @@ public class LoadStoreUnit extends Unit{
 
     @Override
     public void accept(Op.JpLZ op) {
-        if(flag && !STATIC_PREDICT_BR_TAKEN){
+        if(flag){
             pc.set(op.getResult());
         }else{
             pc.set(pcVal);
@@ -137,4 +137,7 @@ public class LoadStoreUnit extends Unit{
         return shouldFlush;
     }
 
+    protected String showUnit(){
+        return "LS";
+    }
 }

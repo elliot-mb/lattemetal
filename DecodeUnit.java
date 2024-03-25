@@ -104,5 +104,7 @@ public class DecodeUnit extends Unit{
         currentOp = op;
     }
 
-
+    protected String showUnit(){
+        return "DE";
+    }
 }

@@ -125,4 +125,8 @@ public class ArithmeticLogicUnit extends Unit {
         op.setResult(pcVal + op.getImVal());
         fwd.setSlotReg(null); //doesnt correspond to a register
     }
+
+    protected String showUnit(){
+        return "EX";
+    }
 }

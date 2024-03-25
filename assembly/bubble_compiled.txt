@@ -1,5 +1,4 @@
-'br      #7'
-'ld      s2 s0 #0'
+'ld      s2 s0 #0' //line 0 is 'br #7'
 'ld      s3 s1 #0'
 'st      s2 s1 #0'
 'st      s3 s0 #0'
@@ -26,3 +25,4 @@
 'jplz    s6 #-14'
 'jplz    t1 #1'
 'br      #10'
+'addi    t0 zero #1000'

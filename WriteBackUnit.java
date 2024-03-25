@@ -99,4 +99,7 @@ public class WriteBackUnit extends Unit{
         //nothing
     }
 
+    protected String showUnit(){
+        return "WB";
+    }
 }

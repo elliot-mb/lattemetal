@@ -122,8 +122,10 @@ public abstract class Unit implements InstructionVoidVisitor {
         //this method is uniform for all units because it does nothing
     }
 
+    abstract protected String showUnit();
+
     public String toString(){
-        return currentOp == null ? " " : isUnfinished() ? "↻" : "|";//(currentOp != null ? Integer.toHexString(currentOp.getId() % 16) : "_");
+        return " " + (currentOp == null ? showUnit() : isUnfinished() ? "↘↘" : "→|") + " ";//(currentOp != null ? Integer.toHexString(currentOp.getId() % 16) : "_");
     }
 
     public void flush(){

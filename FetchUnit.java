@@ -130,4 +130,8 @@ public class FetchUnit extends Unit {
 //        next.setPcVal(op.getImVal());
         pc.set(pcVal + 1 + op.getImVal());
     }
+
+    protected String showUnit(){
+        return "FE";
+    }
 }
