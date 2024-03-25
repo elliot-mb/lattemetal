@@ -6,27 +6,19 @@ public class DecodeUnit extends Unit{
 
     private boolean hasRun;
 
-    DecodeUnit(RegisterFile rf, PipelineRegister last, PipelineRegister next){
-        super(last, next);
+    DecodeUnit(RegisterFile rf, PipelineRegister[] ins, PipelineRegister[] outs){
+        super(ins, outs);
         this.rf = rf;
     }
 
     @Override
-    public void readOffPipeline(){
-        hasRun = false;
-        pcVal = ins.getPcVal();
-        flag = ins.isFlag();
-        currentOp = ins.pull();
-    }
-
-    @Override
     protected void procInstruction() {
-        hasRun = true;
+        //doesnt take any time to proc
     }
 
     @Override
     protected boolean isUnfinished() {
-        return !hasRun;
+        return false;
     }
 
     @Override

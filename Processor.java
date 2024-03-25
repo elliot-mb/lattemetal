@@ -38,12 +38,33 @@ public class Processor {
         this.pc = new ProgramCounter(ic.numInstrs());
         this.rf = new RegisterFile();
         this.mem = mem.length > 0 ? mem[0] : new Memory();
-        this.feu = new FetchUnit(ic, pc, prefec, feuIsu);
-        this.isu = new IssueUnit(this.sb, this.rf, feuIsu, isuDeu);
-        this.deu = new DecodeUnit(this.rf, isuDeu, deuAlu);
-        this.alu = new ArithmeticLogicUnit(deuAlu, aluLsu);
-        this.lsu = new LoadStoreUnit(this.mem, this.pc, aluLsu, lsuWbu);
-        this.wbu = new WriteBackUnit(this.rf, this.sb, lsuWbu, voided);
+        this.feu = new FetchUnit(
+                this.ic,
+                this.pc,
+                new PipelineRegister[]{prefec},
+                new PipelineRegister[]{feuIsu});
+        this.isu = new IssueUnit(
+                this.sb,
+                this.rf,
+                new PipelineRegister[]{feuIsu},
+                new PipelineRegister[]{isuDeu});
+        this.deu = new DecodeUnit(
+                this.rf,
+                new PipelineRegister[]{isuDeu},
+                new PipelineRegister[]{deuAlu});
+        this.alu = new ArithmeticLogicUnit(
+                new PipelineRegister[]{deuAlu},
+                new PipelineRegister[]{aluLsu});
+        this.lsu = new LoadStoreUnit(
+                this.mem,
+                this.pc,
+                new PipelineRegister[]{aluLsu},
+                new PipelineRegister[]{lsuWbu});
+        this.wbu = new WriteBackUnit(
+                this.rf,
+                this.sb,
+                new PipelineRegister[]{lsuWbu},
+                new PipelineRegister[]{voided});
     }
 
 //    private void sendSingleInstruction(){

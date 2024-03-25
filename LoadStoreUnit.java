@@ -16,8 +16,8 @@ public class LoadStoreUnit extends Unit{
     private boolean shouldFlush = false;
 
 
-    LoadStoreUnit(Memory mem, ProgramCounter pc, PipelineRegister last, PipelineRegister next){
-        super(last, next);
+    LoadStoreUnit(Memory mem, ProgramCounter pc, PipelineRegister[] ins, PipelineRegister[] outs){
+        super(ins, outs);
         this.pc = pc;
         this.mem = mem;
     }
@@ -30,9 +30,7 @@ public class LoadStoreUnit extends Unit{
 
     @Override
     protected void readOffPipeline(){
-        pcVal = ins.getPcVal();
-        flag = ins.isFlag();
-        currentOp = ins.pull();
+        super.readOffPipeline();
         counter.rst();
         counterNop.rst();
     }

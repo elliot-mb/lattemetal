@@ -1,3 +1,4 @@
+import java.util.Arrays;
 
 public abstract class Unit implements InstructionVoidVisitor {
 
@@ -51,13 +52,14 @@ public abstract class Unit implements InstructionVoidVisitor {
         int i = 0;
         for(PipelineRegister out : outs){
             if(outsChoice[i]){
+                if(!out.canPush()) throw new RuntimeException("writeOnPipeline: chosen output cannot be written to, please check before calling");
                 out.setFlag(flag);
                 out.setPcVal(pcVal);
                 out.push(currentOp);
             }
-            outsChoice[i] = false; //wipe outs choice
             i++;
         }
+        rstChosenOuts();
     }
     protected boolean isDone(){
         return currentOp == null;
@@ -96,6 +98,10 @@ public abstract class Unit implements InstructionVoidVisitor {
         return true;
     }
 
+    private void rstChosenOuts(){
+        Arrays.fill(outsChoice, false);
+    }
+
     public void clk(){
         // we have processed this op, and if its not the case that we can pull in and push out to chosen outs, we stall (return)
         if(isDone() && !(canPullOffActiveIn() && (areOutsUnchosen() || canPushOnChosenOuts()))) return;
@@ -124,6 +130,7 @@ public abstract class Unit implements InstructionVoidVisitor {
         currentOp = null;
         pcVal = 0;
         flag = false;
+
     }
 
     protected void chooseOuts() {
