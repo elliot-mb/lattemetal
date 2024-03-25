@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.function.BinaryOperator;
 
 public class Processor {
-
     private final ProgramCounter pc;
     private final InstructionCache ic;
     private final IssueUnit isu;
