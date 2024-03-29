@@ -2,7 +2,7 @@ public class ArithmeticLogicUnit extends Unit {
 
     private final Forwarder fwd;
 
-    ArithmeticLogicUnit(PipelineRegister[] ins, PipelineRegister[] outs){
+    ArithmeticLogicUnit(Scoreboard sb, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
         this.currentOp = null;
         this.fwd = new Forwarder();

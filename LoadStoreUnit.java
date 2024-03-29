@@ -9,7 +9,7 @@ public class LoadStoreUnit extends Unit{
     private Durate counter = new Durate(L1_LATENCY);
     private Durate counterNop = new Durate(NOP_LATENCY);
 
-    LoadStoreUnit(Memory mem, PipelineRegister[] ins, PipelineRegister[] outs){
+    LoadStoreUnit(Scoreboard sb, Memory mem, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
         this.mem = mem;
     }

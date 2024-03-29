@@ -46,6 +46,17 @@ public class IssueUnit extends Unit{
         return hasDeps();
     }
 
+    @Override
+    protected void chooseOuts(){
+        //choose latter pipereg (index 1) if its a load/store, otherwise stick it to the alu
+        if(Utils.isLoadStore(currentOp)) {
+            outsChoice[1] = true;
+            return;
+        }
+        outsChoice[0] = true;
+    }
+
+
     // write the required dependencies into
 
     @Override

@@ -17,16 +17,6 @@ public class DecodeUnit extends Unit{
     }
 
     @Override
-    protected void chooseOuts(){
-        //choose latter pipereg (index 1) if its a load/store, otherwise stick it to the alu
-        if(Utils.isLoadStore(currentOp)) {
-            outsChoice[1] = true;
-            return;
-        }
-        outsChoice[0] = true;
-    }
-
-    @Override
     protected boolean isUnfinished() {
         return false;
     }

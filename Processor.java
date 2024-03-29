@@ -22,10 +22,10 @@ public class Processor {
 
 
     private final PipelineRegister prefec = new PipelineRegister(); //just to pass the pc value to the fetch unit, and increment it!
-    private final PipelineRegister feuIsu = new PipelineRegister();
-    private final PipelineRegister isuDeu = new PipelineRegister();
-    private final PipelineRegister deuAlu = new PipelineRegister();
-    private final PipelineRegister deuLsu = new PipelineRegister();
+    private final PipelineRegister fecDec = new PipelineRegister();
+    private final PipelineRegister deuIsu = new PipelineRegister();
+    private final PipelineRegister isuAlu = new PipelineRegister();
+    private final PipelineRegister isuLsu = new PipelineRegister();
     private final PipelineRegister aluBru = new PipelineRegister();
     private final PipelineRegister lsuBru = new PipelineRegister();
     private final PipelineRegister bruWbu = new PipelineRegister();
@@ -46,22 +46,24 @@ public class Processor {
                 this.ic,
                 this.pc,
                 new PipelineRegister[]{prefec},
-                new PipelineRegister[]{feuIsu});
+                new PipelineRegister[]{fecDec});
+        this.deu = new DecodeUnit(
+                this.rf,
+                new PipelineRegister[]{fecDec},
+                new PipelineRegister[]{deuIsu}); //loadstores go down the latter pipe
         this.isu = new IssueUnit(
                 this.sb,
                 this.rf,
-                new PipelineRegister[]{feuIsu},
-                new PipelineRegister[]{isuDeu});
-        this.deu = new DecodeUnit(
-                this.rf,
-                new PipelineRegister[]{isuDeu},
-                new PipelineRegister[]{deuAlu, deuLsu}); //loadstores go down the latter pipe
+                new PipelineRegister[]{deuIsu},
+                new PipelineRegister[]{isuAlu, isuLsu});
         this.alu = new ArithmeticLogicUnit(
-                new PipelineRegister[]{deuAlu},
+                this.sb,
+                new PipelineRegister[]{isuAlu},
                 new PipelineRegister[]{aluBru});
         this.lsu = new LoadStoreUnit(
+                this.sb,
                 this.mem,
-                new PipelineRegister[]{deuLsu},
+                new PipelineRegister[]{isuLsu},
                 new PipelineRegister[]{lsuBru});
         this.bru = new BranchUnit(
                 this.pc,
@@ -84,7 +86,7 @@ public class Processor {
 
 
     private boolean isPipelineBeingUsed(){
-        return prefec.canPull() || feuIsu.canPull() || isuDeu.canPull() || deuAlu.canPull() || deuLsu.canPull() ||
+        return prefec.canPull() || fecDec.canPull() || deuIsu.canPull() || isuAlu.canPull() || isuLsu.canPull() ||
                 bruWbu.canPull() || aluBru.canPull() || voided.canPull() || !wbu.isDone() || !lsu.isDone() ||
                 lsuBru.canPull() || !alu.isDone() || !deu.isDone() || !feu.isDone() || !isu.isDone();
     }
@@ -98,10 +100,10 @@ public class Processor {
         lsu.flush();
         wbu.flush();
         prefec.flush();
-        feuIsu.flush();
-        isuDeu.flush();
-        deuAlu.flush();
-        deuLsu.flush();
+        fecDec.flush();
+        deuIsu.flush();
+        isuAlu.flush();
+        isuLsu.flush();
         aluBru.flush();
         lsuBru.flush();
         bruWbu.flush();
@@ -122,11 +124,11 @@ public class Processor {
             if(bru.needsFlushing()) flushPipeline();
             lsu.clk();
             alu.clk();
-            deu.clk();
             isu.clk();
+            deu.clk();
             feu.clk();
-            debugOut.println("\t[" + feu + " " + feuIsu + " " + isu + " " + isuDeu+ " " + deu+ " " + "(" + deuAlu + ","
-                    + deuLsu + ") (" + alu + "," + lsu + ") (" + aluBru + "," + lsuBru + ") " + bru + " " + bruWbu + " "
+            debugOut.println("\t[" + feu + " " + fecDec + " " + deu + " " + deuIsu+ " " + isu + " " + "(" + isuAlu + ","
+                    + isuLsu + ") (" + alu + "," + lsu + ") (" + aluBru + "," + lsuBru + ") " + bru + " " + bruWbu + " "
                     + wbu + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + rf);
             if(prefec.canPush() && !pc.isDone()){//&& !(!voided.canPull() && fe.getIsBranch())) {
                 prefec.push(Utils.opFactory.new No());
