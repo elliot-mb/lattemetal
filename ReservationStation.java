@@ -1,10 +1,10 @@
 public class ReservationStation {
-    private static int uId = 0;
-    private int id;
-    private Instruction op;
-    private ReservationStation qJ, qK;
-    private int vJ, vK;
-    private boolean rJ, rK, busy;
+    public static int uId = 0;
+    public int id;
+    public Instruction op;
+    public ReservationStation qJ, qK;
+    public int vJ, vK;
+    public boolean rJ, rK, busy;
     ReservationStation(){
         flush();
         this.id = uId;
@@ -13,6 +13,10 @@ public class ReservationStation {
 
     public int getId(){
         return id;
+    }
+
+    public boolean isBusy(){
+        return busy;
     }
 
     public void flush(){

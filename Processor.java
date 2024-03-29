@@ -63,6 +63,8 @@ public class Processor {
                 new PipelineRegister[]{isuAlu, isuLsu});
         this.alu = new ArithmeticLogicUnit(
                 this.sb,
+                this.aluRs,
+                this.rf,
                 new PipelineRegister[]{isuAlu},
                 new PipelineRegister[]{aluBru});
         this.lsu = new LoadStoreUnit(

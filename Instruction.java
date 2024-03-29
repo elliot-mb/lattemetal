@@ -25,15 +25,12 @@ public abstract class Instruction extends Durate {
     }
 
     public RegisterName getRd() throws RuntimeException{
-        if(this.rd == null) throw new RuntimeException("getRd: there is no first register defined for this instruction");
         return this.rd;
     }
     public RegisterName getRs() throws RuntimeException{
-        if(this.rs == null) throw new RuntimeException("getRs: there is no second register defined for this instruction");
         return this.rs;
     }
     public RegisterName getRt() throws RuntimeException{
-        if(this.rt == null) throw new RuntimeException("getRt: there is no third register defined for this instruction");
         return this.rt;
     }
     public int getIm() throws RuntimeException{

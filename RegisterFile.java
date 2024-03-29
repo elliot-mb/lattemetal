@@ -33,5 +33,8 @@ public class RegisterFile extends Block{
         return resultStatus.get(r.ordinal()) == null;
     }
 
+    public ReservationStation whereRegVal(RegisterName r){
+        return resultStatus.get(r.ordinal());
+    }
 
 }

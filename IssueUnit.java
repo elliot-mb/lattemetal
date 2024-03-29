@@ -56,7 +56,6 @@ public class IssueUnit extends Unit{
         outsChoice[0] = true;
     }
 
-
     // write the required dependencies into
 
     @Override

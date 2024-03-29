@@ -7,11 +7,39 @@ public class ArithmeticLogicUnit extends Unit {
     private final Forwarder fwd; //Probably obsolete; remove once resi stations are done !
     private final List<ReservationStation> rs;
 
-    ArithmeticLogicUnit(Scoreboard sb, ArrayList<ReservationStation> rs, PipelineRegister[] ins, PipelineRegister[] outs){
+    private final RegisterFile rf;
+
+    ArithmeticLogicUnit(Scoreboard sb, List<ReservationStation> rs, RegisterFile rf, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
         this.currentOp = null;
         this.fwd = new Forwarder();
         this.rs = rs;
+        this.rf = rf;
+    }
+
+    @Override
+    protected void readOffPipeline(){
+        getActiveIn();
+        for(ReservationStation r : rs){
+            if(!r.isBusy() && ins[inActive].canPull()){
+                currentOp = ins[inActive].pull();
+                super.readOffPipeline();
+                RegisterName regS = currentOp.getRs();
+                RegisterName regT = currentOp.getRt();
+                if(regS != null && rf.isRegValReady(regS)){
+                    r.vJ = rf.getReg(regS);
+                }else if(regS != null){
+                    r.qJ = rf.whereRegVal(regS);
+                }
+                if(regT != null && rf.isRegValReady(regT)){
+                    r.vK = rf.getReg(regT);
+                }else if(regT != null){
+                    r.qK = rf.whereRegVal(regT);
+                }
+                r.busy = true;
+                r.op = currentOp;
+            }
+        }
     }
 
     @Override
