@@ -20,7 +20,11 @@ public class Processor {
     private final Scoreboard sb;
     private int tally;
 
+    private static final int ALU_RS_COUNT = 2;
+    private static final int LSU_RS_COUNT = 2;
 
+    private final List<ReservationStation> aluRs = new ArrayList<ReservationStation>(ALU_RS_COUNT);
+    //lsu? load store buffers?
 
     private final PipelineRegister prefec = new PipelineRegister(); //just to pass the pc value to the fetch unit, and increment it!
     private final PipelineRegister fecDec = new PipelineRegister();
