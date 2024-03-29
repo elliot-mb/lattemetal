@@ -21,6 +21,7 @@ public class Processor {
     private int tally;
 
 
+
     private final PipelineRegister prefec = new PipelineRegister(); //just to pass the pc value to the fetch unit, and increment it!
     private final PipelineRegister fecDec = new PipelineRegister();
     private final PipelineRegister deuIsu = new PipelineRegister();

@@ -1,22 +1,25 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+
 public class ArithmeticLogicUnit extends Unit {
 
-    private final Forwarder fwd;
+    private final Forwarder fwd; //Probably obsolete; remove once resi stations are done !
+    private final List<ReservationStation> rs;
 
-    ArithmeticLogicUnit(Scoreboard sb, PipelineRegister[] ins, PipelineRegister[] outs){
+    ArithmeticLogicUnit(Scoreboard sb, ArrayList<ReservationStation> rs, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
         this.currentOp = null;
         this.fwd = new Forwarder();
+        this.rs = rs;
     }
 
     @Override
     protected void procInstruction() {
         currentOp.decr();
-        if(!isUnfinished()){ //this is the final procInstruction call
-            currentOp = fwd.forward(currentOp);
-//            if(fwd.didForward()){
-//                //System.out.println("forward: " + fwd);
-//            }
-        }
+//        if(!isUnfinished()){ //this is the final procInstruction call
+//            currentOp = fwd.forward(currentOp);
+//        }
     }
 
     @Override
@@ -27,6 +30,9 @@ public class ArithmeticLogicUnit extends Unit {
     @Override
     public void flush(){
         super.flush();
+        for(ReservationStation r : rs){
+            r.flush();
+        }
         fwd.flush();
     }
 
@@ -35,32 +41,32 @@ public class ArithmeticLogicUnit extends Unit {
         //modify register value = op.getRsVal() + op.getRtVal(); // i guess we can just write into the instruction
         //and then create a writeback stage
         op.setResult(op.getRsVal() + op.getRtVal());
-        fwd.setSlotReg(op.getRd());
-        fwd.setSlot(currentOp.getResult());
+//        fwd.setSlotReg(op.getRd());
+//        fwd.setSlot(currentOp.getResult());
     }
 
     @Override
     public void accept(Op.AddI op) {
         // modify register value = op.getRsVal() + op.getImVal();
         op.setResult(op.getRsVal() + op.getImVal());
-        fwd.setSlotReg(op.getRd());
-        fwd.setSlot(currentOp.getResult());
+//        fwd.setSlotReg(op.getRd());
+//        fwd.setSlot(currentOp.getResult());
     }
 
     @Override
     public void accept(Op.Mul op) {
         // modify register value = op.getRsVal() * op.getRtVal();
         op.setResult(op.getRsVal() * op.getRtVal());
-        fwd.setSlotReg(op.getRd());
-        fwd.setSlot(currentOp.getResult());
+//        fwd.setSlotReg(op.getRd());
+//        fwd.setSlot(currentOp.getResult());
     }
 
     @Override
     public void accept(Op.MulI op) {
         // modify register value = op.getRsVal() * op.getImVal();
         op.setResult(op.getRsVal() * op.getImVal());
-        fwd.setSlotReg(op.getRd());
-        fwd.setSlot(currentOp.getResult());
+//        fwd.setSlotReg(op.getRd());
+//        fwd.setSlot(currentOp.getResult());
     }
 
     @Override
@@ -73,8 +79,8 @@ public class ArithmeticLogicUnit extends Unit {
         else if(a == b) cmpResult = 0;
         else cmpResult = 1;
         op.setResult(cmpResult);
-        fwd.setSlotReg(op.getRd());
-        fwd.setSlot(currentOp.getResult());
+//        fwd.setSlotReg(op.getRd());
+//        fwd.setSlot(currentOp.getResult());
     }
 
     @Override
@@ -105,26 +111,26 @@ public class ArithmeticLogicUnit extends Unit {
         //pc.incr();
         flag = op.getRdVal() <= 0;
         op.setResult(op.getImVal()); //result is just set to imval
-        fwd.setSlotReg(null); //doesnt correspond to a register
+//        fwd.setSlotReg(null); //doesnt correspond to a register
     }
 
     @Override
     public void accept(Op.JpLZ op) {
         flag = op.getRdVal() <= 0;
         op.setResult(pcVal + op.getImVal());
-        fwd.setSlotReg(null); //doesnt correspond to a register
+//        fwd.setSlotReg(null); //doesnt correspond to a register
     }
 
     @Override
     public void accept(Op.Br op) {
         op.setResult(op.getImVal());
-        fwd.setSlotReg(null); //doesnt correspond to a register
+//        fwd.setSlotReg(null); //doesnt correspond to a register
     }
 
     @Override
     public void accept(Op.Jp op) {
         op.setResult(pcVal + op.getImVal());
-        fwd.setSlotReg(null); //doesnt correspond to a register
+//        fwd.setSlotReg(null); //doesnt correspond to a register
     }
 
     protected String showUnit(){

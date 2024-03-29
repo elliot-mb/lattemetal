@@ -1,10 +1,14 @@
+import java.util.ArrayList;
+import java.util.List;
 
 public class RegisterFile extends Block{
 
     private static final int NUM_REGS = RegisterName.values().length;
+    private final List<ReservationStation> resultStatus;
 
     RegisterFile(){
         super(NUM_REGS);
+        this.resultStatus = new ArrayList<ReservationStation>(NUM_REGS);
     }
 
     public void setReg(RegisterName name, int val){
@@ -24,4 +28,10 @@ public class RegisterFile extends Block{
         }
         return builder;
     }
+
+    public boolean isRegValReady(RegisterName r){
+        return resultStatus.get(r.ordinal()) == null;
+    }
+
+
 }
