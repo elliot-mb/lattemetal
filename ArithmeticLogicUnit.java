@@ -19,9 +19,8 @@ public class ArithmeticLogicUnit extends Unit {
 
     @Override
     protected void readOffPipeline(){
-        getActiveIn();
         for(ReservationStation r : rs){
-            if(!r.isBusy() && ins[inActive].canPull()){
+            if(super.canPullOffActiveIn() && !r.isBusy() && ins[getActiveIn()].canPull()){
                 super.readOffPipeline();
                 RegisterName regS = currentOp.getRs();
                 RegisterName regT = currentOp.getRt();

@@ -16,6 +16,9 @@ public class CQueue<T> {
 
     public void empty(){
         xs = new ArrayList<T>();
+        for(int i = 0; i < size; i++){
+            xs.add(null);
+        }
         head = 0;
         tail = size - 1;
         elementsIn = 0;
@@ -38,19 +41,25 @@ public class CQueue<T> {
         }
         elementsIn--;
         tail = (tail + 1) % size;
-        return xs.get(tail);
+        T ret = xs.get(tail);
+        xs.set(tail, null);
+        return ret;
     }
 
     public boolean isEmpty(){
-        int newTail = (tail + 1) % size;
-        return newTail == head;
+        return elementsIn == 0;
     }
 
     public boolean isFull(){
-        return elementsIn == size;
+        return elementsIn >= size;
     }
 
     public List<T> peekXs(){
-        return xs;
+        List<T> ret = new ArrayList<T>();
+        for(int i = 0; i < elementsIn; i++){
+            ret.add(xs.get((i + tail + 1) % size));
+        }
+
+        return ret;
     }
 }

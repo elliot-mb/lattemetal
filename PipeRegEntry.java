@@ -9,7 +9,14 @@ public class PipeRegEntry {
         this.flag = flag;
     }
 
+    PipeRegEntry(){
+        this.op = Utils.opFactory.new No();
+        this.pcVal = 0;
+        this.flag = false;
+    }
+
     public Instruction getOp(){
+        if(op == null) return new PipeRegEntry().getOp();
         return op;
     }
 

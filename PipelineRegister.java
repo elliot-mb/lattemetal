@@ -12,11 +12,11 @@ public class PipelineRegister {
 
     PipelineRegister(int size){
         this.size = size;
-        flush();
+        this.queue = new CQueue<PipeRegEntry>(size);
     }
 
     public void flush(){
-        queue = new CQueue<PipeRegEntry>(size);
+        queue.empty();
     }
 
 //    public void setPcVal(int count){

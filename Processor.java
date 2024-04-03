@@ -35,7 +35,7 @@ public class Processor {
     private final PipelineRegister lsuBru = new PipelineRegister(1);
     private final PipelineRegister bruWbu = new PipelineRegister(1);
     //private final PipelineRegister aluLsu = new PipelineRegister();
-    private final PipelineRegister voided = new PipelineRegister(); //ignored pipe register to satisfy Unit inheritence
+    private final PipelineRegister voided = new PipelineRegister(1); //ignored pipe register to satisfy Unit inheritence
 
     private final int DP_ACC = 2;
 
@@ -122,8 +122,7 @@ public class Processor {
 
     public Memory run(PrintStream debugOut){
         debugOut.println(ic);
-        voided.push(Utils.opFactory.new No());
-        voided.setPcVal(0);
+        voided.push(new PipeRegEntry(Utils.opFactory.new No(), 0, false));
         int retiredInstrCount = 0;
         List<Instruction> retiredInstrs = new ArrayList<Instruction>();
 
@@ -137,17 +136,16 @@ public class Processor {
             isu.clk();
             deu.clk();
             feu.clk();
-            debugOut.println("\t[" + feu + " " + fecDec + " " + deu + " " + deuIsu+ " " + isu + " " + "(" + isuAlu + ","
+            debugOut.println("\t[" + prefec + feu + " " + fecDec + " " + deu + " " + deuIsu+ " " + isu + " " + "(" + isuAlu + ","
                     + isuLsu + ") (" + alu + "," + lsu + ") (" + aluBru + "," + lsuBru + ") " + bru + " " + bruWbu + " "
-                    + wbu + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + rf);
+                    + wbu + voided + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + retiredInstrCount + "\t" + rf);
             if(prefec.canPush() && !pc.isDone()){//&& !(!voided.canPull() && fe.getIsBranch())) {
-                prefec.push(Utils.opFactory.new No());
-                prefec.setPcVal(pc.getCount());
+                prefec.push(new PipeRegEntry(Utils.opFactory.new No(), pc.getCount(), false));
                 //pc.incr();
             }
             tally++;
             if(voided.canPull()) {
-                retiredInstrs.add(voided.pull());
+                retiredInstrs.add(voided.pull().getOp());
                 retiredInstrCount++;
             } //delete whats inside (voided is used to detect when writebacks are finished)
             if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");

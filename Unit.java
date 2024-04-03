@@ -11,6 +11,8 @@ public abstract class Unit implements InstructionVoidVisitor {
     protected final PipelineRegister[] ins;
     protected final PipelineRegister[] outs;
 
+    protected final boolean[] outsChoice;
+
     protected Instruction currentOp;
     protected int pcVal;
     protected boolean flag;
@@ -19,6 +21,8 @@ public abstract class Unit implements InstructionVoidVisitor {
         if(ins.length == 0 || outs.length == 0) throw new RuntimeException("Unit: provide at least one input and at least one output pipereg");
         this.ins = ins;
         this.outs = outs;
+        this.outsChoice = new boolean[this.outs.length];
+        rstChosenOuts();
     }
 
     protected int getActiveIn(){
@@ -65,9 +69,10 @@ public abstract class Unit implements InstructionVoidVisitor {
     protected abstract void procInstruction(); //process instruction
     protected abstract boolean isUnfinished(); //when we need to count down instruction
 
-    private boolean canPullOffActiveIn(){
-        getActiveIn();
-        return ins[inActive].canPull();
+    protected boolean canPullOffActiveIn(){
+        int activeIn = getActiveIn();
+        if(activeIn == -1) return false;
+        return ins[activeIn].canPull();
     }
 
     //if all of our chosen outputs can be pushed onto, this returns true. otherwise we should stall
@@ -101,7 +106,7 @@ public abstract class Unit implements InstructionVoidVisitor {
 
     public void clk(){
         // we have processed this op, and if its not the case that we can pull in and push out to chosen outs, we stall (return)
-        if(isDone() && !(canPullOffActiveIn() && (areOutsUnchosen() || canPushOnChosenOuts()))) return;
+        if(isDone() && !(canPullOffActiveIn()))/* && (areOutsUnchosen() || canPushOnChosenOuts())))*/ return;
         if(isDone()) readOffPipeline(); //dont re-copy if we are mid-processing
         if(isUnfinished()) {
             procInstruction(); //always run at least once if isUnfinished is ever false
@@ -132,8 +137,8 @@ public abstract class Unit implements InstructionVoidVisitor {
 
     }
 
-    protected int chooseOuts() {
-        return 0;
+    protected void chooseOuts() {
+        outsChoice[0] = true; //default selection of the first output, OVERRIDE THIS WHERE NEEDED
     }
 
 }

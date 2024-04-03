@@ -1,7 +1,7 @@
 
 public class Op {
 
-    Op(){}
+
 
     public class Add extends Instruction{ //all operations extend hasduration also by proxy
 
