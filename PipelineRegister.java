@@ -62,6 +62,10 @@ public class PipelineRegister {
     }
 
     public String toString(){
-        return "[" + queue.peekXs().stream().map(PipeRegEntry::getOp).map(this::instrToId).collect(Collectors.joining()) + "]";
+        String gaps = "";
+        for(int i = 0; i < queue.getSize() - queue.getElementsIn(); i++ ){
+            gaps += ",__";
+        }
+        return "[" + gaps + queue.peekXs().stream().map(PipeRegEntry::getOp).map(this::instrToId).collect(Collectors.joining()) + "]";
     }
 }

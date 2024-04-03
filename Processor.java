@@ -2,10 +2,13 @@
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BinaryOperator;
 
 public class Processor {
+    private final Map<Integer, List<Integer>> cdb;
     private final ProgramCounter pc;
     private final InstructionCache ic;
     private final IssueUnit isu;
@@ -41,14 +44,15 @@ public class Processor {
 
     Processor(InstructionCache ic, Memory... mem) throws RuntimeException{
         if(mem.length > 1) throw new RuntimeException("Processor: this constructor cannot have more than one memories");
+        this.cdb = new HashMap<Integer, List<Integer>>();
         for(int i = 0; i < ALU_RS_COUNT; i++){
-            aluRs.add(new ReservationStation());
+            aluRs.add(new ReservationStation(cdb));
         }
         this.sb = new Scoreboard();
         this.ic = ic;
         this.tally = 0;
         this.pc = new ProgramCounter(ic.numInstrs());
-        this.rf = new RegisterFile();
+        this.rf = new RegisterFile(cdb);
         this.mem = mem.length > 0 ? mem[0] : new Memory();
         this.feu = new FetchUnit(
                 this.ic,
@@ -65,6 +69,7 @@ public class Processor {
                 new PipelineRegister[]{deuIsu},
                 new PipelineRegister[]{isuAlu, isuLsu});
         this.alu = new ArithmeticLogicUnit(
+                this.cdb,
                 this.sb,
                 this.aluRs,
                 this.rf,
@@ -149,6 +154,7 @@ public class Processor {
                 retiredInstrCount++;
             } //delete whats inside (voided is used to detect when writebacks are finished)
             if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");
+            cdb.clear();
         }
         debugOut.println("registers (dirty): " + rf);
         debugOut.println("memory: " + mem);

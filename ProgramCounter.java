@@ -19,7 +19,6 @@ public class ProgramCounter {
     }
 
     public void set(int val){
-        System.out.println(val);
         this.counter = val;
     }
 

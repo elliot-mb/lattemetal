@@ -19,6 +19,7 @@ public class IssueUnit extends Unit{
     protected void readOffPipeline(){
         super.readOffPipeline();
         deps = sb.useOrHasDeps(currentOp);
+
         //copyToDepsC(deps);
         //dependencies.add(Lookup.reg.get("zero")); // initial fake dependency just to get it to check
     }
@@ -31,7 +32,7 @@ public class IssueUnit extends Unit{
     protected void procInstruction() {
         //must run just once to avoid false positive of trying to register the instruction twice
         //...once we realise it doesnt have deps, we dont try to register it again
-        if(hasDeps()) deps = sb.useOrHasDeps(currentOp);
+        //if(hasDeps()) deps = sb.useOrHasDeps(currentOp);
     }
 
     @Override
@@ -43,7 +44,7 @@ public class IssueUnit extends Unit{
 
     @Override
     protected boolean isUnfinished() {
-        return hasDeps();
+        return false;
     }
 
     @Override

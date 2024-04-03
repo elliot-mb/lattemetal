@@ -110,8 +110,10 @@ public abstract class Unit implements InstructionVoidVisitor {
         if(isDone()) readOffPipeline(); //dont re-copy if we are mid-processing
         if(isUnfinished()) {
             procInstruction(); //always run at least once if isUnfinished is ever false
+                               //some unit stall with this instruction like the ALU while
+                               //while RSs wait for deps
         }
-        if(isUnfinished()) return;
+        if(isUnfinished() || currentOp == null) return;
         currentOp.visit(this); // /!\ main processing happens here /!\ (forced to be implementation-defined)
         chooseOuts(); //implementation defined unless has one output
         if(!canPushOnChosenOuts()) return; //stall a clock cycle if we cant push the result
