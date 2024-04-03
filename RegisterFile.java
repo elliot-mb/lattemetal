@@ -9,6 +9,9 @@ public class RegisterFile extends Block{
     RegisterFile(){
         super(NUM_REGS);
         this.resultStatus = new ArrayList<ReservationStation>(NUM_REGS);
+        for(int i = 0; i < NUM_REGS; i++){
+            this.resultStatus.add(new ReservationStation());
+        }
     }
 
     public void setReg(RegisterName name, int val){

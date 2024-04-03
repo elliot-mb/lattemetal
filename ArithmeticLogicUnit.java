@@ -22,7 +22,6 @@ public class ArithmeticLogicUnit extends Unit {
         getActiveIn();
         for(ReservationStation r : rs){
             if(!r.isBusy() && ins[inActive].canPull()){
-                currentOp = ins[inActive].pull();
                 super.readOffPipeline();
                 RegisterName regS = currentOp.getRs();
                 RegisterName regT = currentOp.getRt();

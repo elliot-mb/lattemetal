@@ -23,7 +23,7 @@ public class Processor {
     private static final int ALU_RS_COUNT = 2;
     private static final int LSU_RS_COUNT = 2;
 
-    private final List<ReservationStation> aluRs = new ArrayList<ReservationStation>(ALU_RS_COUNT);
+    private final List<ReservationStation> aluRs = new ArrayList<ReservationStation>();
     //lsu? load store buffers?
 
     private final PipelineRegister prefec = new PipelineRegister(); //just to pass the pc value to the fetch unit, and increment it!
@@ -41,6 +41,9 @@ public class Processor {
 
     Processor(InstructionCache ic, Memory... mem) throws RuntimeException{
         if(mem.length > 1) throw new RuntimeException("Processor: this constructor cannot have more than one memories");
+        for(int i = 0; i < ALU_RS_COUNT; i++){
+            aluRs.add(new ReservationStation());
+        }
         this.sb = new Scoreboard();
         this.ic = ic;
         this.tally = 0;
