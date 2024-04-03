@@ -128,6 +128,9 @@ public class Processor {
 
         //AbstractMap<Instruction, Integer> inFlights = new HashMap<Instruction, Integer>();
         while(isPipelineBeingUsed() || !pc.isDone()){
+            debugOut.println("\t[" + prefec + feu + " " + fecDec + " " + deu + " " + deuIsu+ " " + isu + " " + "(" + isuAlu + ","
+                    + isuLsu + ") (" + alu + "," + lsu + ") (" + aluBru + "," + lsuBru + ") " + bru + " " + bruWbu + " "
+                    + wbu + voided + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + retiredInstrCount + "\t" + rf);
             wbu.clk();
             bru.clk();
             if(bru.needsFlushing()) flushPipeline();
@@ -136,9 +139,6 @@ public class Processor {
             isu.clk();
             deu.clk();
             feu.clk();
-            debugOut.println("\t[" + prefec + feu + " " + fecDec + " " + deu + " " + deuIsu+ " " + isu + " " + "(" + isuAlu + ","
-                    + isuLsu + ") (" + alu + "," + lsu + ") (" + aluBru + "," + lsuBru + ") " + bru + " " + bruWbu + " "
-                    + wbu + voided + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + retiredInstrCount + "\t" + rf);
             if(prefec.canPush() && !pc.isDone()){//&& !(!voided.canPull() && fe.getIsBranch())) {
                 prefec.push(new PipeRegEntry(Utils.opFactory.new No(), pc.getCount(), false));
                 //pc.incr();

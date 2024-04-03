@@ -33,6 +33,7 @@ public class FetchUnit extends Unit {
     protected void writeOnPipeline() {
         //incr then write the incremented value on pipeline
         currentOp = ic.getInstruction(pc.getCount());
+        currentOp.visit(this);
         super.writeOnPipeline();
     }
 

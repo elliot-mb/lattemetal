@@ -41,9 +41,7 @@ public class CQueue<T> {
         }
         elementsIn--;
         tail = (tail + 1) % size;
-        T ret = xs.get(tail);
-        xs.set(tail, null);
-        return ret;
+        return xs.get(tail);
     }
 
     public boolean isEmpty(){
