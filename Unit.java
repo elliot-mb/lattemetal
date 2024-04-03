@@ -11,9 +11,6 @@ public abstract class Unit implements InstructionVoidVisitor {
     protected final PipelineRegister[] ins;
     protected final PipelineRegister[] outs;
 
-    protected int inActive;
-    protected final boolean[] outsChoice;
-
     protected Instruction currentOp;
     protected int pcVal;
     protected boolean flag;
@@ -22,11 +19,11 @@ public abstract class Unit implements InstructionVoidVisitor {
         if(ins.length == 0 || outs.length == 0) throw new RuntimeException("Unit: provide at least one input and at least one output pipereg");
         this.ins = ins;
         this.outs = outs;
-        this.outsChoice = new boolean[this.outs.length];
     }
 
-    protected void getActiveIn(){
+    protected int getActiveIn(){
         boolean hasSet = false;
+        int inActive = -1;
         int i = 0;
         for(PipelineRegister in : ins){
             if(in.canPull() && !hasSet){
@@ -37,15 +34,16 @@ public abstract class Unit implements InstructionVoidVisitor {
             }
             i++;
         }
+        return inActive;
     }
 
     //default implementations
     protected void readOffPipeline(){
-        getActiveIn();
-        PipelineRegister in = ins[inActive];
-        pcVal = in.getPcVal();
-        flag = in.isFlag();
-        currentOp = in.pull();
+        PipelineRegister in = ins[getActiveIn()];
+        PipeRegEntry e = in.pull();
+        pcVal = e.getPcVal();
+        flag = e.getFlag();
+        currentOp = e.getOp();
     }
     protected void writeOnPipeline(){
         if(areOutsUnchosen()) throw new RuntimeException("writeOnPipeline: choose outputs before writing on the pipeline");
@@ -53,9 +51,8 @@ public abstract class Unit implements InstructionVoidVisitor {
         for(PipelineRegister out : outs){
             if(outsChoice[i]){
                 if(!out.canPush()) throw new RuntimeException("writeOnPipeline: chosen output cannot be written to, please check before calling");
-                out.setFlag(flag);
-                out.setPcVal(pcVal);
-                out.push(currentOp);
+                PipeRegEntry e = new PipeRegEntry(currentOp, pcVal, flag);
+                out.push(e);
             }
             i++;
         }
@@ -135,8 +132,8 @@ public abstract class Unit implements InstructionVoidVisitor {
 
     }
 
-    protected void chooseOuts() {
-        outsChoice[0] = true; //default selection of the first output, OVERRIDE THIS WHERE NEEDED
+    protected int chooseOuts() {
+        return 0;
     }
 
 }

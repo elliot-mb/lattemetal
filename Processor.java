@@ -26,14 +26,14 @@ public class Processor {
     private final List<ReservationStation> aluRs = new ArrayList<ReservationStation>();
     //lsu? load store buffers?
 
-    private final PipelineRegister prefec = new PipelineRegister(); //just to pass the pc value to the fetch unit, and increment it!
-    private final PipelineRegister fecDec = new PipelineRegister();
-    private final PipelineRegister deuIsu = new PipelineRegister();
-    private final PipelineRegister isuAlu = new PipelineRegister();
-    private final PipelineRegister isuLsu = new PipelineRegister();
-    private final PipelineRegister aluBru = new PipelineRegister();
-    private final PipelineRegister lsuBru = new PipelineRegister();
-    private final PipelineRegister bruWbu = new PipelineRegister();
+    private final PipelineRegister prefec = new PipelineRegister(1); //just to pass the pc value to the fetch unit, and increment it!
+    private final PipelineRegister fecDec = new PipelineRegister(1);
+    private final PipelineRegister deuIsu = new PipelineRegister(1);
+    private final PipelineRegister isuAlu = new PipelineRegister(1);
+    private final PipelineRegister isuLsu = new PipelineRegister(1);
+    private final PipelineRegister aluBru = new PipelineRegister(1);
+    private final PipelineRegister lsuBru = new PipelineRegister(1);
+    private final PipelineRegister bruWbu = new PipelineRegister(1);
     //private final PipelineRegister aluLsu = new PipelineRegister();
     private final PipelineRegister voided = new PipelineRegister(); //ignored pipe register to satisfy Unit inheritence
 
