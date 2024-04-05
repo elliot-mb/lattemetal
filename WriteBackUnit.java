@@ -4,6 +4,7 @@ public class WriteBackUnit extends Unit{
     private static final int REG_LATENCY = 1;
     private final RegisterFile rf;
     private final Scoreboard sb;
+
     private final ReorderEntry rob;
     private final Durate counter = new Durate(REG_LATENCY);
 
