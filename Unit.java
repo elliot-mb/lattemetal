@@ -60,7 +60,7 @@ public abstract class Unit implements InstructionVoidVisitor {
     //default implementations
     protected void readOffPipeline(){
         PipelineRegister in = ins[selectionPriority()];
-        PipeRegEntry e = in.pull();
+        PipelineEntry e = in.pull();
         pcVal = e.getPcVal();
         flag = e.getFlag();
         currentOp = e.getOp();
@@ -71,7 +71,7 @@ public abstract class Unit implements InstructionVoidVisitor {
         for(PipelineRegister out : outs){
             if(outsChoice[i]){
                 if(!out.canPush()) throw new RuntimeException("writeOnPipeline: chosen output cannot be written to, please check before calling");
-                PipeRegEntry e = new PipeRegEntry(currentOp, pcVal, flag);
+                PipelineEntry e = new PipelineEntry(currentOp, pcVal, flag);
                 out.push(e);
             }
             i++;

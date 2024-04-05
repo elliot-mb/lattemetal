@@ -3,7 +3,7 @@ import java.util.Map;
 
 public class ReservationStation implements InstructionVoidVisitor {
     public static int uId = 0;
-    public int id;
+    public final int id;
     public Instruction op;
     public ReservationStation qJ, qK;
     public int vJ, vK;
@@ -44,6 +44,7 @@ public class ReservationStation implements InstructionVoidVisitor {
         if(qJ != null && cdb.containsKey(qJ.getId())){
             System.out.println("READ OFF COMMON DATA BUS! reservation station " + qJ.getId() + " sent this result");
             vJ = cdb.get(qJ.getId()).get(0); //broadcast this data on the first element of the list
+
         }
         if(qK != null && cdb.containsKey(qK.getId())){
             System.out.println("READ OFF COMMON DATA BUS! reservation station " + qK.getId() + " sent this result");

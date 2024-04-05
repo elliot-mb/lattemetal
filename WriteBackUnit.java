@@ -4,9 +4,10 @@ public class WriteBackUnit extends Unit{
     private static final int REG_LATENCY = 1;
     private final RegisterFile rf;
     private final Scoreboard sb;
+    private final ReorderEntry rob;
     private final Durate counter = new Durate(REG_LATENCY);
 
-    WriteBackUnit(RegisterFile rf, Scoreboard sb, PipelineRegister[] ins, PipelineRegister[] outs){
+    WriteBackUnit(RegisterFile rf, Scoreboard sb, ReorderBuffer rob, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
         this.rf = rf;
         this.sb = sb;

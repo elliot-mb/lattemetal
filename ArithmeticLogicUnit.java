@@ -26,32 +26,40 @@ public class ArithmeticLogicUnit extends Unit {
         for(ReservationStation rs : rss){
             if(canPullOffActiveIn() && !rs.isBusy() && ins[selectionPriority()].canPull()){ //can read multiple times off the queue
                 PipelineRegister in = ins[selectionPriority()];
-                PipeRegEntry e = in.pull();
+                PipelineEntry e = in.pull();
                 pcVal = e.getPcVal();
                 flag = e.getFlag();
                 opFromQueue = e.getOp();
                 rs.op = opFromQueue;
-                RegisterName regD = opFromQueue.getRd();
-                RegisterName regS = opFromQueue.getRs();
-                RegisterName regT = opFromQueue.getRt();
+                List<RegisterName> sources = rs.op.visit(new SourceRegVisitor());
+                List<RegisterName> dest = rs.op.visit(new DestRegVisitor());
 
-                RegisterName regJ = regS;
-                RegisterName regK = regT;
+                RegisterName regJ = sources.isEmpty() ? null : sources.get(0);
+                RegisterName regK = sources.size() <= 1 ? null : sources.get(1);
 
                 if(regJ != null && rf.isRegValReady(regJ)){
                     rs.vJ = rf.getReg(regJ);
                     rs.rJ = true; //ready up
                 }else if(regJ != null){
                     rs.qJ = rf.whereRegVal(regJ);
+                    rs.rJ = false;
+                }
+                if(regJ == null){
+                    rs.rJ = true;
                 }
                 if(regK != null && rf.isRegValReady(regK)){
                     rs.vK = rf.getReg(regK);
                     rs.rK = true; //ready up
                 }else if(regK != null){
                     rs.qK = rf.whereRegVal(regK);
+                    rs.rJ = false;
                 }
-                rs.busy = true;                   // stores do not write to registers
-                if(opFromQueue.getRd() != null && opFromQueue.visit(new ConcreteCodeVisitor()) != Opcode.st) rf.pointAtResStation(regD, rs);
+                if(regK == null){
+                    rs.rJ = true;
+                }
+
+                rs.busy = true;
+                if(!dest.isEmpty()) rf.pointAtResStation(dest.get(0), rs);
             }
         }
     }
@@ -213,6 +221,6 @@ public class ArithmeticLogicUnit extends Unit {
     }
 
     protected String showUnit(){
-        return (rss.get(0).isBusy() ? "*" : "_") + (rss.get(1).isBusy() ? "*" : "_")  + "EX";
+        return (rss.get(0).isBusy() ? "" + rss.get(0).op.getId() : "_") + (rss.get(1).isBusy() ? "" + rss.get(1).op.getId() : "_")  + "EX";
     }
 }

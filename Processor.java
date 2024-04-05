@@ -127,7 +127,7 @@ public class Processor {
 
     public Memory run(PrintStream debugOut){
         debugOut.println(ic);
-        voided.push(new PipeRegEntry(Utils.opFactory.new No(), 0, false));
+        voided.push(new PipelineEntry(Utils.opFactory.new No(), 0, false));
         int retiredInstrCount = 0;
         List<Instruction> retiredInstrs = new ArrayList<Instruction>();
 
@@ -145,7 +145,7 @@ public class Processor {
             deu.clk();
             feu.clk();
             if(prefec.canPush() && !pc.isDone()){//&& !(!voided.canPull() && fe.getIsBranch())) {
-                prefec.push(new PipeRegEntry(Utils.opFactory.new No(), pc.getCount(), false));
+                prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));
                 //pc.incr();
             }
             tally++;
@@ -154,6 +154,7 @@ public class Processor {
                 retiredInstrCount++;
             } //delete whats inside (voided is used to detect when writebacks are finished)
             if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");
+            System.out.println(cdb.keySet().toString() + cdb.values().toString());
             cdb.clear();
         }
         debugOut.println("registers (dirty): " + rf);

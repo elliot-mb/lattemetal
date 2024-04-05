@@ -5,11 +5,11 @@ import java.util.stream.Collectors;
 public class PipelineRegister {
 
     private final int size;
-    private CircluarQueue<PipeRegEntry> queue;
+    private CircluarQueue<PipelineEntry> queue;
 
     PipelineRegister(int size){
         this.size = size;
-        this.queue = new CircluarQueue<PipeRegEntry>(size);
+        this.queue = new CircluarQueue<PipelineEntry>(size);
     }
 
     public void flush(){
@@ -34,13 +34,13 @@ public class PipelineRegister {
 //    }
 
     //push can stall (just if inFlight is not null)
-    public void push(PipeRegEntry e){
+    public void push(PipelineEntry e){
         if(queue.isFull()) throw new RuntimeException("push: pushing to a full pipereg");
         queue.push(e.copy()); //make sure to copy
     }
 
     //can return null, indicating a stall
-    public PipeRegEntry pull(){
+    public PipelineEntry pull(){
         if(queue.isEmpty()) throw new RuntimeException("pull: pulling from an empty pipereg");
         return queue.pop().copy();
     }
@@ -53,8 +53,8 @@ public class PipelineRegister {
         return !queue.isEmpty();
     }
 
-    public PipeRegEntry peek() {
-        List<PipeRegEntry> xs = queue.peekXs();
+    public PipelineEntry peek() {
+        List<PipelineEntry> xs = queue.peekXs();
         return xs.get(xs.size() - 1);
     }
 
@@ -68,6 +68,6 @@ public class PipelineRegister {
         for(int i = 0; i < queue.getSize() - queue.getElementsIn(); i++ ){
             gaps += ",__";
         }
-        return "[" + gaps + queue.peekXs().stream().map(PipeRegEntry::getOp).map(this::instrToId).collect(Collectors.joining()) + "]";
+        return "[" + gaps + queue.peekXs().stream().map(PipelineEntry::getOp).map(this::instrToId).collect(Collectors.joining()) + "]";
     }
 }
