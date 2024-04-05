@@ -1,4 +1,6 @@
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public abstract class Unit implements InstructionVoidVisitor {
 
@@ -25,16 +27,13 @@ public abstract class Unit implements InstructionVoidVisitor {
         rstChosenOuts();
     }
 
-    protected int getActiveIn(){
+    protected List<Integer> getActiveIn(){
         boolean hasSet = false;
-        int inActive = -1;
+        List<Integer> inActive = new ArrayList<Integer>();
         int i = 0;
         for(PipelineRegister in : ins){
-            if(in.canPull() && !hasSet){
-                hasSet = true; //this should only occur once
-                inActive = i;
-            }else if(in.canPull()){
-                throw new RuntimeException("getActiveIn: this unit was sent more than one input instruction to process, should receive exactly one");
+            if(in.canPull()) {
+                inActive.add(i);
             }
             i++;
         }
@@ -43,7 +42,7 @@ public abstract class Unit implements InstructionVoidVisitor {
 
     //default implementations
     protected void readOffPipeline(){
-        PipelineRegister in = ins[getActiveIn()];
+        PipelineRegister in = ins[getActiveIn().get(0)];
         PipeRegEntry e = in.pull();
         pcVal = e.getPcVal();
         flag = e.getFlag();
@@ -70,8 +69,8 @@ public abstract class Unit implements InstructionVoidVisitor {
     protected abstract boolean isUnfinished(); //when we need to count down instruction
 
     protected boolean canPullOffActiveIn(){
-        int activeIn = getActiveIn();
-        if(activeIn == -1) return false;
+        if(getActiveIn().isEmpty()) return false;
+        int activeIn = getActiveIn().get(0);
         return ins[activeIn].canPull();
     }
 

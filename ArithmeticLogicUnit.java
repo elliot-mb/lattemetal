@@ -24,8 +24,8 @@ public class ArithmeticLogicUnit extends Unit {
     @Override
     protected void readOffPipeline(){
         for(ReservationStation rs : rss){
-            if(canPullOffActiveIn() && !rs.isBusy() && ins[getActiveIn()].canPull()){ //can read multiple times off the queue
-                PipelineRegister in = ins[getActiveIn()];
+            if(canPullOffActiveIn() && !rs.isBusy() && ins[getActiveIn().get(0)].canPull()){ //can read multiple times off the queue
+                PipelineRegister in = ins[getActiveIn().get(0)];
                 PipeRegEntry e = in.pull();
                 pcVal = e.getPcVal();
                 flag = e.getFlag();
