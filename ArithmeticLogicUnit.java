@@ -5,12 +5,14 @@ public class ArithmeticLogicUnit extends Unit {
     private final Map<Integer, List<Integer>> cdb;
     private final List<ReservationStation> rss;
     private int currentRs;
+    private final int baseRs;
     private final RegisterFile rf;
 
     ArithmeticLogicUnit(Map<Integer, List<Integer>> cdb, List<ReservationStation> rs, RegisterFile rf, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
         this.currentOp = null;
         this.currentRs = 0;
+        this.baseRs = rs.get(0).getId();
         this.rss = rs;
         this.rf = rf;
         this.cdb = cdb;
@@ -34,13 +36,13 @@ public class ArithmeticLogicUnit extends Unit {
         for(ReservationStation rs : rss){
             if(rs.isBusy()) rs.update(); //dont update those with no instruction inside
             //System.out.println("UPDATED AND NOW " + rs.isReady());
-            if(currentOp == null && rs.isReady()){
+            if(currentOp == null && rs.isBusy() && rs.isReady()){
                 currentOp = rs.op;
-                currentRs = rs.getId(); //should only be reset after we finish processing stuff
+                currentOp.rst();
+                currentRs = rs.getId() - baseRs; //should only be reset after we finish processing stuff
             }
         }
-        if(currentOp != null) currentOp.decr();
-
+        if(currentOp != null && !currentOp.isDone()) currentOp.decr();
     }
 
     @Override
@@ -54,7 +56,7 @@ public class ArithmeticLogicUnit extends Unit {
 
     @Override
     protected boolean isUnfinished() {
-        return currentOp == null; //if we arent done with the inner up, and its not blank
+        return currentOp == null || !currentOp.isDone(); //if we arent done with the inner up, and its not blank
     }
 
     @Override

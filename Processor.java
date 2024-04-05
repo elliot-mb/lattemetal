@@ -141,7 +141,7 @@ public class Processor {
         //AbstractMap<Instruction, Integer> inFlights = new HashMap<Instruction, Integer>();
         while(isPipelineBeingUsed() || !pc.isDone()){
             debugOut.println("\t[" + prefec + feu + " " + fecDec + " " + deu + " " + deuIsu+ " " + isu + " " + "(" + isuAlu + ","
-                    + isuLsu + ") (" + alu + "," + lsu + ") (" + aluBru + "," + lsuBru + ") " + bru + " " + bruWbu + " "
+                    + isuLsu + ") (" + alu + ", " + lsu + ") (" + aluBru + "," + lsuBru + ") " + bru + " " + bruWbu + " "
                     + wbu + voided + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + retiredInstrCount + "\t" + rf);
             wbu.clk();
             bru.clk();

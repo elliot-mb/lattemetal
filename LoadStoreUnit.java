@@ -9,6 +9,7 @@ public class LoadStoreUnit extends Unit{
     private final Memory mem;
 
     private int currentRs;
+    private final int baseRs;
 
     private final RegisterFile rf;
 
@@ -17,10 +18,11 @@ public class LoadStoreUnit extends Unit{
 
     private Durate counter = new Durate(L1_LATENCY);
 
-    LoadStoreUnit(Memory mem, List<ReservationStation> rss, RegisterFile rf, Map<Integer, List<Integer>> cdb, PipelineRegister[] ins, PipelineRegister[] outs){
+    LoadStoreUnit(Memory mem, List<ReservationStation> rs, RegisterFile rf, Map<Integer, List<Integer>> cdb, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
         this.mem = mem;
-        this.rss = rss;
+        this.baseRs = rs.get(0).getId();
+        this.rss = rs;
         this.rf = rf;
         this.cdb = cdb;
     }
@@ -49,23 +51,23 @@ public class LoadStoreUnit extends Unit{
             if(currentOp == null && rs.isReady()){
                 counter.rst();
                 currentOp = rs.op;
-                currentRs = rs.getId(); //should only be reset after we finish processing stuff
+                currentRs = rs.getId() - baseRs; //should only be reset after we finish processing stuff
             }
         }
 
-        if(currentOp != null) {
+        if(currentOp != null && !counter.isDone()) {
             counter.decr();
-            currentOp.decr();
         }
     }
 
     @Override
     protected boolean isUnfinished() {
-        return currentOp == null;//(!counter.isDone() && Utils.isLoadStore(currentOp)) || !counterNop.isDone(); //if its not a load/store we're finished
+        return currentOp == null || !counter.isDone();//(!counter.isDone() && Utils.isLoadStore(currentOp)) || !counterNop.isDone(); //if its not a load/store we're finished
     }
 
     @Override
     protected void writeOnPipeline(){
+        super.writeOnPipeline();
         cdb.put(currentRs, Collections.singletonList(currentOp.getResult()));
         rss.get(currentRs).busy = false;
     }
