@@ -56,6 +56,11 @@ public class PipelineRegister {
         return !queue.isEmpty();
     }
 
+    public PipeRegEntry peek() {
+        List<PipeRegEntry> xs = queue.peekXs();
+        return xs.get(xs.size() - 1);
+    }
+
     private String instrToId(Instruction op){
         String pad = canPull() && (op.getId() % 100) < 10 ? "0" : "";
         return "," + (canPull() ? pad + (op.getId() % 100) : "__");

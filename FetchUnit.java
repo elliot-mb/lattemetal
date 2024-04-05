@@ -21,6 +21,7 @@ public class FetchUnit extends Unit {
     @Override
     protected void procInstruction() {
         counter.decr();
+        currentOp = ic.getInstruction(pc.getCount());
     }
 
     @Override
@@ -32,7 +33,6 @@ public class FetchUnit extends Unit {
     @Override
     protected void writeOnPipeline() {
         //incr then write the incremented value on pipeline
-        currentOp = ic.getInstruction(pc.getCount());
         currentOp.visit(this);
         super.writeOnPipeline();
     }

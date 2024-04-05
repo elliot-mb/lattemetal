@@ -28,7 +28,6 @@ public abstract class Unit implements InstructionVoidVisitor {
     }
 
     protected List<Integer> getActiveIn(){
-        boolean hasSet = false;
         List<Integer> inActive = new ArrayList<Integer>();
         int i = 0;
         for(PipelineRegister in : ins){
@@ -40,9 +39,27 @@ public abstract class Unit implements InstructionVoidVisitor {
         return inActive;
     }
 
+    private int oldestInInstr(){
+        int lowest = Integer.MAX_VALUE;
+        int i = 0;
+        int res = -1;
+        for(PipelineRegister in : ins){
+            if(in.canPull()) {
+                lowest = Math.min(in.peek().getOp().getId(), lowest);
+                res = i;
+            }
+            i++;
+        }
+        return res;
+    }
+
+    protected int selectionPriority(){
+        return oldestInInstr();
+    }
+
     //default implementations
     protected void readOffPipeline(){
-        PipelineRegister in = ins[getActiveIn().get(0)];
+        PipelineRegister in = ins[selectionPriority()];
         PipeRegEntry e = in.pull();
         pcVal = e.getPcVal();
         flag = e.getFlag();
@@ -70,7 +87,7 @@ public abstract class Unit implements InstructionVoidVisitor {
 
     protected boolean canPullOffActiveIn(){
         if(getActiveIn().isEmpty()) return false;
-        int activeIn = getActiveIn().get(0);
+        int activeIn = selectionPriority();
         return ins[activeIn].canPull();
     }
 
