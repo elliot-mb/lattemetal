@@ -1,6 +1,6 @@
 
 
-public class Id implements InstructionCodeVisitor { //just returns the opcode (identity function?)
+public class ConcreteCodeVisitor implements InstructionCodeVisitor { //just returns the opcode (identity function?)
 
 
     @Override

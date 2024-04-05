@@ -42,9 +42,11 @@ public class ReservationStation implements InstructionVoidVisitor {
         if(qJ == null || !qJ.isBusy()) rJ = true;
         if(qK == null || !qK.isBusy()) rK = true;
         if(qJ != null && cdb.containsKey(qJ.getId())){
+            System.out.println("READ OFF COMMON DATA BUS! reservation station " + qJ.getId() + " sent this result");
             vJ = cdb.get(qJ.getId()).get(0); //broadcast this data on the first element of the list
         }
         if(qK != null && cdb.containsKey(qK.getId())){
+            System.out.println("READ OFF COMMON DATA BUS! reservation station " + qK.getId() + " sent this result");
             vK = cdb.get(qK.getId()).get(0);
         }
         op.visit(this); //put the updated values inside op

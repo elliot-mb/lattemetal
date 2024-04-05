@@ -34,7 +34,7 @@ public class ArithmeticLogicUnit extends Unit {
                 RegisterName regD = opFromQueue.getRd();
                 RegisterName regS = opFromQueue.getRs();
                 RegisterName regT = opFromQueue.getRt();
-//              store neesd to knwo waht Rd IS SO IM NOT SURE WHAT TO DO
+
                 RegisterName regJ = regS;
                 RegisterName regK = regT;
 
@@ -51,7 +51,7 @@ public class ArithmeticLogicUnit extends Unit {
                     rs.qK = rf.whereRegVal(regK);
                 }
                 rs.busy = true;                   // stores do not write to registers
-                if(opFromQueue.getRd() != null && opFromQueue.visit(new Id()) != Opcode.st) rf.pointAtResStation(opFromQueue.getRd(), rs);
+                if(opFromQueue.getRd() != null && opFromQueue.visit(new ConcreteCodeVisitor()) != Opcode.st) rf.pointAtResStation(regD, rs);
             }
         }
     }
@@ -68,6 +68,15 @@ public class ArithmeticLogicUnit extends Unit {
         }
         if(currentOp != null) currentOp.decr();
 
+    }
+
+    @Override
+    protected boolean isDone(){
+        boolean allBusy = true;
+        for(ReservationStation rs : rss){
+            allBusy = rs.isBusy() && allBusy;
+        }
+        return !allBusy;
     }
 
     @Override
@@ -204,6 +213,6 @@ public class ArithmeticLogicUnit extends Unit {
     }
 
     protected String showUnit(){
-        return "EX";
+        return (rss.get(0).isBusy() ? "*" : "_") + (rss.get(1).isBusy() ? "*" : "_")  + "EX";
     }
 }

@@ -1,14 +1,14 @@
 import java.util.ArrayList;
 import java.util.List;
 //circular queue
-public class CQueue<T> {
+public class CircluarQueue<T> {
     private List<T> xs;
     private int head;
     private int tail;
     private final int size;
     private int elementsIn;
 
-    CQueue(int size){
+    CircluarQueue(int size){
         if(size < 1) throw new RuntimeException("CQueue: size must be one or more");
         this.size = size;
         empty();

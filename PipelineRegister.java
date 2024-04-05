@@ -1,18 +1,15 @@
-import java.nio.channels.Pipe;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.PriorityQueue;
 import java.util.stream.Collectors;
 
 //these will become little queues now
 public class PipelineRegister {
 
     private final int size;
-    private CQueue<PipeRegEntry> queue;
+    private CircluarQueue<PipeRegEntry> queue;
 
     PipelineRegister(int size){
         this.size = size;
-        this.queue = new CQueue<PipeRegEntry>(size);
+        this.queue = new CircluarQueue<PipeRegEntry>(size);
     }
 
     public void flush(){

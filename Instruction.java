@@ -1,3 +1,4 @@
+import java.util.List;
 
 public abstract class Instruction extends Durate {
 
@@ -50,6 +51,7 @@ public abstract class Instruction extends Durate {
     }
 
     abstract public Opcode visit(InstructionCodeVisitor v);
+    abstract public List<RegisterName> visit(InstructionRegVisitor v);
     abstract public void visit(InstructionVoidVisitor v);
 
     protected String regToString(RegisterName r){
@@ -62,7 +64,7 @@ public abstract class Instruction extends Durate {
 
     @Override
     public String toString(){
-        Opcode underlying = visit(new Id());
+        Opcode underlying = visit(new ConcreteCodeVisitor());
         return underlying.name() + "\t" + regToString(rd) + regToString(rs) + regToString(rt) + immToString(im);
     }
 
@@ -75,26 +77,26 @@ public abstract class Instruction extends Durate {
     // operator argument validation on the four instruction shapes
     protected void checkShape(RegisterName rd, RegisterName rs, RegisterName rt){
         if(rd == null || rs == null || rt == null)
-            throw new RuntimeException(visit(new Id()) + ": missing at least one register reference");
+            throw new RuntimeException(visit(new ConcreteCodeVisitor()) + ": missing at least one register reference");
     }
 
     protected void checkShape(RegisterName rd, RegisterName rs, Integer im){
         if(rd == null || rs == null)
-            throw new RuntimeException(visit(new Id()) +": missing at least one register reference");
+            throw new RuntimeException(visit(new ConcreteCodeVisitor()) +": missing at least one register reference");
         if(this.im == null)
-            throw new RuntimeException(visit(new Id()) +": missing immediate");
+            throw new RuntimeException(visit(new ConcreteCodeVisitor()) +": missing immediate");
     }
 
     protected void checkShape(RegisterName rd, Integer im){
         if(rd == null)
-            throw new RuntimeException(visit(new Id()) +": missing the register reference");
+            throw new RuntimeException(visit(new ConcreteCodeVisitor()) +": missing the register reference");
         if(this.im == null)
-            throw new RuntimeException(visit(new Id()) +": missing immediate");
+            throw new RuntimeException(visit(new ConcreteCodeVisitor()) +": missing immediate");
     }
 
     protected void checkShape(Integer im){
         if(this.im == null)
-            throw new RuntimeException(visit(new Id()) +": missing immediate");
+            throw new RuntimeException(visit(new ConcreteCodeVisitor()) +": missing immediate");
     }
 
     public abstract Instruction copy();

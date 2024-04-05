@@ -8,7 +8,7 @@ public class Utils {
 
     private static final char[] WHITESPACE = new char[]{' ', '\n', '\r', '\t'};
 
-    private static final Id preDecoder = new Id();
+    private static final ConcreteCodeVisitor preDecoder = new ConcreteCodeVisitor();
 
     public static final Op opFactory = new Op();
 
