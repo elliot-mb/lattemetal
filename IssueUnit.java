@@ -4,21 +4,21 @@ import java.util.ArrayList;
 
 public class IssueUnit extends Unit{
 
-    private final Scoreboard sb;
     private final RegisterFile rf;
+
+    private final ReorderBuffer rob;
     private ArrayList<RegisterName> deps;
 
-    IssueUnit(Scoreboard sb, RegisterFile rf, PipelineRegister[] ins, PipelineRegister[] outs){
+    IssueUnit(RegisterFile rf, ReorderBuffer rob, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
-        this.sb = sb;
         this.rf = rf;
+        this.rob = rob;
         this.deps = new ArrayList<>();
     }
 
     @Override
     protected void readOffPipeline(){
         super.readOffPipeline();
-        deps = sb.useOrHasDeps(currentOp);
 
         //copyToDepsC(deps);
         //dependencies.add(Lookup.reg.get("zero")); // initial fake dependency just to get it to check
@@ -39,7 +39,6 @@ public class IssueUnit extends Unit{
     public void flush(){
         super.flush();
         deps = new ArrayList<RegisterName>();
-        sb.flush();
     }
 
     @Override

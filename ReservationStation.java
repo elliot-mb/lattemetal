@@ -37,6 +37,39 @@ public class ReservationStation implements InstructionVoidVisitor {
         this.rK = false;
     }
 
+    public void set(PipelineEntry e, RegisterFile rf){
+        op = e.getOp();
+        List<RegisterName> sources = op.visit(new SourceRegVisitor());
+        List<RegisterName> dest = op.visit(new DestRegVisitor());
+
+        RegisterName regJ = sources.isEmpty() ? null : sources.get(0);
+        RegisterName regK = sources.size() <= 1 ? null : sources.get(1);
+
+        if(regJ != null && rf.isRegValReady(regJ)){
+            vJ = rf.getReg(regJ);
+            rJ = true; //ready up
+        }else if(regJ != null){
+            qJ = rf.whereRegVal(regJ);
+            rJ = false;
+        }
+        if(regJ == null){
+            rJ = true;
+        }
+        if(regK != null && rf.isRegValReady(regK)){
+            vK = rf.getReg(regK);
+            rK = true; //ready up
+        }else if(regK != null){
+            qK = rf.whereRegVal(regK);
+            rJ = false;
+        }
+        if(regK == null){
+            rJ = true;
+        }
+
+        busy = true;
+        if(!dest.isEmpty()) rf.pointAtResStation(dest.get(0), this);
+    }
+
     //checks if either dependant RSs have finished!
     public void update(){
         if(qJ == null || !qJ.isBusy()) rJ = true;

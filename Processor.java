@@ -20,7 +20,7 @@ public class Processor {
     private final LoadStoreUnit lsu;
     private final BranchUnit bru;
     private final WriteBackUnit wbu;
-    private final Scoreboard sb;
+    private final ReorderBuffer rob;
     private int tally;
 
     private static final int ALU_RS_COUNT = 2;
@@ -31,7 +31,7 @@ public class Processor {
 
     private final PipelineRegister prefec = new PipelineRegister(1); //just to pass the pc value to the fetch unit, and increment it!
     private final PipelineRegister fecDec = new PipelineRegister(1);
-    private final PipelineRegister deuIsu = new PipelineRegister(1);
+    private final PipelineRegister deuIsu = new PipelineRegister(2); //instruction queue!!
     private final PipelineRegister isuAlu = new PipelineRegister(1);
     private final PipelineRegister isuLsu = new PipelineRegister(1);
     private final PipelineRegister aluBru = new PipelineRegister(1);
@@ -42,13 +42,15 @@ public class Processor {
 
     private final int DP_ACC = 2;
 
+    private final int ROB_ENTRIES = 8;
+
     Processor(InstructionCache ic, Memory... mem) throws RuntimeException{
         if(mem.length > 1) throw new RuntimeException("Processor: this constructor cannot have more than one memories");
         this.cdb = new HashMap<Integer, List<Integer>>();
+        this.rob = new ReorderBuffer(ROB_ENTRIES);
         for(int i = 0; i < ALU_RS_COUNT; i++){
             aluRs.add(new ReservationStation(cdb));
         }
-        this.sb = new Scoreboard();
         this.ic = ic;
         this.tally = 0;
         this.pc = new ProgramCounter(ic.numInstrs());
@@ -64,19 +66,17 @@ public class Processor {
                 new PipelineRegister[]{fecDec},
                 new PipelineRegister[]{deuIsu}); //loadstores go down the latter pipe
         this.isu = new IssueUnit(
-                this.sb,
                 this.rf,
+                this.rob,
                 new PipelineRegister[]{deuIsu},
                 new PipelineRegister[]{isuAlu, isuLsu});
         this.alu = new ArithmeticLogicUnit(
                 this.cdb,
-                this.sb,
                 this.aluRs,
                 this.rf,
                 new PipelineRegister[]{isuAlu},
                 new PipelineRegister[]{aluBru});
         this.lsu = new LoadStoreUnit(
-                this.sb,
                 this.mem,
                 new PipelineRegister[]{isuLsu},
                 new PipelineRegister[]{lsuBru});
@@ -87,7 +87,7 @@ public class Processor {
         );
         this.wbu = new WriteBackUnit(
                 this.rf,
-                this.sb,
+                this.rob,
                 new PipelineRegister[]{bruWbu},
                 new PipelineRegister[]{voided});
     }

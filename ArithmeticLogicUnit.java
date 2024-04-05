@@ -3,19 +3,17 @@ import java.util.*;
 public class ArithmeticLogicUnit extends Unit {
 
     private final Map<Integer, List<Integer>> cdb;
-    private final Forwarder fwd; //Probably obsolete; remove once resi stations are done !
     private final List<ReservationStation> rss;
 
     private Instruction opFromQueue;
     private int currentRs;
     private final RegisterFile rf;
 
-    ArithmeticLogicUnit(Map<Integer, List<Integer>> cdb, Scoreboard sb, List<ReservationStation> rs, RegisterFile rf, PipelineRegister[] ins, PipelineRegister[] outs){
+    ArithmeticLogicUnit(Map<Integer, List<Integer>> cdb, List<ReservationStation> rs, RegisterFile rf, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
         this.currentOp = null;
         this.opFromQueue = null;
         this.currentRs = 0;
-        this.fwd = new Forwarder();
         this.rss = rs;
         this.rf = rf;
         this.cdb = cdb;
@@ -30,36 +28,7 @@ public class ArithmeticLogicUnit extends Unit {
                 pcVal = e.getPcVal();
                 flag = e.getFlag();
                 opFromQueue = e.getOp();
-                rs.op = opFromQueue;
-                List<RegisterName> sources = rs.op.visit(new SourceRegVisitor());
-                List<RegisterName> dest = rs.op.visit(new DestRegVisitor());
-
-                RegisterName regJ = sources.isEmpty() ? null : sources.get(0);
-                RegisterName regK = sources.size() <= 1 ? null : sources.get(1);
-
-                if(regJ != null && rf.isRegValReady(regJ)){
-                    rs.vJ = rf.getReg(regJ);
-                    rs.rJ = true; //ready up
-                }else if(regJ != null){
-                    rs.qJ = rf.whereRegVal(regJ);
-                    rs.rJ = false;
-                }
-                if(regJ == null){
-                    rs.rJ = true;
-                }
-                if(regK != null && rf.isRegValReady(regK)){
-                    rs.vK = rf.getReg(regK);
-                    rs.rK = true; //ready up
-                }else if(regK != null){
-                    rs.qK = rf.whereRegVal(regK);
-                    rs.rJ = false;
-                }
-                if(regK == null){
-                    rs.rJ = true;
-                }
-
-                rs.busy = true;
-                if(!dest.isEmpty()) rf.pointAtResStation(dest.get(0), rs);
+                rs.set(e, rf);
             }
         }
     }
@@ -98,7 +67,6 @@ public class ArithmeticLogicUnit extends Unit {
         for(ReservationStation r : rss){
             r.flush();
         }
-        fwd.flush();
     }
 
     @Override

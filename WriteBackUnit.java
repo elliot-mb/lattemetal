@@ -3,15 +3,14 @@ public class WriteBackUnit extends Unit{
 
     private static final int REG_LATENCY = 1;
     private final RegisterFile rf;
-    private final Scoreboard sb;
 
-    private final ReorderEntry rob;
+    private final ReorderBuffer rob;
     private final Durate counter = new Durate(REG_LATENCY);
 
-    WriteBackUnit(RegisterFile rf, Scoreboard sb, ReorderBuffer rob, PipelineRegister[] ins, PipelineRegister[] outs){
+    WriteBackUnit(RegisterFile rf, ReorderBuffer rob, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
         this.rf = rf;
-        this.sb = sb;
+        this.rob = rob;
     }
 
     @Override
@@ -37,7 +36,6 @@ public class WriteBackUnit extends Unit{
 
     private void setRdToRes(RegisterName rd, int result){
         rf.setReg(rd, result);
-        sb.validateReg(rd);
     }
 
     // all the below methods write back to the registers correctly
