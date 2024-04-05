@@ -27,6 +27,7 @@ public class Processor {
     private static final int LSU_RS_COUNT = 2;
 
     private final List<ReservationStation> aluRs = new ArrayList<ReservationStation>();
+    private final List<ReservationStation> lsuRs = new ArrayList<ReservationStation>();
     //lsu? load store buffers?
 
     private final PipelineRegister prefec = new PipelineRegister(1); //just to pass the pc value to the fetch unit, and increment it!
@@ -50,6 +51,9 @@ public class Processor {
         this.rob = new ReorderBuffer(ROB_ENTRIES);
         for(int i = 0; i < ALU_RS_COUNT; i++){
             aluRs.add(new ReservationStation(cdb));
+        }
+        for(int i = 0; i < LSU_RS_COUNT; i++){
+            lsuRs.add(new ReservationStation(cdb));
         }
         this.ic = ic;
         this.tally = 0;
@@ -78,6 +82,9 @@ public class Processor {
                 new PipelineRegister[]{aluBru});
         this.lsu = new LoadStoreUnit(
                 this.mem,
+                this.lsuRs,
+                this.rf,
+                this.cdb,
                 new PipelineRegister[]{isuLsu},
                 new PipelineRegister[]{lsuBru});
         this.bru = new BranchUnit(

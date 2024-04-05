@@ -1,4 +1,6 @@
-
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class LoadStoreUnit extends Unit{
 
@@ -6,31 +8,75 @@ public class LoadStoreUnit extends Unit{
     private static final int NOP_LATENCY = 1;
     private final Memory mem;
 
-    private Durate counter = new Durate(L1_LATENCY);
-    private Durate counterNop = new Durate(NOP_LATENCY);
+    private int currentRs;
 
-    LoadStoreUnit(Memory mem, PipelineRegister[] ins, PipelineRegister[] outs){
+    private final RegisterFile rf;
+
+    private final Map<Integer, List<Integer>> cdb;
+    private final List<ReservationStation> rss;
+
+    private Durate counter = new Durate(L1_LATENCY);
+
+    LoadStoreUnit(Memory mem, List<ReservationStation> rss, RegisterFile rf, Map<Integer, List<Integer>> cdb, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
         this.mem = mem;
+        this.rss = rss;
+        this.rf = rf;
+        this.cdb = cdb;
     }
 
     @Override
     protected void readOffPipeline(){
-        super.readOffPipeline();
-        counter.rst();
-        counterNop.rst();
+        for(ReservationStation rs : rss){
+            if(canPullOffActiveIn() && !rs.isBusy() && ins[selectionPriority()].canPull()){ //can read multiple times off the queue
+                PipelineRegister in = ins[selectionPriority()];
+                PipelineEntry e = in.pull();
+                pcVal = e.getPcVal();
+                flag = e.getFlag();
+                rs.set(e, rf);
+            }
+        }
+//        super.readOffPipeline();
+//        counter.rst();
+//        counterNop.rst();
     }
 
     @Override
     protected void procInstruction() {
-        counter.decr();
+        for(ReservationStation rs : rss){
+            if(rs.isBusy()) rs.update(); //dont update those with no instruction inside
+            //System.out.println("UPDATED AND NOW " + rs.isReady());
+            if(currentOp == null && rs.isReady()){
+                counter.rst();
+                currentOp = rs.op;
+                currentRs = rs.getId(); //should only be reset after we finish processing stuff
+            }
+        }
 
-        if(!counterNop.isDone()) counterNop.decr();
+        if(currentOp != null) {
+            counter.decr();
+            currentOp.decr();
+        }
     }
 
     @Override
     protected boolean isUnfinished() {
-        return (!counter.isDone() && Utils.isLoadStore(currentOp)) || !counterNop.isDone(); //if its not a load/store we're finished
+        return currentOp == null;//(!counter.isDone() && Utils.isLoadStore(currentOp)) || !counterNop.isDone(); //if its not a load/store we're finished
+    }
+
+    @Override
+    protected void writeOnPipeline(){
+        cdb.put(currentRs, Collections.singletonList(currentOp.getResult()));
+        rss.get(currentRs).busy = false;
+    }
+
+    @Override
+    protected boolean isDone(){
+        boolean allBusy = true;
+        for(ReservationStation rs : rss){
+            allBusy = rs.isBusy() && allBusy;
+        }
+        return !allBusy;
     }
 
     //visitation
@@ -64,6 +110,8 @@ public class LoadStoreUnit extends Unit{
     public void accept(Op.Ld op) {
         op.setResult(op.getRsVal() + op.getImVal()); //copied from old ALU
         op.setResult(mem.read(op.getResult()));
+        op.setRdVal(op.getResult());
+        rf.regValIsReady(op.getRd());
         //pc.set(pcVal);
     }
 
@@ -71,6 +119,8 @@ public class LoadStoreUnit extends Unit{
     public void accept(Op.LdC op) {
         op.setResult(op.getImVal()); //copied from old ALU
         op.setResult(mem.read(op.getResult()));
+        op.setRdVal(op.getResult());
+        rf.regValIsReady(op.getRd());
         //pc.set(pcVal);
     }
 
@@ -102,6 +152,6 @@ public class LoadStoreUnit extends Unit{
     }
 
     protected String showUnit(){
-        return "LS";
+        return (rss.get(0).isBusy() ? "" + rss.get(0).op.getId() : "_") + "," + (rss.get(1).isBusy() ? "" + rss.get(1).op.getId() : "_") + "LS";
     }
 }

@@ -4,15 +4,12 @@ public class ArithmeticLogicUnit extends Unit {
 
     private final Map<Integer, List<Integer>> cdb;
     private final List<ReservationStation> rss;
-
-    private Instruction opFromQueue;
     private int currentRs;
     private final RegisterFile rf;
 
     ArithmeticLogicUnit(Map<Integer, List<Integer>> cdb, List<ReservationStation> rs, RegisterFile rf, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
         this.currentOp = null;
-        this.opFromQueue = null;
         this.currentRs = 0;
         this.rss = rs;
         this.rf = rf;
@@ -27,7 +24,6 @@ public class ArithmeticLogicUnit extends Unit {
                 PipelineEntry e = in.pull();
                 pcVal = e.getPcVal();
                 flag = e.getFlag();
-                opFromQueue = e.getOp();
                 rs.set(e, rf);
             }
         }
@@ -189,6 +185,6 @@ public class ArithmeticLogicUnit extends Unit {
     }
 
     protected String showUnit(){
-        return (rss.get(0).isBusy() ? "" + rss.get(0).op.getId() : "_") + (rss.get(1).isBusy() ? "" + rss.get(1).op.getId() : "_")  + "EX";
+        return (rss.get(0).isBusy() ? "" + rss.get(0).op.getId() : "_") + "," + (rss.get(1).isBusy() ? "" + rss.get(1).op.getId() : "_")  + "EX";
     }
 }
