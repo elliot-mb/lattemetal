@@ -1,4 +1,6 @@
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public abstract class Unit implements InstructionVoidVisitor {
 
@@ -11,7 +13,6 @@ public abstract class Unit implements InstructionVoidVisitor {
     protected final PipelineRegister[] ins;
     protected final PipelineRegister[] outs;
 
-    protected int inActive;
     protected final boolean[] outsChoice;
 
     protected Instruction currentOp;
@@ -23,29 +24,46 @@ public abstract class Unit implements InstructionVoidVisitor {
         this.ins = ins;
         this.outs = outs;
         this.outsChoice = new boolean[this.outs.length];
+        rstChosenOuts();
     }
 
-    protected void getActiveIn(){
-        boolean hasSet = false;
+    protected List<Integer> getActiveIn(){
+        List<Integer> inActive = new ArrayList<Integer>();
         int i = 0;
         for(PipelineRegister in : ins){
-            if(in.canPull() && !hasSet){
-                hasSet = true; //this should only occur once
-                inActive = i;
-            }else if(in.canPull()){
-                throw new RuntimeException("getActiveIn: this unit was sent more than one input instruction to process, should receive exactly one");
+            if(in.canPull()) {
+                inActive.add(i);
             }
             i++;
         }
+        return inActive;
+    }
+
+    private int oldestInInstr(){
+        int lowest = Integer.MAX_VALUE;
+        int i = 0;
+        int res = -1;
+        for(PipelineRegister in : ins){
+            if(in.canPull()) {
+                lowest = Math.min(in.peek().getOp().getId(), lowest);
+                res = i;
+            }
+            i++;
+        }
+        return res;
+    }
+
+    protected int selectionPriority(){
+        return oldestInInstr();
     }
 
     //default implementations
     protected void readOffPipeline(){
-        getActiveIn();
-        PipelineRegister in = ins[inActive];
-        pcVal = in.getPcVal();
-        flag = in.isFlag();
-        currentOp = in.pull();
+        PipelineRegister in = ins[selectionPriority()];
+        PipeRegEntry e = in.pull();
+        pcVal = e.getPcVal();
+        flag = e.getFlag();
+        currentOp = e.getOp();
     }
     protected void writeOnPipeline(){
         if(areOutsUnchosen()) throw new RuntimeException("writeOnPipeline: choose outputs before writing on the pipeline");
@@ -53,9 +71,8 @@ public abstract class Unit implements InstructionVoidVisitor {
         for(PipelineRegister out : outs){
             if(outsChoice[i]){
                 if(!out.canPush()) throw new RuntimeException("writeOnPipeline: chosen output cannot be written to, please check before calling");
-                out.setFlag(flag);
-                out.setPcVal(pcVal);
-                out.push(currentOp);
+                PipeRegEntry e = new PipeRegEntry(currentOp, pcVal, flag);
+                out.push(e);
             }
             i++;
         }
@@ -68,9 +85,10 @@ public abstract class Unit implements InstructionVoidVisitor {
     protected abstract void procInstruction(); //process instruction
     protected abstract boolean isUnfinished(); //when we need to count down instruction
 
-    private boolean canPullOffActiveIn(){
-        getActiveIn();
-        return ins[inActive].canPull();
+    protected boolean canPullOffActiveIn(){
+        if(getActiveIn().isEmpty()) return false;
+        int activeIn = selectionPriority();
+        return ins[activeIn].canPull();
     }
 
     //if all of our chosen outputs can be pushed onto, this returns true. otherwise we should stall
@@ -104,10 +122,12 @@ public abstract class Unit implements InstructionVoidVisitor {
 
     public void clk(){
         // we have processed this op, and if its not the case that we can pull in and push out to chosen outs, we stall (return)
-        if(isDone() && !(canPullOffActiveIn() && (areOutsUnchosen() || canPushOnChosenOuts()))) return;
+        if(isDone() && !(canPullOffActiveIn()))/* && (areOutsUnchosen() || canPushOnChosenOuts())))*/ return;
         if(isDone()) readOffPipeline(); //dont re-copy if we are mid-processing
         if(isUnfinished()) {
             procInstruction(); //always run at least once if isUnfinished is ever false
+                               //some unit stall with this instruction like the ALU while
+                               //while RSs wait for deps
         }
         if(isUnfinished()) return;
         currentOp.visit(this); // /!\ main processing happens here /!\ (forced to be implementation-defined)
@@ -125,7 +145,7 @@ public abstract class Unit implements InstructionVoidVisitor {
     abstract protected String showUnit();
 
     public String toString(){
-        return " " + (currentOp == null ? showUnit() : isUnfinished() ? "\s↘" : "\s|") + " ";//(currentOp != null ? Integer.toHexString(currentOp.getId() % 16) : "_");
+        return (currentOp == null ? showUnit() : isUnfinished() ? "\s↘" : "\s|");//(currentOp != null ? Integer.toHexString(currentOp.getId() % 16) : "_");
     }
 
     public void flush(){

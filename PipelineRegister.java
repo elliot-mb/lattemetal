@@ -1,65 +1,76 @@
+import java.nio.channels.Pipe;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.stream.Collectors;
 
-
+//these will become little queues now
 public class PipelineRegister {
 
-    //cannot be final because it MUST change
-    private Instruction inFlight;
-    private Integer pcVal;
-    private boolean flag; //used for a 'branch taken' bit
+    private final int size;
+    private CQueue<PipeRegEntry> queue;
 
-    PipelineRegister(){
-        inFlight = null;
-        pcVal = null;
-        flag = false;
+    PipelineRegister(int size){
+        this.size = size;
+        this.queue = new CQueue<PipeRegEntry>(size);
     }
 
     public void flush(){
-        if(canPull()) pull();
+        queue.empty();
     }
 
-    public void setPcVal(int count){
-        pcVal = count;
-    }
+//    public void setPcVal(int count){
+//        pcVal = count;
+//    }
 
-    public Integer getPcVal(){
-        if(pcVal == null) throw new RuntimeException("getPc: pc is null and was not set");
-        return pcVal;
-    }
+//    public Integer getPcVal(){
+//        if(pcVal == null) throw new RuntimeException("getPc: pc is null and was not set");
+//        return pcVal;
+//    }
 
-    public void setFlag(boolean val){
-        flag = val;
-    }
+//    public void setFlag(boolean val){
+//        flag = val;
+//    }
 
-    public boolean isFlag(){
-        return flag;
-    }
+//    public boolean isFlag(){
+//        return flag;
+//    }
 
     //push can stall (just if inFlight is not null)
-    public void push(Instruction op){
-        if(inFlight != null) throw new RuntimeException("push: pushing to a full pipereg");
-        inFlight = op.copy(); //copy it in
+    public void push(PipeRegEntry e){
+        if(queue.isFull()) throw new RuntimeException("push: pushing to a full pipereg");
+        queue.push(e.copy()); //make sure to copy
     }
 
     //can return null, indicating a stall
-    public Instruction pull(){
-        if(inFlight == null) throw new RuntimeException("pull: pulling from an empty pipereg");
-        Instruction result = inFlight.copy(); //copy it out, meaning we cant mutate the instruction inside even if we pull it out
-        inFlight = null; //reset
-        pcVal = null;
-        flag = false;
-        return result;
+    public PipeRegEntry pull(){
+        if(queue.isEmpty()) throw new RuntimeException("pull: pulling from an empty pipereg");
+        return queue.pop().copy();
     }
 
     public boolean canPush(){
-        return inFlight == null;
+        return !queue.isFull();
     }
 
     public boolean canPull(){
-        return inFlight != null;
+        return !queue.isEmpty();
+    }
+
+    public PipeRegEntry peek() {
+        List<PipeRegEntry> xs = queue.peekXs();
+        return xs.get(xs.size() - 1);
+    }
+
+    private String instrToId(Instruction op){
+        String pad = canPull() && (op.getId() % 100) < 10 ? "0" : "";
+        return "," + (canPull() ? pad + (op.getId() % 100) : "__");
     }
 
     public String toString(){
-        String pad = canPull() && (inFlight.getId() % 100) < 10 ? "0" : "";
-        return "" + (canPull() ? pad + (inFlight.getId() % 100) : "\s\s"); //+ "::" + pcVal;
+        String gaps = "";
+        for(int i = 0; i < queue.getSize() - queue.getElementsIn(); i++ ){
+            gaps += ",__";
+        }
+        return "[" + gaps + queue.peekXs().stream().map(PipeRegEntry::getOp).map(this::instrToId).collect(Collectors.joining()) + "]";
     }
 }

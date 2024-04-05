@@ -50,15 +50,15 @@ loop:       add s6 s5 t0            --loc + i
             addi s8 s8 #1           --            0              1   2
             add s0 s5 t0            -- loc + i
             addi s1 s0 #1           -- loc + i + 1 (copy to address swap registers in swap:)
-            brlz s8 swap
+            jplz s8 swap
 
 swapret:    addi t0 t0 #1           -- i++
             cmp s6 t0 s4            -- i < len - 1 ?
             addi s6 s6 #1           -- 0 1 2
-            brlz s6 loop
+            jplz s6 loop
 
 -- out of the loop now, we check if swaps occurred
-            brlz t1 halt
+            jplz t1 halt
             br start
 
-halt:
+halt:       addi t0 zero #1000

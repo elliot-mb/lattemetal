@@ -43,7 +43,7 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) throws FileNotFoundException {
-        String programPath = "./assembly/quot.latte";
+        String programPath = "./assembly/basic_block.latte";
         int printWidth = 1;
         boolean testing = false;
         if(args.length >= 1){

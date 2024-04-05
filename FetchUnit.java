@@ -21,21 +21,19 @@ public class FetchUnit extends Unit {
     @Override
     protected void procInstruction() {
         counter.decr();
+        currentOp = ic.getInstruction(pc.getCount());
     }
 
     @Override
     protected void readOffPipeline(){
-        getActiveIn();
-        PipelineRegister in = ins[inActive];
-        pcVal = in.getPcVal();
-        currentOp = ic.getInstruction(pcVal);
-        in.pull();
+        super.readOffPipeline();
         counter.rst();
     }
 
     @Override
     protected void writeOnPipeline() {
-        pcVal++; //incr then write the incremented value on pipeline
+        //incr then write the incremented value on pipeline
+        currentOp.visit(this);
         super.writeOnPipeline();
     }
 

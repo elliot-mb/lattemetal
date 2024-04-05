@@ -2,10 +2,13 @@
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BinaryOperator;
 
 public class Processor {
+    private final Map<Integer, List<Integer>> cdb;
     private final ProgramCounter pc;
     private final InstructionCache ic;
     private final IssueUnit isu;
@@ -15,54 +18,77 @@ public class Processor {
     private final FetchUnit feu;
     private final DecodeUnit deu;
     private final LoadStoreUnit lsu;
+    private final BranchUnit bru;
+    private final WriteBackUnit wbu;
     private final Scoreboard sb;
     private int tally;
-    private final WriteBackUnit wbu;
 
-    private final PipelineRegister prefec = new PipelineRegister(); //just to pass the pc value to the fetch unit, and increment it!
-    private final PipelineRegister feuIsu = new PipelineRegister();
-    private final PipelineRegister isuDeu = new PipelineRegister();
-    private final PipelineRegister deuAlu = new PipelineRegister();
-    private final PipelineRegister aluLsu = new PipelineRegister();
-    private final PipelineRegister lsuWbu = new PipelineRegister();
-    private final PipelineRegister voided = new PipelineRegister(); //ignored pipe register to satisfy Unit inheritence
+    private static final int ALU_RS_COUNT = 2;
+    private static final int LSU_RS_COUNT = 2;
+
+    private final List<ReservationStation> aluRs = new ArrayList<ReservationStation>();
+    //lsu? load store buffers?
+
+    private final PipelineRegister prefec = new PipelineRegister(1); //just to pass the pc value to the fetch unit, and increment it!
+    private final PipelineRegister fecDec = new PipelineRegister(1);
+    private final PipelineRegister deuIsu = new PipelineRegister(1);
+    private final PipelineRegister isuAlu = new PipelineRegister(1);
+    private final PipelineRegister isuLsu = new PipelineRegister(1);
+    private final PipelineRegister aluBru = new PipelineRegister(1);
+    private final PipelineRegister lsuBru = new PipelineRegister(1);
+    private final PipelineRegister bruWbu = new PipelineRegister(1);
+    //private final PipelineRegister aluLsu = new PipelineRegister();
+    private final PipelineRegister voided = new PipelineRegister(1); //ignored pipe register to satisfy Unit inheritence
 
     private final int DP_ACC = 2;
 
     Processor(InstructionCache ic, Memory... mem) throws RuntimeException{
         if(mem.length > 1) throw new RuntimeException("Processor: this constructor cannot have more than one memories");
+        this.cdb = new HashMap<Integer, List<Integer>>();
+        for(int i = 0; i < ALU_RS_COUNT; i++){
+            aluRs.add(new ReservationStation(cdb));
+        }
         this.sb = new Scoreboard();
         this.ic = ic;
         this.tally = 0;
         this.pc = new ProgramCounter(ic.numInstrs());
-        this.rf = new RegisterFile();
+        this.rf = new RegisterFile(cdb);
         this.mem = mem.length > 0 ? mem[0] : new Memory();
         this.feu = new FetchUnit(
                 this.ic,
                 this.pc,
                 new PipelineRegister[]{prefec},
-                new PipelineRegister[]{feuIsu});
+                new PipelineRegister[]{fecDec});
+        this.deu = new DecodeUnit(
+                this.rf,
+                new PipelineRegister[]{fecDec},
+                new PipelineRegister[]{deuIsu}); //loadstores go down the latter pipe
         this.isu = new IssueUnit(
                 this.sb,
                 this.rf,
-                new PipelineRegister[]{feuIsu},
-                new PipelineRegister[]{isuDeu});
-        this.deu = new DecodeUnit(
-                this.rf,
-                new PipelineRegister[]{isuDeu},
-                new PipelineRegister[]{deuAlu});
+                new PipelineRegister[]{deuIsu},
+                new PipelineRegister[]{isuAlu, isuLsu});
         this.alu = new ArithmeticLogicUnit(
-                new PipelineRegister[]{deuAlu},
-                new PipelineRegister[]{aluLsu});
+                this.cdb,
+                this.sb,
+                this.aluRs,
+                this.rf,
+                new PipelineRegister[]{isuAlu},
+                new PipelineRegister[]{aluBru});
         this.lsu = new LoadStoreUnit(
+                this.sb,
                 this.mem,
+                new PipelineRegister[]{isuLsu},
+                new PipelineRegister[]{lsuBru});
+        this.bru = new BranchUnit(
                 this.pc,
-                new PipelineRegister[]{aluLsu},
-                new PipelineRegister[]{lsuWbu});
+                new PipelineRegister[]{aluBru, lsuBru},
+                new PipelineRegister[]{bruWbu}
+        );
         this.wbu = new WriteBackUnit(
                 this.rf,
                 this.sb,
-                new PipelineRegister[]{lsuWbu},
+                new PipelineRegister[]{bruWbu},
                 new PipelineRegister[]{voided});
     }
 
@@ -75,8 +101,9 @@ public class Processor {
 
 
     private boolean isPipelineBeingUsed(){
-        return prefec.canPull() || feuIsu.canPull() || isuDeu.canPull() || deuAlu.canPull() || aluLsu.canPull() || lsuWbu.canPull() || voided.canPull() ||
-                !wbu.isDone() || !lsu.isDone() || !alu.isDone() || !deu.isDone() || !feu.isDone() || !isu.isDone();
+        return prefec.canPull() || fecDec.canPull() || deuIsu.canPull() || isuAlu.canPull() || isuLsu.canPull() ||
+                bruWbu.canPull() || aluBru.canPull() || voided.canPull() || !wbu.isDone() || !lsu.isDone() ||
+                lsuBru.canPull() || !alu.isDone() || !deu.isDone() || !feu.isDone() || !isu.isDone();
     }
 
     private void flushPipeline(){
@@ -88,42 +115,46 @@ public class Processor {
         lsu.flush();
         wbu.flush();
         prefec.flush();
-        feuIsu.flush();
-        isuDeu.flush();
-        deuAlu.flush();
-        aluLsu.flush();
-        lsuWbu.flush();
+        fecDec.flush();
+        deuIsu.flush();
+        isuAlu.flush();
+        isuLsu.flush();
+        aluBru.flush();
+        lsuBru.flush();
+        bruWbu.flush();
         voided.flush();
     }
 
     public Memory run(PrintStream debugOut){
         debugOut.println(ic);
-        voided.push(Utils.opFactory.new No());
-        voided.setPcVal(0);
+        voided.push(new PipeRegEntry(Utils.opFactory.new No(), 0, false));
         int retiredInstrCount = 0;
         List<Instruction> retiredInstrs = new ArrayList<Instruction>();
 
         //AbstractMap<Instruction, Integer> inFlights = new HashMap<Instruction, Integer>();
         while(isPipelineBeingUsed() || !pc.isDone()){
+            debugOut.println("\t[" + prefec + feu + " " + fecDec + " " + deu + " " + deuIsu+ " " + isu + " " + "(" + isuAlu + ","
+                    + isuLsu + ") (" + alu + "," + lsu + ") (" + aluBru + "," + lsuBru + ") " + bru + " " + bruWbu + " "
+                    + wbu + voided + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + retiredInstrCount + "\t" + rf);
             wbu.clk();
+            bru.clk();
+            if(bru.needsFlushing()) flushPipeline();
             lsu.clk();
-            if(lsu.needsFlushing()) flushPipeline();
             alu.clk();
-            deu.clk();
             isu.clk();
+            deu.clk();
             feu.clk();
-            debugOut.println("\t[" + feu + feuIsu + isu + isuDeu + deu + deuAlu + alu + aluLsu + lsu + lsuWbu + wbu + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + rf);
             if(prefec.canPush() && !pc.isDone()){//&& !(!voided.canPull() && fe.getIsBranch())) {
-                prefec.push(Utils.opFactory.new No());
-                prefec.setPcVal(pc.getCount());
+                prefec.push(new PipeRegEntry(Utils.opFactory.new No(), pc.getCount(), false));
                 //pc.incr();
             }
             tally++;
             if(voided.canPull()) {
-                retiredInstrs.add(voided.pull());
+                retiredInstrs.add(voided.pull().getOp());
                 retiredInstrCount++;
             } //delete whats inside (voided is used to detect when writebacks are finished)
             if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");
+            cdb.clear();
         }
         debugOut.println("registers (dirty): " + rf);
         debugOut.println("memory: " + mem);

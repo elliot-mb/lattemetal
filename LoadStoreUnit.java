@@ -6,24 +6,12 @@ public class LoadStoreUnit extends Unit{
     private static final int NOP_LATENCY = 1;
     private final Memory mem;
 
-    private final ProgramCounter pc;
-
     private Durate counter = new Durate(L1_LATENCY);
     private Durate counterNop = new Durate(NOP_LATENCY);
 
-    private boolean shouldFlush = false;
-
-
-    LoadStoreUnit(Memory mem, ProgramCounter pc, PipelineRegister[] ins, PipelineRegister[] outs){
+    LoadStoreUnit(Scoreboard sb, Memory mem, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
-        this.pc = pc;
         this.mem = mem;
-    }
-
-    @Override
-    public void flush(){
-        super.flush();
-        shouldFlush = false; //once we flush we dont want to flush again next cycle
     }
 
     @Override
@@ -74,67 +62,43 @@ public class LoadStoreUnit extends Unit{
 
     @Override
     public void accept(Op.Ld op) {
+        op.setResult(op.getRsVal() + op.getImVal()); //copied from old ALU
         op.setResult(mem.read(op.getResult()));
         //pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.LdC op) {
+        op.setResult(op.getImVal()); //copied from old ALU
         op.setResult(mem.read(op.getResult()));
         //pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.St op) {
+        op.setResult(op.getRsVal() + op.getImVal()); //copied from old ALU
         mem.set(op.getRdVal(), op.getResult());
         //pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.BrLZ op) {
-        if(flag){
-            //we only need to reset to destination if we didnt set it correctly
-            //(if we predicted wrong)
-            pc.set(op.getResult());
-        }else{
-            pc.set(pcVal);
-        }
-        //if we got it wrong we flush
-        if(flag != STATIC_PREDICT_BR_TAKEN){
-            shouldFlush = true;
-        }
+
     }
 
     @Override
     public void accept(Op.JpLZ op) {
-        if(flag){
-            pc.set(op.getResult());
-        }else{
-            pc.set(pcVal);
-        }
-        if(flag != STATIC_PREDICT_BR_TAKEN){
-            shouldFlush = true;
-        }
+
     }
 
     @Override
     public void accept(Op.Br op) {
-        pc.set(op.getResult());
+
     }
 
     @Override
     public void accept(Op.Jp op) {
-        pc.set(op.getResult());
-    }
 
-    /**
-     *
-     * WILL BE PUT INTO A BRANCH UNIT
-     *
-     */
-
-    public boolean needsFlushing(){
-        return shouldFlush;
     }
 
     protected String showUnit(){
