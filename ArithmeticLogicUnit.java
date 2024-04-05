@@ -5,12 +5,15 @@ public class ArithmeticLogicUnit extends Unit {
     private final Map<Integer, List<Integer>> cdb;
     private final Forwarder fwd; //Probably obsolete; remove once resi stations are done !
     private final List<ReservationStation> rss;
+
+    private Instruction opFromQueue;
     private int currentRs;
     private final RegisterFile rf;
 
     ArithmeticLogicUnit(Map<Integer, List<Integer>> cdb, Scoreboard sb, List<ReservationStation> rs, RegisterFile rf, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
         this.currentOp = null;
+        this.opFromQueue = null;
         this.currentRs = 0;
         this.fwd = new Forwarder();
         this.rss = rs;
@@ -22,40 +25,45 @@ public class ArithmeticLogicUnit extends Unit {
     protected void readOffPipeline(){
         for(ReservationStation rs : rss){
             if(canPullOffActiveIn() && !rs.isBusy() && ins[getActiveIn()].canPull()){ //can read multiple times off the queue
-                super.readOffPipeline();
-                RegisterName regD = currentOp.getRd();
-                RegisterName regS = currentOp.getRs();
-                RegisterName regT = currentOp.getRt();
-
+                PipelineRegister in = ins[getActiveIn()];
+                PipeRegEntry e = in.pull();
+                pcVal = e.getPcVal();
+                flag = e.getFlag();
+                opFromQueue = e.getOp();
+                rs.op = opFromQueue;
+                RegisterName regD = opFromQueue.getRd();
+                RegisterName regS = opFromQueue.getRs();
+                RegisterName regT = opFromQueue.getRt();
+//              store neesd to knwo waht Rd IS SO IM NOT SURE WHAT TO DO
                 RegisterName regJ = regS;
                 RegisterName regK = regT;
 
                 if(regJ != null && rf.isRegValReady(regJ)){
                     rs.vJ = rf.getReg(regJ);
+                    rs.rJ = true; //ready up
                 }else if(regJ != null){
                     rs.qJ = rf.whereRegVal(regJ);
                 }
                 if(regK != null && rf.isRegValReady(regK)){
                     rs.vK = rf.getReg(regK);
+                    rs.rK = true; //ready up
                 }else if(regK != null){
                     rs.qK = rf.whereRegVal(regK);
                 }
-                rs.busy = true;
-                rs.op = currentOp;
-                if(currentOp.getRd() != null) rf.pointAtResStation(currentOp.getRd(), rs);
+                rs.busy = true;                   // stores do not write to registers
+                if(opFromQueue.getRd() != null && opFromQueue.visit(new Id()) != Opcode.st) rf.pointAtResStation(opFromQueue.getRd(), rs);
             }
         }
-        currentOp = null;
     }
 
     @Override
     protected void procInstruction() {
         for(ReservationStation rs : rss){
-            rs.update();
+            if(rs.isBusy()) rs.update(); //dont update those with no instruction inside
+            //System.out.println("UPDATED AND NOW " + rs.isReady());
             if(currentOp == null && rs.isReady()){
                 currentOp = rs.op;
                 currentRs = rs.getId(); //should only be reset after we finish processing stuff
-
             }
         }
         if(currentOp != null) currentOp.decr();
@@ -64,7 +72,7 @@ public class ArithmeticLogicUnit extends Unit {
 
     @Override
     protected boolean isUnfinished() {
-        return !isDone() && !currentOp.isDone(); //if we arent done with the inner up, and its not blank
+        return currentOp == null; //if we arent done with the inner up, and its not blank
     }
 
     @Override

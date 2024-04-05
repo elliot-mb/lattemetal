@@ -51,7 +51,7 @@ public class ReservationStation implements InstructionVoidVisitor {
     }
 
     public boolean isReady(){
-        return rJ && rK;
+        return (qJ == null || rJ) && (qK == null || rK); //if qi is null that means there is no resevation station assigned to ti
     }
 
     @Override
@@ -94,7 +94,7 @@ public class ReservationStation implements InstructionVoidVisitor {
 
     @Override
     public void accept(Op.St op) {
-        op.setRsVal(vJ);
+        op.setRdVal(vJ);
     }
 
     @Override
