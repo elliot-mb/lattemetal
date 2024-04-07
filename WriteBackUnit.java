@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +49,9 @@ public class WriteBackUnit extends Unit{
 
     private void setRdToRes(RegisterName rd, int result){
 //        rf.setReg(rd, result); change this to setting it on the common data bus!
-        cdb.put()
+        
+
+        //cdb.put(currentRobEntry, List.of(result)); do this earlier! at like after the lsu and wbu complete
     }
 
     // all the below methods write back to the registers correctly
