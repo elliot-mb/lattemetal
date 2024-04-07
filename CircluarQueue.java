@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
 //circular queue
 public class CircluarQueue<T> {
     private List<T> xs;

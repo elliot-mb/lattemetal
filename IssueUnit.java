@@ -7,25 +7,18 @@ public class IssueUnit extends Unit{
     private final RegisterFile rf;
 
     private final ReorderBuffer rob;
-    private ArrayList<RegisterName> deps;
 
     IssueUnit(RegisterFile rf, ReorderBuffer rob, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
         this.rf = rf;
         this.rob = rob;
-        this.deps = new ArrayList<>();
     }
 
     @Override
     protected void readOffPipeline(){
         super.readOffPipeline();
-
         //copyToDepsC(deps);
         //dependencies.add(Lookup.reg.get("zero")); // initial fake dependency just to get it to check
-    }
-
-    private boolean hasDeps(){
-        return deps.size() > 0;
     }
 
     @Override
@@ -38,7 +31,6 @@ public class IssueUnit extends Unit{
     @Override
     public void flush(){
         super.flush();
-        deps = new ArrayList<RegisterName>();
     }
 
     @Override
@@ -60,62 +52,62 @@ public class IssueUnit extends Unit{
 
     @Override
     public void accept(Op.Add op) {
-
+        rob.add(new ReorderEntry(op, op.getRd().ordinal()));
     }
 
     @Override
     public void accept(Op.AddI op) {
-
+        rob.add(new ReorderEntry(op, op.getRd().ordinal()));
     }
 
     @Override
     public void accept(Op.Mul op) {
-
+        rob.add(new ReorderEntry(op, op.getRd().ordinal()));
     }
 
     @Override
     public void accept(Op.MulI op) {
-
+        rob.add(new ReorderEntry(op, op.getRd().ordinal()));
     }
 
     @Override
     public void accept(Op.Cmp op) {
-
+        rob.add(new ReorderEntry(op, op.getRd().ordinal()));
     }
 
     @Override
     public void accept(Op.Ld op) {
-
+        rob.add(new ReorderEntry(op, op.getRd().ordinal()));
     }
 
     @Override
     public void accept(Op.LdC op) {
-
+        rob.add(new ReorderEntry(op, op.getRd().ordinal()));
     }
 
     @Override
     public void accept(Op.St op) {
-
+        rob.add(new ReorderEntry(op, op.getRsVal() + op.getIm()));
     }
 
     @Override
     public void accept(Op.BrLZ op) {
-
+        rob.add(new ReorderEntry(op, ReorderBuffer.NO_DEST));
     }
 
     @Override
     public void accept(Op.JpLZ op) {
-
+        rob.add(new ReorderEntry(op, ReorderBuffer.NO_DEST));
     }
 
     @Override
     public void accept(Op.Br op) {
-
+        rob.add(new ReorderEntry(op, ReorderBuffer.NO_DEST));
     }
 
     @Override
     public void accept(Op.Jp op) {
-
+        rob.add(new ReorderEntry(op, ReorderBuffer.NO_DEST));
     }
 
     protected String showUnit(){

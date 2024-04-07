@@ -142,7 +142,7 @@ public class Processor {
         while(isPipelineBeingUsed() || !pc.isDone()){
             debugOut.println("\t[" + prefec + feu + " " + fecDec + " " + deu + " " + deuIsu+ " " + isu + " " + "(" + isuAlu + ","
                     + isuLsu + ") (" + alu + ", " + lsu + ") (" + aluBru + "," + lsuBru + ") " + bru + " " + bruWbu + " "
-                    + wbu + voided + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + retiredInstrCount + "\t" + rf);
+                    + wbu + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + retiredInstrCount + "\t" + rob);
             wbu.clk();
             bru.clk();
             if(bru.needsFlushing()) flushPipeline();
