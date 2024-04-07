@@ -30,6 +30,22 @@ public class ReorderBuffer {
         return "[" + gaps + buffer.peekXs().stream().map(ReorderEntry::toString).map(this::appendComma).collect(Collectors.joining()) + "]";
     }
 
+    public void setValOfEntry(int id, int val){
+        List<ReorderEntry> re = buffer.peekXs();
+        int index = -1;
+        int i = buffer.getElementsIn() - 1;
+        for(ReorderEntry r : re){
+            if(r.id == id) {
+                index = i;
+            }
+            i--;
+        }
+        if(index == -1) throw new RuntimeException("setValOfEntry: there is no such entry with id '" + id + "' in reorder buffer");
+        ReorderEntry rChange = re.get(index);
+        rChange.setValue(val);
+        buffer.setElement(i, rChange);
+    }
+
     public Integer tailId(){
         if(buffer.isEmpty()) return null;
         List<ReorderEntry> re = buffer.peekXs();

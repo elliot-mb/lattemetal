@@ -43,7 +43,7 @@ public class ArithmeticLogicUnit extends Unit {
             //System.out.println("UPDATED AND NOW " + rs.isReady());
             if(currentOp == null && rs.isBusy() && rs.isReady()){
                 currentRobEntry = rs.robEntry;
-                currentOp = rs.op;
+                currentOp = rs.getOp();
                 currentOp.rst();
                 currentRs = rs.getId() - baseRs; //should only be reset after we finish processing stuff
             }
@@ -82,14 +82,14 @@ public class ArithmeticLogicUnit extends Unit {
     protected void writeOnPipeline(){
         super.writeOnPipeline();
         cdb.put(currentRobEntry, Collections.singletonList(currentOp.getResult()));
-        rss.get(currentRs).busy = false;
+        rss.get(currentRs).setIsBusy(false);
     }
 
     @Override
     public void accept(Op.Add op) {
         //modify register value = op.getRsVal() + op.getRtVal(); // i guess we can just write into the instruction
         //and then create a writeback stage
-        op.setResult(op.getRsVal() + op.getRtVal());
+        op.setResult(rss.get(currentRs).getvJ() + rss.get(currentRs).getvK());
         op.setRdVal(op.getResult());
         prf.regValIsReady(currentOp.getRd().ordinal());
 //        fwd.setSlotReg(op.getRd());
@@ -99,7 +99,7 @@ public class ArithmeticLogicUnit extends Unit {
     @Override
     public void accept(Op.AddI op) {
         // modify register value = op.getRsVal() + op.getImVal();
-        op.setResult(op.getRsVal() + op.getImVal());
+        op.setResult(rss.get(currentRs).getvJ() + op.getImVal());
         op.setRdVal(op.getResult());
         prf.regValIsReady(currentOp.getRd().ordinal());
 //        fwd.setSlotReg(op.getRd());
@@ -109,7 +109,7 @@ public class ArithmeticLogicUnit extends Unit {
     @Override
     public void accept(Op.Mul op) {
         // modify register value = op.getRsVal() * op.getRtVal();
-        op.setResult(op.getRsVal() * op.getRtVal());
+        op.setResult(rss.get(currentRs).getvJ() * rss.get(currentRs).getvK());
         op.setRdVal(op.getResult());
         prf.regValIsReady(currentOp.getRd().ordinal());
 //        fwd.setSlotReg(op.getRd());
@@ -119,7 +119,7 @@ public class ArithmeticLogicUnit extends Unit {
     @Override
     public void accept(Op.MulI op) {
         // modify register value = op.getRsVal() * op.getImVal();
-        op.setResult(op.getRsVal() * op.getImVal());
+        op.setResult(rss.get(currentRs).getvJ() * op.getImVal());
         op.setRdVal(op.getResult());
         prf.regValIsReady(currentOp.getRd().ordinal());
 //        fwd.setSlotReg(op.getRd());
@@ -129,8 +129,8 @@ public class ArithmeticLogicUnit extends Unit {
     @Override
     public void accept(Op.Cmp op) {
         // modify rd value
-        final int a = op.getRsVal();
-        final int b = op.getRtVal();
+        final int a = rss.get(currentRs).getvJ();
+        final int b = rss.get(currentRs).getvK();
         int cmpResult;
         if(a < b) cmpResult = -1;
         else if(a == b) cmpResult = 0;
@@ -198,6 +198,6 @@ public class ArithmeticLogicUnit extends Unit {
     }
 
     protected String showUnit(){
-        return (rss.get(0).isBusy() ? "" + rss.get(0).op.getId() : "_") + "," + (rss.get(1).isBusy() ? "" + rss.get(1).op.getId() : "_")  + "EX";
+        return (rss.get(0).isBusy() ? "" + rss.get(0).getOp().getId() : "_") + "," + (rss.get(1).isBusy() ? "" + rss.get(1).getOp().getId() : "_")  + "EX";
     }
 }

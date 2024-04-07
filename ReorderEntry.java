@@ -14,7 +14,9 @@ public class ReorderEntry {
         uId++;
     }
 
-
+    public void setValue(int value){
+        this.value = value;
+    }
 
     public String toString(){
         int id =  op.getId() % 100;

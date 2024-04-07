@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 //circular queue
 public class CircluarQueue<T> {
@@ -34,6 +33,11 @@ public class CircluarQueue<T> {
         return elementsIn;
     }
 
+    public void setElement(int i, T newE){
+        if(i >= elementsIn) throw new RuntimeException("setElement: setting element outside of queue");
+        xs.set(itemIFromHead(i), newE);
+    }
+
     public void push(T x){
         if(isFull()) {
             System.out.println("CQueue.push: warning: queue is full");
@@ -63,11 +67,15 @@ public class CircluarQueue<T> {
         return elementsIn >= size;
     }
 
+    private int itemIFromHead(int i){
+        return (head - i - 1 + size) % size;
+    }
+
     public List<T> peekXs(){
         List<T> ret = new ArrayList<T>();
 
         for(int i = 0; i < elementsIn; i++){
-            ret.add(xs.get((head - i - 1 + size) % size));
+            ret.add(xs.get(itemIFromHead(i)));
         }
 
         return ret;

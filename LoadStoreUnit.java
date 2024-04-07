@@ -8,6 +8,7 @@ public class LoadStoreUnit extends Unit{
     private static final int NOP_LATENCY = 1;
     private final Memory mem;
 
+    private final ReorderBuffer rob;
     private int currentRs;
     private final int baseRs;
 
@@ -28,6 +29,7 @@ public class LoadStoreUnit extends Unit{
         this.rf = rf;
         this.cdb = cdb;
         this.prf = prf;
+        this.rob = rob;
     }
 
     @Override
@@ -54,7 +56,7 @@ public class LoadStoreUnit extends Unit{
             if(currentOp == null && rs.isReady()){
                 currentRobEntry = rs.robEntry;
                 counter.rst();
-                currentOp = rs.op;
+                currentOp = rs.getOp();
                 currentRs = rs.getId() - baseRs; //should only be reset after we finish processing stuff
             }
         }
@@ -79,7 +81,7 @@ public class LoadStoreUnit extends Unit{
         super.writeOnPipeline();
         cdb.put(currentRobEntry, Collections.singletonList(currentOp.getResult()));
 
-        rss.get(currentRs).busy = false;
+        rss.get(currentRs).setIsBusy(false);
     }
 
     @Override
@@ -120,7 +122,7 @@ public class LoadStoreUnit extends Unit{
 
     @Override
     public void accept(Op.Ld op) {
-        op.setResult(op.getRsVal() + op.getImVal()); //copied from old ALU
+        op.setResult(rss.get(currentRs).getvJ() + op.getImVal()); //copied from old ALU
         op.setResult(mem.read(op.getResult()));
         op.setRdVal(op.getResult());
         prf.regValIsReady(currentOp.getRd().ordinal());
@@ -138,9 +140,11 @@ public class LoadStoreUnit extends Unit{
 
     @Override
     public void accept(Op.St op) {
-        op.setResult(op.getRsVal() + op.getImVal()); //copied from old ALU
-        mem.set(op.getRdVal(), op.getResult());
-        if(prf) //add to prf if the value to be written is ready!!!!! JUST FOR STORE GODDAMN IT
+        op.setResult(rss.get(currentRs).getvJ() + op.getImVal()); //copied from old ALU
+        //mem.set(op.getRdVal(), op.getResult());
+        if(prf.isRegValReady(op.getRd().ordinal())){
+            rob.setValOfEntry(currentRobEntry, rf.getReg(op.getRd()));//add to prf if the value to be written is ready!!!!! JUST FOR STORE GODDAMN IT
+        }
         //pc.set(pcVal);
     }
 
@@ -165,6 +169,6 @@ public class LoadStoreUnit extends Unit{
     }
 
     protected String showUnit(){
-        return (rss.get(0).isBusy() ? "" + rss.get(0).op.getId() : "_") + "," + (rss.get(1).isBusy() ? "" + rss.get(1).op.getId() : "_") + "LS";
+        return (rss.get(0).isBusy() ? "" + rss.get(0).getOp().getId() : "_") + "," + (rss.get(1).isBusy() ? "" + rss.get(1).getOp().getId() : "_") + "LS";
     }
 }

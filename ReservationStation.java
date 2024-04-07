@@ -5,10 +5,10 @@ public class ReservationStation implements InstructionVoidVisitor {
     public static final int NO_DEPENDENCY = -1;
     public static int uId = 0;
     public final int id;
-    public Instruction op;
-    public int qJ, qK;
-    public int vJ, vK;
-    public boolean rJ, rK, busy;
+    private Instruction op;
+    private int qJ, qK;
+    private int vJ, vK;
+    private boolean rJ, rK, busy;
 
     public int robEntry;
 
@@ -27,6 +27,14 @@ public class ReservationStation implements InstructionVoidVisitor {
 
     public boolean isBusy(){
         return busy;
+    }
+
+    public void setIsBusy(boolean busy){
+        this.busy = busy;
+    }
+
+    public Instruction getOp(){
+        return op;
     }
 
     public void flush(){
@@ -98,6 +106,16 @@ public class ReservationStation implements InstructionVoidVisitor {
 
     public boolean isReady(){
         return (qJ  == NO_DEPENDENCY || rJ) && (qK == NO_DEPENDENCY || rK); //if qi is null that means there is no resevation station assigned to ti
+    }
+
+    public int getvJ(){
+        if(!rJ) throw new RuntimeException("getvJ: reservation station has an unready value which cannot be read");
+        return vJ;
+    }
+
+    public int getvK(){
+        if(!rK) throw new RuntimeException("getvK: reservation station has an unready value which cannot be read");
+        return vK;
     }
 
     @Override

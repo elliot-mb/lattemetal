@@ -21,6 +21,7 @@ public class Processor {
     private final BranchUnit bru;
     private final WriteBackUnit wbu;
     private final ReorderBuffer rob;
+    private final PhysicalRegFile prf;
     private int tally;
 
     private static final int ALU_RS_COUNT = 2;
@@ -59,6 +60,7 @@ public class Processor {
         this.tally = 0;
         this.pc = new ProgramCounter(ic.numInstrs());
         this.rf = new RegisterFile(cdb);
+        this.prf = new PhysicalRegFile(cdb);
         this.mem = mem.length > 0 ? mem[0] : new Memory();
         this.feu = new FetchUnit(
                 this.ic,
@@ -80,12 +82,14 @@ public class Processor {
                 this.cdb,
                 this.aluRs,
                 this.rf,
+                this.prf,
                 new PipelineRegister[]{isuAlu},
                 new PipelineRegister[]{aluBru});
         this.lsu = new LoadStoreUnit(
                 this.mem,
                 this.lsuRs,
                 this.rf,
+                this.prf,
                 this.cdb,
                 this.rob,
                 new PipelineRegister[]{isuLsu},
