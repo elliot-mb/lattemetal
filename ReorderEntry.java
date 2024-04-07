@@ -1,6 +1,6 @@
 public class ReorderEntry {
 
-    public static int uId = 0;
+    public static int uId = RegisterFile.NUM_REGS + 1; //start above register values so locations dont collide
     public final int id;
     private final Instruction op;
     private final int destination; // register number OR memory address for where instruction result is written

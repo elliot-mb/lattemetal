@@ -2,10 +2,11 @@ import java.util.List;
 import java.util.Map;
 
 public class ReservationStation implements InstructionVoidVisitor {
+    public static final int NO_DEPENDENCY = -1;
     public static int uId = 0;
     public final int id;
     public Instruction op;
-    public ReservationStation qJ, qK;
+    public int qJ, qK;
     public int vJ, vK;
     public boolean rJ, rK, busy;
 
@@ -31,8 +32,8 @@ public class ReservationStation implements InstructionVoidVisitor {
     public void flush(){
         this.busy = false;
         this.op = null;
-        this.qJ = null;
-        this.qK = null;
+        this.qJ = NO_DEPENDENCY; //rob entry id
+        this.qK = NO_DEPENDENCY; //rob entry id
         this.vJ = 0;
         this.vK = 0;
         this.rJ = false;
@@ -42,15 +43,16 @@ public class ReservationStation implements InstructionVoidVisitor {
 
     public void set(PipelineEntry e, RegisterFile rf, int robEntry){
         op = e.getOp();
-        List<RegisterName> sources = op.visit(new SourceRegVisitor());
-        List<RegisterName> dest = op.visit(new DestRegVisitor());
+        List<Integer> sources = op.visit(new SourceLocVisitor());
+        List<Integer> dest = op.visit(new DestLocVisitor());
 
-        RegisterName regJ = sources.isEmpty() ? null : sources.get(0);
-        RegisterName regK = sources.size() <= 1 ? null : sources.get(1);
+        Integer regJ = sources.isEmpty() ? null : sources.get(0);
+        Integer regK = sources.size() <= 1 ? null : sources.get(1);
 
         if(regJ != null && rf.isRegValReady(regJ)){
             vJ = rf.getReg(regJ);
             rJ = true; //ready up
+            qJ = NO_DEPENDENCY;
         }else if(regJ != null){
             qJ = rf.whereRegVal(regJ);
             rJ = false;
@@ -61,6 +63,7 @@ public class ReservationStation implements InstructionVoidVisitor {
         if(regK != null && rf.isRegValReady(regK)){
             vK = rf.getReg(regK);
             rK = true; //ready up
+            qK = NO_DEPENDENCY;
         }else if(regK != null){
             qK = rf.whereRegVal(regK);
             rJ = false;
@@ -70,7 +73,7 @@ public class ReservationStation implements InstructionVoidVisitor {
         }
 
         busy = true;
-        if(!dest.isEmpty()) rf.pointAtResStation(dest.get(0), this);
+        if(!dest.isEmpty()) rf.pointAtRobEntry(dest.get(0), robEntry); //tell the register file to point at the rob entry of the instruction in this rs, IF there is a result
         this.robEntry = robEntry;
     }
 

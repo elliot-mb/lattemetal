@@ -19,7 +19,7 @@ public class Op {
             return v.accept(this);
         }
         @Override
-        public List<RegisterName> visit(InstructionRegVisitor v) {
+        public List<Integer> visit(InstructionLocVisitor v) {
             return v.accept(this);
         }
         @Override
@@ -58,7 +58,7 @@ public class Op {
             return v.accept(this);
         }
         @Override
-        public List<RegisterName> visit(InstructionRegVisitor v) {
+        public List<Integer> visit(InstructionLocVisitor v) {
             return v.accept(this);
         }
         @Override
@@ -95,7 +95,7 @@ public class Op {
             return v.accept(this);
         }
         @Override
-        public List<RegisterName> visit(InstructionRegVisitor v) {
+        public List<Integer> visit(InstructionLocVisitor v) {
             return v.accept(this);
         }
         @Override
@@ -134,7 +134,7 @@ public class Op {
             return v.accept(this);
         }
         @Override
-        public List<RegisterName> visit(InstructionRegVisitor v) {
+        public List<Integer> visit(InstructionLocVisitor v) {
             return v.accept(this);
         }
         @Override
@@ -172,7 +172,7 @@ public class Op {
             return v.accept(this);
         }
         @Override
-        public List<RegisterName> visit(InstructionRegVisitor v) {
+        public List<Integer> visit(InstructionLocVisitor v) {
             return v.accept(this);
         }
         @Override
@@ -209,7 +209,7 @@ public class Op {
         @Override
         public Opcode visit(InstructionCodeVisitor v) { return v.accept(this); }
         @Override
-        public List<RegisterName> visit(InstructionRegVisitor v) {
+        public List<Integer> visit(InstructionLocVisitor v) {
             return v.accept(this);
         }
         @Override
@@ -246,7 +246,7 @@ public class Op {
             return v.accept(this);
         }
         @Override
-        public List<RegisterName> visit(InstructionRegVisitor v) {
+        public List<Integer> visit(InstructionLocVisitor v) {
             return v.accept(this);
         }
         @Override
@@ -280,7 +280,7 @@ public class Op {
             return v.accept(this);
         }
         @Override
-        public List<RegisterName> visit(InstructionRegVisitor v) {
+        public List<Integer> visit(InstructionLocVisitor v) {
             return v.accept(this);
         }
         @Override
@@ -318,7 +318,7 @@ public class Op {
         }
 
         @Override
-        public List<RegisterName> visit(InstructionRegVisitor v) {
+        public List<Integer> visit(InstructionLocVisitor v) {
             return v.accept(this);
         }
         @Override
@@ -349,7 +349,7 @@ public class Op {
         @Override
         public Opcode visit(InstructionCodeVisitor v) { return v.accept(this); }
         @Override
-        public List<RegisterName> visit(InstructionRegVisitor v) {
+        public List<Integer> visit(InstructionLocVisitor v) {
             return v.accept(this);
         }
         @Override
@@ -382,7 +382,7 @@ public class Op {
             return v.accept(this);
         }
         @Override
-        public List<RegisterName> visit(InstructionRegVisitor v) {
+        public List<Integer> visit(InstructionLocVisitor v) {
             return v.accept(this);
         }
         @Override
@@ -412,7 +412,7 @@ public class Op {
             return v.accept(this);
         }
         @Override
-        public List<RegisterName> visit(InstructionRegVisitor v) {
+        public List<Integer> visit(InstructionLocVisitor v) {
             return v.accept(this);
         }
         @Override
@@ -440,7 +440,7 @@ public class Op {
             return v.accept(this);
         }
         @Override
-        public List<RegisterName> visit(InstructionRegVisitor v) {
+        public List<Integer> visit(InstructionLocVisitor v) {
             return v.accept(this);
         }
         @Override

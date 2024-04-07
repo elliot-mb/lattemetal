@@ -51,7 +51,7 @@ public abstract class Instruction extends Durate {
     }
 
     abstract public Opcode visit(InstructionCodeVisitor v);
-    abstract public List<RegisterName> visit(InstructionRegVisitor v);
+    abstract public List<Integer> visit(InstructionLocVisitor v);
     abstract public void visit(InstructionVoidVisitor v);
 
     protected String regToString(RegisterName r){
