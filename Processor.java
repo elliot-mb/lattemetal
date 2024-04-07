@@ -87,6 +87,7 @@ public class Processor {
                 this.lsuRs,
                 this.rf,
                 this.cdb,
+                this.rob,
                 new PipelineRegister[]{isuLsu},
                 new PipelineRegister[]{lsuBru});
         this.bru = new BranchUnit(

@@ -41,7 +41,7 @@ public class ReservationStation implements InstructionVoidVisitor {
         this.robEntry = 0;
     }
 
-    public void set(PipelineEntry e, RegisterFile rf, int robEntry){
+    public void set(PipelineEntry e, PhysicalRegFile prf, RegisterFile rf, int robEntry){
         op = e.getOp();
         List<Integer> sources = op.visit(new SourceLocVisitor());
         List<Integer> dest = op.visit(new DestLocVisitor());
@@ -49,23 +49,23 @@ public class ReservationStation implements InstructionVoidVisitor {
         Integer regJ = sources.isEmpty() ? null : sources.get(0);
         Integer regK = sources.size() <= 1 ? null : sources.get(1);
 
-        if(regJ != null && rf.isRegValReady(regJ)){
-            vJ = rf.getReg(regJ);
+        if(regJ != null && prf.isRegValReady(regJ)){
+            vJ = rf.getReg(null, regJ);
             rJ = true; //ready up
             qJ = NO_DEPENDENCY;
         }else if(regJ != null){
-            qJ = rf.whereRegVal(regJ);
+            qJ = prf.whereDestVal(regJ);
             rJ = false;
         }
         if(regJ == null){
             rJ = true;
         }
-        if(regK != null && rf.isRegValReady(regK)){
-            vK = rf.getReg(regK);
+        if(regK != null && prf.isRegValReady(regK)){
+            vK = rf.getReg(null, regK);
             rK = true; //ready up
             qK = NO_DEPENDENCY;
         }else if(regK != null){
-            qK = rf.whereRegVal(regK);
+            qK = prf.whereDestVal(regK);
             rJ = false;
         }
         if(regK == null){
@@ -73,28 +73,31 @@ public class ReservationStation implements InstructionVoidVisitor {
         }
 
         busy = true;
-        if(!dest.isEmpty()) rf.pointAtRobEntry(dest.get(0), robEntry); //tell the register file to point at the rob entry of the instruction in this rs, IF there is a result
+        if(!dest.isEmpty()) prf.pointAtRobEntry(dest.get(0), robEntry); //tell the register file to point at the rob entry of the instruction in this rs, IF there is a result
         this.robEntry = robEntry;
     }
 
     //checks if either dependant RSs have finished!
     public void update(){
-        if(qJ == null || !qJ.isBusy()) rJ = true;
-        if(qK == null || !qK.isBusy()) rK = true;
-        if(qJ != null && cdb.containsKey(qJ.getId())){
-            System.out.println(this.id + " READ OFF COMMON DATA BUS! reservation station " + qJ.getId() + " sent this result");
-            vJ = cdb.get(qJ.getId()).get(0); //broadcast this data on the first element of the list
-
+        if(qJ == NO_DEPENDENCY) rJ = true;
+        if(qK == NO_DEPENDENCY) rK = true;
+        if(qJ != NO_DEPENDENCY && cdb.containsKey(qJ)){
+            System.out.println(this.id + " READ OFF COMMON DATA BUS! ROB entry " + qJ + " has this result");
+            vJ = cdb.get(qJ).get(0); //broadcast this data on the first element of the list
+            qJ = NO_DEPENDENCY;
+            rJ = true;
         }
-        if(qK != null && cdb.containsKey(qK.getId())){
-            System.out.println(this.id + " READ OFF COMMON DATA BUS! reservation station " + qK.getId() + " sent this result");
-            vK = cdb.get(qK.getId()).get(0);
+        if(qK != NO_DEPENDENCY && cdb.containsKey(qK)){
+            System.out.println(this.id + " READ OFF COMMON DATA BUS! reservation station " + qK + " sent this result");
+            vK = cdb.get(qK).get(0);
+            qK = NO_DEPENDENCY;
+            rK = true;
         }
         op.visit(this); //put the updated values inside op
     }
 
     public boolean isReady(){
-        return (qJ == null || rJ) && (qK == null || rK); //if qi is null that means there is no resevation station assigned to ti
+        return (qJ  == NO_DEPENDENCY || rJ) && (qK == NO_DEPENDENCY || rK); //if qi is null that means there is no resevation station assigned to ti
     }
 
     @Override

@@ -17,16 +17,17 @@ public class LoadStoreUnit extends Unit{
     private final List<ReservationStation> rss;
 
     private int currentRobEntry;
-
+    private final PhysicalRegFile prf;
     private Durate counter = new Durate(L1_LATENCY);
 
-    LoadStoreUnit(Memory mem, List<ReservationStation> rs, RegisterFile rf, Map<Integer, List<Integer>> cdb, PipelineRegister[] ins, PipelineRegister[] outs){
+    LoadStoreUnit(Memory mem, List<ReservationStation> rs, RegisterFile rf, PhysicalRegFile prf, Map<Integer, List<Integer>> cdb, ReorderBuffer rob, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
         this.mem = mem;
         this.baseRs = rs.get(0).getId();
         this.rss = rs;
         this.rf = rf;
         this.cdb = cdb;
+        this.prf = prf;
     }
 
     @Override
@@ -37,7 +38,7 @@ public class LoadStoreUnit extends Unit{
                 PipelineEntry e = in.pull();
                 pcVal = e.getPcVal();
                 flag = e.getFlag();
-                rs.set(e, rf, e.getEntry().get(0));
+                rs.set(e, prf, rf, e.getEntry().get(0));
             }
         }
 //        super.readOffPipeline();
@@ -76,7 +77,8 @@ public class LoadStoreUnit extends Unit{
     @Override
     protected void writeOnPipeline(){
         super.writeOnPipeline();
-        cdb.put(currentRs, Collections.singletonList(currentOp.getResult()));
+        cdb.put(currentRobEntry, Collections.singletonList(currentOp.getResult()));
+
         rss.get(currentRs).busy = false;
     }
 
@@ -121,7 +123,7 @@ public class LoadStoreUnit extends Unit{
         op.setResult(op.getRsVal() + op.getImVal()); //copied from old ALU
         op.setResult(mem.read(op.getResult()));
         op.setRdVal(op.getResult());
-        rf.regValIsReady(op.getRd());
+        prf.regValIsReady(currentOp.getRd().ordinal());
         //pc.set(pcVal);
     }
 
@@ -130,7 +132,7 @@ public class LoadStoreUnit extends Unit{
         op.setResult(op.getImVal()); //copied from old ALU
         op.setResult(mem.read(op.getResult()));
         op.setRdVal(op.getResult());
-        rf.regValIsReady(op.getRd());
+        prf.regValIsReady(currentOp.getRd().ordinal());
         //pc.set(pcVal);
     }
 
@@ -138,6 +140,7 @@ public class LoadStoreUnit extends Unit{
     public void accept(Op.St op) {
         op.setResult(op.getRsVal() + op.getImVal()); //copied from old ALU
         mem.set(op.getRdVal(), op.getResult());
+        if(prf) //add to prf if the value to be written is ready!!!!! JUST FOR STORE GODDAMN IT
         //pc.set(pcVal);
     }
 

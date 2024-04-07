@@ -15,9 +15,9 @@ public class PhysicalRegFile {
     public boolean isRegValReady(int r){
         return !resultStatus.containsKey(r); //if the register does not point anywhere it is ready
     }
-    public void destValIsReady(int r) { resultStatus.remove(r); } // there is no res station it corresponds to
+    public void regValIsReady(int r) { resultStatus.remove(r); } // there is no res station it corresponds to
     public int whereDestVal(int r){
         return resultStatus.get(r);
     }
-    public void pointAtRobEntry(RegisterName r, int robEntry) { resultStatus.put(r.ordinal(), robEntry); }
+    public void pointAtRobEntry(int r, int robEntry) { resultStatus.put(r, robEntry); }
 }

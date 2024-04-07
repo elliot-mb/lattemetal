@@ -8,9 +8,11 @@ public class ArithmeticLogicUnit extends Unit {
     private final int baseRs;
     private final RegisterFile rf;
 
+    private final PhysicalRegFile prf;
+
     private int currentRobEntry;
 
-    ArithmeticLogicUnit(Map<Integer, List<Integer>> cdb, List<ReservationStation> rs, RegisterFile rf, PipelineRegister[] ins, PipelineRegister[] outs){
+    ArithmeticLogicUnit(Map<Integer, List<Integer>> cdb, List<ReservationStation> rs, RegisterFile rf, PhysicalRegFile prf, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
         this.currentOp = null;
         this.currentRs = 0;
@@ -18,6 +20,7 @@ public class ArithmeticLogicUnit extends Unit {
         this.rss = rs;
         this.rf = rf;
         this.cdb = cdb;
+        this.prf = prf;
     }
 
     @Override
@@ -28,7 +31,7 @@ public class ArithmeticLogicUnit extends Unit {
                 PipelineEntry e = in.pull();
                 pcVal = e.getPcVal();
                 flag = e.getFlag();
-                rs.set(e, rf, e.getEntry().get(0));
+                rs.set(e, prf, rf, e.getEntry().get(0));
             }
         }
     }
@@ -88,7 +91,7 @@ public class ArithmeticLogicUnit extends Unit {
         //and then create a writeback stage
         op.setResult(op.getRsVal() + op.getRtVal());
         op.setRdVal(op.getResult());
-        rf.regValIsReady(currentOp.getRd());
+        prf.regValIsReady(currentOp.getRd().ordinal());
 //        fwd.setSlotReg(op.getRd());
 //        fwd.setSlot(currentOp.getResult());
     }
@@ -98,7 +101,7 @@ public class ArithmeticLogicUnit extends Unit {
         // modify register value = op.getRsVal() + op.getImVal();
         op.setResult(op.getRsVal() + op.getImVal());
         op.setRdVal(op.getResult());
-        rf.regValIsReady(currentOp.getRd());
+        prf.regValIsReady(currentOp.getRd().ordinal());
 //        fwd.setSlotReg(op.getRd());
 //        fwd.setSlot(currentOp.getResult());
     }
@@ -108,7 +111,7 @@ public class ArithmeticLogicUnit extends Unit {
         // modify register value = op.getRsVal() * op.getRtVal();
         op.setResult(op.getRsVal() * op.getRtVal());
         op.setRdVal(op.getResult());
-        rf.regValIsReady(currentOp.getRd());
+        prf.regValIsReady(currentOp.getRd().ordinal());
 //        fwd.setSlotReg(op.getRd());
 //        fwd.setSlot(currentOp.getResult());
     }
@@ -118,7 +121,7 @@ public class ArithmeticLogicUnit extends Unit {
         // modify register value = op.getRsVal() * op.getImVal();
         op.setResult(op.getRsVal() * op.getImVal());
         op.setRdVal(op.getResult());
-        rf.regValIsReady(currentOp.getRd());
+        prf.regValIsReady(currentOp.getRd().ordinal());
 //        fwd.setSlotReg(op.getRd());
 //        fwd.setSlot(currentOp.getResult());
     }
@@ -134,7 +137,7 @@ public class ArithmeticLogicUnit extends Unit {
         else cmpResult = 1;
         op.setResult(cmpResult);
         op.setRdVal(op.getResult());
-        rf.regValIsReady(currentOp.getRd());
+        prf.regValIsReady(currentOp.getRd().ordinal());
 //        fwd.setSlotReg(op.getRd());
 //        fwd.setSlot(currentOp.getResult());
     }

@@ -20,7 +20,9 @@ public class RegisterFile extends Block{
         setDelegate(name.ordinal(), val);
     }
 
-    public int getReg(RegisterName name){
+    public int getReg(RegisterName name, int... nameNum){
+        if(nameNum.length > 1) throw new RuntimeException("getReg: optional argument nameNum cannot be more than one long");
+        if(name == null) return read(nameNum[0]);
         return read(name.ordinal());
     }
 
@@ -32,13 +34,4 @@ public class RegisterFile extends Block{
         }
         return builder;
     }
-
-    public boolean isRegValReady(int r){
-        return resultStatus.get(r) == ReservationStation.NO_DEPENDENCY;
-    }
-    public void regValIsReady(RegisterName r) { resultStatus.set(r.ordinal(), null); } // there is no res station it corresponds to
-    public int whereRegVal(RegisterName r){
-        return resultStatus.get(r.ordinal());
-    }
-    public void pointAtRobEntry(RegisterName r, int robEntry) { resultStatus.set(r.ordinal(), robEntry); }
 }
