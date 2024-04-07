@@ -1,12 +1,21 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class PipelineEntry {
     private final Instruction op;
     private final Integer pcVal;
     private final boolean flag; //used for a 'branch taken' bit
 
-    PipelineEntry(Instruction op, Integer pcVal, boolean flag){
+    private final List<Integer> entry = new ArrayList<Integer>();
+
+    PipelineEntry(Instruction op, Integer pcVal, boolean flag, int... entry){
         this.op = op;
         this.pcVal = pcVal;
         this.flag = flag;
+        for(int x : entry){
+            this.entry.add(x);
+        }
     }
 
     PipelineEntry(){
@@ -27,6 +36,8 @@ public class PipelineEntry {
     public boolean getFlag(){
         return flag;
     }
+
+    public List<Integer> getEntry() { return entry; }
 
     public PipelineEntry copy(){
         return new PipelineEntry(op.copy(), pcVal.intValue(), flag);

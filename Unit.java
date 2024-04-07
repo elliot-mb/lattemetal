@@ -65,13 +65,18 @@ public abstract class Unit implements InstructionVoidVisitor {
         flag = e.getFlag();
         currentOp = e.getOp();
     }
+
+    protected PipelineEntry makeEntryToWrite(){
+        return new PipelineEntry(currentOp, pcVal, flag);
+    }
+
     protected void writeOnPipeline(){
         if(areOutsUnchosen()) throw new RuntimeException("writeOnPipeline: choose outputs before writing on the pipeline");
         int i = 0;
         for(PipelineRegister out : outs){
             if(outsChoice[i]){
                 if(!out.canPush()) throw new RuntimeException("writeOnPipeline: chosen output cannot be written to, please check before calling");
-                PipelineEntry e = new PipelineEntry(currentOp, pcVal, flag);
+                PipelineEntry e = makeEntryToWrite();
                 out.push(e);
             }
             i++;

@@ -8,6 +8,8 @@ public class ArithmeticLogicUnit extends Unit {
     private final int baseRs;
     private final RegisterFile rf;
 
+    private int currentRobEntry;
+
     ArithmeticLogicUnit(Map<Integer, List<Integer>> cdb, List<ReservationStation> rs, RegisterFile rf, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
         this.currentOp = null;
@@ -26,7 +28,7 @@ public class ArithmeticLogicUnit extends Unit {
                 PipelineEntry e = in.pull();
                 pcVal = e.getPcVal();
                 flag = e.getFlag();
-                rs.set(e, rf);
+                rs.set(e, rf, e.getEntry().get(0));
             }
         }
     }
@@ -37,6 +39,7 @@ public class ArithmeticLogicUnit extends Unit {
             if(rs.isBusy()) rs.update(); //dont update those with no instruction inside
             //System.out.println("UPDATED AND NOW " + rs.isReady());
             if(currentOp == null && rs.isBusy() && rs.isReady()){
+                currentRobEntry = rs.robEntry;
                 currentOp = rs.op;
                 currentOp.rst();
                 currentRs = rs.getId() - baseRs; //should only be reset after we finish processing stuff
@@ -65,6 +68,11 @@ public class ArithmeticLogicUnit extends Unit {
         for(ReservationStation r : rss){
             r.flush();
         }
+    }
+
+    @Override
+    protected PipelineEntry makeEntryToWrite(){
+        return new PipelineEntry(currentOp, pcVal, flag, currentRobEntry); //send currentRobEntry to resi station!
     }
 
     @Override

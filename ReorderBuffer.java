@@ -18,12 +18,22 @@ public class ReorderBuffer {
         return buffer.isFull();
     }
 
+    private String appendComma(String s){
+        return s + ",";
+    }
+
     public String toString(){
         String gaps = "";
         for(int i = 0; i < buffer.getSize() - buffer.getElementsIn(); i++ ){
             gaps += ",__";
         }
-        return "[" + gaps + buffer.peekXs().stream().map(ReorderEntry::toString).collect(Collectors.joining()) + "]";
+        return "[" + gaps + buffer.peekXs().stream().map(ReorderEntry::toString).map(this::appendComma).collect(Collectors.joining()) + "]";
+    }
+
+    public Integer tailId(){
+        if(buffer.isEmpty()) return null;
+        List<ReorderEntry> re = buffer.peekXs();
+        return re.get(re.size() - 1).id;
     }
 
 }

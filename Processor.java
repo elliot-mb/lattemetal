@@ -72,6 +72,8 @@ public class Processor {
         this.isu = new IssueUnit(
                 this.rf,
                 this.rob,
+                this.aluRs,
+                this.lsuRs,
                 new PipelineRegister[]{deuIsu},
                 new PipelineRegister[]{isuAlu, isuLsu});
         this.alu = new ArithmeticLogicUnit(
@@ -95,6 +97,7 @@ public class Processor {
         this.wbu = new WriteBackUnit(
                 this.rf,
                 this.rob,
+                this.cdb,
                 new PipelineRegister[]{bruWbu},
                 new PipelineRegister[]{voided});
     }

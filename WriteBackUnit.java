@@ -1,3 +1,5 @@
+import java.util.List;
+import java.util.Map;
 
 public class WriteBackUnit extends Unit{
 
@@ -7,15 +9,25 @@ public class WriteBackUnit extends Unit{
     private final ReorderBuffer rob;
     private final Durate counter = new Durate(REG_LATENCY);
 
-    WriteBackUnit(RegisterFile rf, ReorderBuffer rob, PipelineRegister[] ins, PipelineRegister[] outs){
+    private final Map<Integer, List<Integer>> cdb;
+
+    private int currentRobEntry;
+
+    WriteBackUnit(RegisterFile rf, ReorderBuffer rob, Map<Integer, List<Integer>> cdb, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
         this.rf = rf;
         this.rob = rob;
+        this.cdb = cdb;
     }
 
     @Override
     protected void readOffPipeline(){
-        super.readOffPipeline();
+        PipelineRegister in = ins[selectionPriority()];
+        PipelineEntry e = in.pull();
+        pcVal = e.getPcVal();
+        flag = e.getFlag();
+        currentOp = e.getOp();
+        currentRobEntry = e.getEntry().get(0);
         counter.rst();
     }
 
@@ -35,7 +47,8 @@ public class WriteBackUnit extends Unit{
     }
 
     private void setRdToRes(RegisterName rd, int result){
-        rf.setReg(rd, result);
+//        rf.setReg(rd, result); change this to setting it on the common data bus!
+        cdb.put()
     }
 
     // all the below methods write back to the registers correctly

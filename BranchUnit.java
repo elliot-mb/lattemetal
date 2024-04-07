@@ -4,9 +4,21 @@ public class BranchUnit extends Unit{
 
     private final ProgramCounter pc;
 
+    private int currentRobEntry;
+
     BranchUnit(ProgramCounter pc, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
         this.pc = pc;
+    }
+
+    @Override
+    protected void readOffPipeline(){
+        PipelineRegister in = ins[selectionPriority()];
+        PipelineEntry e = in.pull();
+        pcVal = e.getPcVal();
+        flag = e.getFlag();
+        currentOp = e.getOp();
+        currentRobEntry = e.getEntry().get(0); //requires rob entry number otherwise they crash
     }
 
     @Override
@@ -22,6 +34,11 @@ public class BranchUnit extends Unit{
     @Override
     protected String showUnit() {
         return "BR";
+    }
+
+    @Override
+    protected PipelineEntry makeEntryToWrite(){
+        return new PipelineEntry(currentOp, pcVal, flag, currentRobEntry); //send currentRobEntry to resi station!
     }
 
     @Override

@@ -1,6 +1,7 @@
 
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class IssueUnit extends Unit{
 
@@ -8,10 +9,24 @@ public class IssueUnit extends Unit{
 
     private final ReorderBuffer rob;
 
-    IssueUnit(RegisterFile rf, ReorderBuffer rob, PipelineRegister[] ins, PipelineRegister[] outs){
+    private final List<ReservationStation> aluRs;
+    private final List<ReservationStation> lsuRs;
+
+    private int currentRobEntry;
+
+    IssueUnit(RegisterFile rf, ReorderBuffer rob, List<ReservationStation> aluRs, List<ReservationStation> lsuRs, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
         this.rf = rf;
         this.rob = rob;
+        this.aluRs = aluRs;
+        this.lsuRs = lsuRs;
+    }
+
+    private boolean isAnRsFree(List<ReservationStation> rss){
+        for(ReservationStation rs : rss){
+            if(!rs.isBusy()) return true;
+        }
+        return false;
     }
 
     @Override
@@ -23,6 +38,7 @@ public class IssueUnit extends Unit{
 
     @Override
     protected void procInstruction() {
+
         //must run just once to avoid false positive of trying to register the instruction twice
         //...once we realise it doesnt have deps, we dont try to register it again
         //if(hasDeps()) deps = sb.useOrHasDeps(currentOp);
@@ -35,79 +51,112 @@ public class IssueUnit extends Unit{
 
     @Override
     protected boolean isUnfinished() {
-        return false;
+        return rob.isFull() || (!sendToAlu(currentOp) && !isAnRsFree(lsuRs)) || (sendToAlu(currentOp) && !isAnRsFree(aluRs));
+    }
+
+    private boolean sendToAlu(Instruction op){
+        return !Utils.isLoadStore(currentOp);
     }
 
     @Override
     protected void chooseOuts(){
         //choose latter pipereg (index 1) if its a load/store, otherwise stick it to the alu
-        if(Utils.isLoadStore(currentOp)) {
+        if(!sendToAlu(currentOp)) {
             outsChoice[1] = true;
             return;
         }
         outsChoice[0] = true;
     }
 
+    @Override
+    protected PipelineEntry makeEntryToWrite(){
+        return new PipelineEntry(currentOp, pcVal, flag, currentRobEntry); //send currentRobEntry to resi station!
+    }
+
     // write the required dependencies into
 
     @Override
     public void accept(Op.Add op) {
-        rob.add(new ReorderEntry(op, op.getRd().ordinal()));
+        ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal());
+        currentRobEntry = e.id;
+        rob.add(e);
     }
 
     @Override
     public void accept(Op.AddI op) {
-        rob.add(new ReorderEntry(op, op.getRd().ordinal()));
+        ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal());
+        currentRobEntry = e.id;
+        rob.add(e);
     }
 
     @Override
     public void accept(Op.Mul op) {
-        rob.add(new ReorderEntry(op, op.getRd().ordinal()));
+        ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal());
+        currentRobEntry = e.id;
+        rob.add(e);
     }
 
     @Override
     public void accept(Op.MulI op) {
-        rob.add(new ReorderEntry(op, op.getRd().ordinal()));
+        ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal());
+        currentRobEntry = e.id;
+        rob.add(e);
     }
 
     @Override
     public void accept(Op.Cmp op) {
-        rob.add(new ReorderEntry(op, op.getRd().ordinal()));
+        ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal());
+        currentRobEntry = e.id;
+        rob.add(e);
     }
 
     @Override
     public void accept(Op.Ld op) {
-        rob.add(new ReorderEntry(op, op.getRd().ordinal()));
+        ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal());
+        currentRobEntry = e.id;
+        rob.add(e);
     }
 
     @Override
     public void accept(Op.LdC op) {
-        rob.add(new ReorderEntry(op, op.getRd().ordinal()));
+        ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal());
+        currentRobEntry = e.id;
+        rob.add(e);
     }
 
     @Override
     public void accept(Op.St op) {
-        rob.add(new ReorderEntry(op, op.getRsVal() + op.getIm()));
+        ReorderEntry e = new ReorderEntry(op, op.getRsVal() + op.getIm());
+        currentRobEntry = e.id;
+        rob.add(e);
     }
 
     @Override
     public void accept(Op.BrLZ op) {
-        rob.add(new ReorderEntry(op, ReorderBuffer.NO_DEST));
+        ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST);
+        currentRobEntry = e.id;
+        rob.add(e);
     }
 
     @Override
     public void accept(Op.JpLZ op) {
-        rob.add(new ReorderEntry(op, ReorderBuffer.NO_DEST));
+        ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST);
+        currentRobEntry = e.id;
+        rob.add(e);
     }
 
     @Override
     public void accept(Op.Br op) {
-        rob.add(new ReorderEntry(op, ReorderBuffer.NO_DEST));
+        ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST);
+        currentRobEntry = e.id;
+        rob.add(e);
     }
 
     @Override
     public void accept(Op.Jp op) {
-        rob.add(new ReorderEntry(op, ReorderBuffer.NO_DEST));
+        ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST);
+        currentRobEntry = e.id;
+        rob.add(e);
     }
 
     protected String showUnit(){

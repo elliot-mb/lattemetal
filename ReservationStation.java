@@ -9,6 +9,8 @@ public class ReservationStation implements InstructionVoidVisitor {
     public int vJ, vK;
     public boolean rJ, rK, busy;
 
+    public int robEntry;
+
     private final Map<Integer, List<Integer>> cdb;
 
     ReservationStation(Map<Integer, List<Integer>> cdb){
@@ -35,9 +37,10 @@ public class ReservationStation implements InstructionVoidVisitor {
         this.vK = 0;
         this.rJ = false;
         this.rK = false;
+        this.robEntry = 0;
     }
 
-    public void set(PipelineEntry e, RegisterFile rf){
+    public void set(PipelineEntry e, RegisterFile rf, int robEntry){
         op = e.getOp();
         List<RegisterName> sources = op.visit(new SourceRegVisitor());
         List<RegisterName> dest = op.visit(new DestRegVisitor());
@@ -68,6 +71,7 @@ public class ReservationStation implements InstructionVoidVisitor {
 
         busy = true;
         if(!dest.isEmpty()) rf.pointAtResStation(dest.get(0), this);
+        this.robEntry = robEntry;
     }
 
     //checks if either dependant RSs have finished!

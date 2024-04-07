@@ -16,6 +16,8 @@ public class LoadStoreUnit extends Unit{
     private final Map<Integer, List<Integer>> cdb;
     private final List<ReservationStation> rss;
 
+    private int currentRobEntry;
+
     private Durate counter = new Durate(L1_LATENCY);
 
     LoadStoreUnit(Memory mem, List<ReservationStation> rs, RegisterFile rf, Map<Integer, List<Integer>> cdb, PipelineRegister[] ins, PipelineRegister[] outs){
@@ -35,7 +37,7 @@ public class LoadStoreUnit extends Unit{
                 PipelineEntry e = in.pull();
                 pcVal = e.getPcVal();
                 flag = e.getFlag();
-                rs.set(e, rf);
+                rs.set(e, rf, e.getEntry().get(0));
             }
         }
 //        super.readOffPipeline();
@@ -49,6 +51,7 @@ public class LoadStoreUnit extends Unit{
             if(rs.isBusy()) rs.update(); //dont update those with no instruction inside
             //System.out.println("UPDATED AND NOW " + rs.isReady());
             if(currentOp == null && rs.isReady()){
+                currentRobEntry = rs.robEntry;
                 counter.rst();
                 currentOp = rs.op;
                 currentRs = rs.getId() - baseRs; //should only be reset after we finish processing stuff
@@ -63,6 +66,11 @@ public class LoadStoreUnit extends Unit{
     @Override
     protected boolean isUnfinished() {
         return currentOp == null || !counter.isDone();//(!counter.isDone() && Utils.isLoadStore(currentOp)) || !counterNop.isDone(); //if its not a load/store we're finished
+    }
+
+    @Override
+    protected PipelineEntry makeEntryToWrite(){
+        return new PipelineEntry(currentOp, pcVal, flag, currentRobEntry); //send currentRobEntry to resi station!
     }
 
     @Override

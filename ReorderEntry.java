@@ -14,9 +14,11 @@ public class ReorderEntry {
         uId++;
     }
 
+
+
     public String toString(){
         int id =  op.getId() % 100;
-        String pad = Utils.digitsInInt(op.getId()) == 1 ? "0" : "";
+        String pad = Utils.digitsInInt(op.getId()) < 2 ? "0" : "";
         return pad + id;
     }
 }
