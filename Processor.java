@@ -49,7 +49,9 @@ public class Processor {
     Processor(InstructionCache ic, Memory... mem) throws RuntimeException{
         if(mem.length > 1) throw new RuntimeException("Processor: this constructor cannot have more than one memories");
         this.cdb = new HashMap<Integer, List<Integer>>();
-        this.rob = new ReorderBuffer(ROB_ENTRIES, cdb);
+        this.mem = mem.length > 0 ? mem[0] : new Memory();
+        this.rf = new RegisterFile(cdb);
+        this.rob = new ReorderBuffer(ROB_ENTRIES, cdb, rf, this.mem);
         for(int i = 0; i < ALU_RS_COUNT; i++){
             aluRs.add(new ReservationStation(cdb, rob));
         }
@@ -59,9 +61,8 @@ public class Processor {
         this.ic = ic;
         this.tally = 0;
         this.pc = new ProgramCounter(ic.numInstrs());
-        this.rf = new RegisterFile(cdb);
         this.prf = new PhysicalRegFile(cdb, rob);
-        this.mem = mem.length > 0 ? mem[0] : new Memory();
+        this.rob.setPrf(prf); //avoid circular dependency
         this.feu = new FetchUnit(
                 this.ic,
                 this.pc,
@@ -103,6 +104,7 @@ public class Processor {
         this.wbu = new WriteBackUnit(
                 this.rf,
                 this.rob,
+                this.prf,
                 this.cdb,
                 new PipelineRegister[]{bruWbu},
                 new PipelineRegister[]{rtired});

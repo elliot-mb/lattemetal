@@ -8,18 +8,24 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     private final CircluarQueue<ReorderEntry> buffer;
     private final Map<Integer, List<Integer>> cdb;
     private final RegisterFile rf;
-    private final PhysicalRegFile prf;
+    private PhysicalRegFile prf;
     private final Memory mem;
 
     private ReorderEntry currentCommit;
+    private boolean prfSet = false;
 
-    ReorderBuffer(int size, Map<Integer, List<Integer>> cdb, RegisterFile rf, PhysicalRegFile prf, Memory mem){
+    ReorderBuffer(int size, Map<Integer, List<Integer>> cdb, RegisterFile rf, Memory mem){
         this.buffer = new CircluarQueue<ReorderEntry>(size);
         this.cdb = cdb;
         this.rf = rf;
-        this.prf = prf;
         this.currentCommit = null;
         this.mem = mem;
+    }
+
+    //avoids circular dep
+    public void setPrf(PhysicalRegFile prf){
+        this.prf = prf;
+        prfSet = true;
     }
 
     public void add(ReorderEntry re){
@@ -86,6 +92,8 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     }
 
     public void clk(){
+        if(!prfSet) throw new RuntimeException("ReorderBuffer.clk: prf not set");
+
         List<ReorderEntry> re = buffer.peekXs();
         // read off the cbd and into the robber
         for(ReorderEntry r: re){
@@ -151,7 +159,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.St op) {
-        mem.set(currentCommit.getValue(), );
+        mem.set(currentCommit.getValue(), op.getResult()); //addr gets stored in result in the LSU!
     }
 
     @Override

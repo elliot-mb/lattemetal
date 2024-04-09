@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class WriteBackUnit extends Unit{
 
@@ -9,17 +6,19 @@ public class WriteBackUnit extends Unit{
     private final RegisterFile rf;
 
     private final ReorderBuffer rob;
+    private final PhysicalRegFile prf;
     private final Durate counter = new Durate(REG_LATENCY);
 
     private final Map<Integer, List<Integer>> cdb;
 
     private int currentRobEntry;
 
-    WriteBackUnit(RegisterFile rf, ReorderBuffer rob, Map<Integer, List<Integer>> cdb, PipelineRegister[] ins, PipelineRegister[] outs){
+    WriteBackUnit(RegisterFile rf, ReorderBuffer rob, PhysicalRegFile prf, Map<Integer, List<Integer>> cdb, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
         this.rf = rf;
         this.rob = rob;
         this.cdb = cdb;
+        this.prf = prf;
     }
 
     @Override
@@ -100,10 +99,17 @@ public class WriteBackUnit extends Unit{
 
     @Override
     public void accept(Op.St op) {
-
-        if(prf.isRegValAtRobAndReady(op.getRd().ordinal())){
-            int resultEntryLoc = prf.whereInRob(op.getRd().ordinal());
-            rob.setValOfEntry(currentRobEntry, rob.getValOfEntry(resultEntryLoc)); //copy reg value from elsewhere in the rob to the result of the store
+        //stores' result is set to the location in memory
+        if(prf.isDestValAtRobAndReady(op.getRd().ordinal())) {
+            int val;
+            if (prf.isDestValUnmapped(op.getRd().ordinal())) {
+                val = rf.getReg(op.getRd()); //this happens when nobody is busy with this register
+            } else {
+                //not entirely sure if this 'else' case is necessary because we have clk() in ROB doing this
+                int resultEntryLoc = prf.whereInRob(op.getRd().ordinal());
+                val = rob.getValOfEntry(resultEntryLoc); //copy reg value from elsewhere in the rob to the result of the store
+            }
+            cdb.put(currentRobEntry, List.of(val)); //if this doesnt happen, it will later get broadcast in another instr
         }
     }
 
