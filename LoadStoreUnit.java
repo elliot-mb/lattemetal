@@ -129,7 +129,6 @@ public class LoadStoreUnit extends Unit{
         op.setResult(mem.read(op.getResult()));
         op.setRdVal(op.getResult());
         prf.regValIsReady(currentOp.getRd().ordinal());
-        cdb.put(currentRobEntry, Collections.singletonList(currentOp.getResult()));
     }
 
     @Override
@@ -138,18 +137,17 @@ public class LoadStoreUnit extends Unit{
         op.setResult(mem.read(op.getResult()));
         op.setRdVal(op.getResult());
         prf.regValIsReady(currentOp.getRd().ordinal());
-        cdb.put(currentRobEntry, Collections.singletonList(currentOp.getResult()));
     }
 
     @Override
     public void accept(Op.St op) {
         op.setResult(rss.get(currentRs).getvJ() + op.getImVal()); //copied from old ALU
-        //mem.set(op.getRdVal(), op.getResult());
-        if(prf.isRegValAtRobAndReady(op.getRd().ordinal())){
-            int resultEntryLoc = prf.whereInRob(op.getRd().ordinal());
-            rob.setValOfEntry(currentRobEntry, rob.getValOfEntry(resultEntryLoc)); //copy reg value from elsewhere in the rob to the result of the store
-        }
-        //pc.set(pcVal);
+
+        //this goes in write result now
+//        if(prf.isRegValAtRobAndReady(op.getRd().ordinal())){
+//            int resultEntryLoc = prf.whereInRob(op.getRd().ordinal());
+//            rob.setValOfEntry(currentRobEntry, rob.getValOfEntry(resultEntryLoc)); //copy reg value from elsewhere in the rob to the result of the store
+//        }
     }
 
     @Override

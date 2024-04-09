@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -57,42 +58,53 @@ public class WriteBackUnit extends Unit{
     // all the below methods write back to the registers correctly
     @Override
     public void accept(Op.Add op) {
-        setRdToRes(op.getRd(), op.getResult());
+        //setRdToRes(op.getRd(), op.getResult());
+        cdb.put(currentRobEntry, Collections.singletonList(currentOp.getResult()));
     }
 
     @Override
     public void accept(Op.AddI op) {
-        setRdToRes(op.getRd(), op.getResult());
+        //setRdToRes(op.getRd(), op.getResult());
+        cdb.put(currentRobEntry, Collections.singletonList(currentOp.getResult()));
     }
 
     @Override
     public void accept(Op.Mul op) {
-        setRdToRes(op.getRd(), op.getResult());
+        //setRdToRes(op.getRd(), op.getResult());
+        cdb.put(currentRobEntry, Collections.singletonList(currentOp.getResult()));
     }
 
     @Override
     public void accept(Op.MulI op) {
-        setRdToRes(op.getRd(), op.getResult());
+        //setRdToRes(op.getRd(), op.getResult());
+        cdb.put(currentRobEntry, Collections.singletonList(currentOp.getResult()));
     }
 
     @Override
     public void accept(Op.Cmp op) {
-        setRdToRes(op.getRd(), op.getResult());
+        //setRdToRes(op.getRd(), op.getResult());
+        cdb.put(currentRobEntry, Collections.singletonList(currentOp.getResult()));
     }
 
     @Override
     public void accept(Op.Ld op) {
-        setRdToRes(op.getRd(), op.getResult());
+        //setRdToRes(op.getRd(), op.getResult());
+        cdb.put(currentRobEntry, Collections.singletonList(currentOp.getResult()));
     }
 
     @Override
     public void accept(Op.LdC op) {
-        setRdToRes(op.getRd(), op.getResult());
+        //setRdToRes(op.getRd(), op.getResult());
+        cdb.put(currentRobEntry, Collections.singletonList(currentOp.getResult()));
     }
 
     @Override
     public void accept(Op.St op) {
-        //nothing
+
+        if(prf.isRegValAtRobAndReady(op.getRd().ordinal())){
+            int resultEntryLoc = prf.whereInRob(op.getRd().ordinal());
+            rob.setValOfEntry(currentRobEntry, rob.getValOfEntry(resultEntryLoc)); //copy reg value from elsewhere in the rob to the result of the store
+        }
     }
 
     @Override

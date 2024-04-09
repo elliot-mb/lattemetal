@@ -81,7 +81,7 @@ public class ArithmeticLogicUnit extends Unit {
     @Override
     protected void writeOnPipeline(){
         super.writeOnPipeline();
-        cdb.put(currentRobEntry, Collections.singletonList(currentOp.getResult()));
+//        cdb.put(currentRobEntry, Collections.singletonList(currentOp.getResult()));
         rss.get(currentRs).setIsBusy(false);
     }
 
