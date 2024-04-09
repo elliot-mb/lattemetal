@@ -127,7 +127,7 @@ public abstract class Unit implements InstructionVoidVisitor {
 
     /**
      * override this where we want to read when we are not done (e.g. where we have reservation stations)
-     * @return false
+     * @return must be false if the unit cannot handle empty input pipeline buffers in its overloaded readOffPipeline method
      */
     protected boolean attemptToRead(){
         return false;
@@ -136,7 +136,7 @@ public abstract class Unit implements InstructionVoidVisitor {
     public void clk(){
         // we have processed this op, and if its not the case that we can pull in and push out to chosen outs, we stall (return)
         if(isDone() && !(canPullOffActiveIn()))/* && (areOutsUnchosen() || canPushOnChosenOuts())))*/ return;
-        if(isDone() || (canPullOffActiveIn() && attemptToRead())) readOffPipeline(); //dont re-copy if we are mid-processing
+        if(isDone() || attemptToRead()) readOffPipeline(); //dont re-copy if we are mid-processing
         if(isUnfinished()) {
             procInstruction(); //always run at least once if isUnfinished is ever false
                                //some unit stall with this instruction like the ALU while

@@ -60,7 +60,7 @@ public class ArithmeticLogicUnit extends Unit {
                 currentRobEntry = rs.robEntry;
                 currentOp = rs.getOp();
                 currentOp.rst();
-                currentRs = rs.getId() - baseRs; //should only be reset after we finish processing stuff
+                currentRs = index; //should only be reset after we finish processing stuff
             }
         }
 

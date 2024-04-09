@@ -68,12 +68,12 @@ public class LoadStoreUnit extends Unit{
                 currentRobEntry = rs.robEntry;
                 currentOp = rs.getOp();
                 counter.rst();
-                currentRs = rs.getId() - baseRs; //should only be reset after we finish processing stuff
+                currentRs = index; //should only be reset after we finish processing stuff
             }
         }
 
-        if(currentOp != null && !currentOp.isDone()) {
-            currentOp.decr();
+        if(currentOp != null && !counter.isDone()) {
+            counter.decr();
         }
     }
 
