@@ -59,7 +59,7 @@ public class ReservationStation implements InstructionVoidVisitor {
         Integer regK = sources.size() <= 1 ? null : sources.get(1);
 
         if(regJ != null && prf.isRegValReady(regJ)){
-            vJ = prf.isRegValUnmapped(regJ) ? rf.getReg(null, regJ) : rob.getValOfEntry(prf.whereInRob(regJ));
+            vJ = prf.isDestValUnmapped(regJ) ? rf.getReg(null, regJ) : rob.getValOfEntry(prf.whereInRob(regJ));
             rJ = true; //ready up
             qJ = NO_DEPENDENCY;
         }else if(regJ != null){
@@ -70,7 +70,7 @@ public class ReservationStation implements InstructionVoidVisitor {
             rJ = true;
         }
         if(regK != null && prf.isRegValReady(regK)){
-            vK =  prf.isRegValUnmapped(regK) ? rf.getReg(null, regK) : rob.getValOfEntry(prf.whereInRob(regK));
+            vK =  prf.isDestValUnmapped(regK) ? rf.getReg(null, regK) : rob.getValOfEntry(prf.whereInRob(regK));
             rK = true; //ready up
             qK = NO_DEPENDENCY;
         }else if(regK != null){
@@ -90,7 +90,7 @@ public class ReservationStation implements InstructionVoidVisitor {
     public void update(){
         if(qJ == NO_DEPENDENCY) rJ = true;
         if(qK == NO_DEPENDENCY) rK = true;
-        if(qJ != NO_DEPENDENCY && cdb.containsKey(qJ)){
+        if(qJ != NO_DEPENDENCY && cdb.containsKey(qJ)){ //qJ is memory location or register
             System.out.println(this.id + " READ OFF COMMON DATA BUS! ROB entry " + qJ + " has this result");
             vJ = cdb.get(qJ).get(0); //broadcast this data on the first element of the list
             qJ = NO_DEPENDENCY;

@@ -1,4 +1,3 @@
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -125,18 +124,19 @@ public class LoadStoreUnit extends Unit{
 
     @Override
     public void accept(Op.Ld op) {
-        op.setResult(rss.get(currentRs).getvJ() + op.getImVal()); //copied from old ALU
-        op.setResult(mem.read(op.getResult()));
+        int addr = rss.get(currentRs).getvJ() + op.getImVal(); //copied from old ALU
+        op.setResult(rob.getValOfEntry(prf.whereInRob(addr)));//this must be ready otherwise the reservation station wouldnt have released the instruction
+        //op.setResult(mem.read(addr));
         op.setRdVal(op.getResult());
-        prf.regValIsReady(currentOp.getRd().ordinal());
+        //prf.destValIsReady(currentOp.getRd().ordinal()); this can happen only in commit!
     }
 
     @Override
     public void accept(Op.LdC op) {
-        op.setResult(op.getImVal()); //copied from old ALU
-        op.setResult(mem.read(op.getResult()));
+        int addr = op.getImVal(); //copied from old ALU
+        op.setResult(rob.getValOfEntry(prf.whereInRob(addr))); //this must be ready otherwise the reservation station wouldnt have released the instruction
         op.setRdVal(op.getResult());
-        prf.regValIsReady(currentOp.getRd().ordinal());
+        //prf.destValIsReady(currentOp.getRd().ordinal()); this can happen only in commit!
     }
 
     @Override

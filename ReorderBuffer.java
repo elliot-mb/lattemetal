@@ -110,41 +110,48 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     @Override
     public void accept(Op.Add op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
+        prf.destValIsReady(op.getRd().ordinal());
     }
 
     @Override
     public void accept(Op.AddI op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
+        prf.destValIsReady(op.getRd().ordinal());
     }
 
     @Override
     public void accept(Op.Mul op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
+        prf.destValIsReady(op.getRd().ordinal());
     }
 
     @Override
     public void accept(Op.MulI op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
+        prf.destValIsReady(op.getRd().ordinal());
     }
 
     @Override
     public void accept(Op.Cmp op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
+        prf.destValIsReady(op.getRd().ordinal());
     }
 
     @Override
     public void accept(Op.Ld op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
+        prf.destValIsReady(op.getRd().ordinal());
     }
 
     @Override
     public void accept(Op.LdC op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
+        prf.destValIsReady(op.getRd().ordinal());
     }
 
     @Override
     public void accept(Op.St op) {
-        mem.set(currentCommit.getValue(), )
+        mem.set(currentCommit.getValue(), );
     }
 
     @Override

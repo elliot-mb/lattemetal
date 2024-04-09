@@ -91,9 +91,8 @@ public class ArithmeticLogicUnit extends Unit {
         //and then create a writeback stage
         op.setResult(rss.get(currentRs).getvJ() + rss.get(currentRs).getvK());
         op.setRdVal(op.getResult());
-        prf.regValIsReady(currentOp.getRd().ordinal());
-//        fwd.setSlotReg(op.getRd());
-//        fwd.setSlot(currentOp.getResult());
+        //prf.destValIsReady(currentOp.getRd().ordinal()); moved to rob
+
     }
 
     @Override
@@ -101,9 +100,7 @@ public class ArithmeticLogicUnit extends Unit {
         // modify register value = op.getRsVal() + op.getImVal();
         op.setResult(rss.get(currentRs).getvJ() + op.getImVal());
         op.setRdVal(op.getResult());
-        prf.regValIsReady(currentOp.getRd().ordinal());
-//        fwd.setSlotReg(op.getRd());
-//        fwd.setSlot(currentOp.getResult());
+//prf.destValIsReady(currentOp.getRd().ordinal()); moved to rob
     }
 
     @Override
@@ -111,9 +108,7 @@ public class ArithmeticLogicUnit extends Unit {
         // modify register value = op.getRsVal() * op.getRtVal();
         op.setResult(rss.get(currentRs).getvJ() * rss.get(currentRs).getvK());
         op.setRdVal(op.getResult());
-        prf.regValIsReady(currentOp.getRd().ordinal());
-//        fwd.setSlotReg(op.getRd());
-//        fwd.setSlot(currentOp.getResult());
+//prf.destValIsReady(currentOp.getRd().ordinal()); moved to rob
     }
 
     @Override
@@ -121,9 +116,7 @@ public class ArithmeticLogicUnit extends Unit {
         // modify register value = op.getRsVal() * op.getImVal();
         op.setResult(rss.get(currentRs).getvJ() * op.getImVal());
         op.setRdVal(op.getResult());
-        prf.regValIsReady(currentOp.getRd().ordinal());
-//        fwd.setSlotReg(op.getRd());
-//        fwd.setSlot(currentOp.getResult());
+//prf.destValIsReady(currentOp.getRd().ordinal()); moved to rob
     }
 
     @Override
@@ -137,9 +130,7 @@ public class ArithmeticLogicUnit extends Unit {
         else cmpResult = 1;
         op.setResult(cmpResult);
         op.setRdVal(op.getResult());
-        prf.regValIsReady(currentOp.getRd().ordinal());
-//        fwd.setSlotReg(op.getRd());
-//        fwd.setSlot(currentOp.getResult());
+//prf.destValIsReady(currentOp.getRd().ordinal()); moved to rob
     }
 
     @Override
