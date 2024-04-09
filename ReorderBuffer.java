@@ -97,13 +97,14 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         List<ReorderEntry> re = buffer.peekXs();
         // read off the cbd and into the robber
         for(ReorderEntry r: re){
+            if(r.isReady()) System.out.println("entry " + r.getId() + " is ready!");
             if(cdb.containsKey(r.getId())){
                 r.setValue(cdb.get(r.getId()).get(0)); //read from the map if the id matches this rese entry (value is already in the entry before we commit!)
             }
         }
 
         if(!re.isEmpty()){
-            ReorderEntry willPop = re.get(0);
+            ReorderEntry willPop = re.get(re.size() - 1);
             if(willPop.isReady()){
                 //visitation to distinguish between stores, common instructions, and branches (incorrect)
                 currentCommit = buffer.pop(); //accessible in visitor
@@ -118,68 +119,77 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     @Override
     public void accept(Op.Add op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
-        prf.destValIsReady(op.getRd().ordinal());
+        prf.regValIsReady(op.getRd());
+        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.AddI op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
-        prf.destValIsReady(op.getRd().ordinal());
+        prf.regValIsReady(op.getRd());
+        cdb.remove(currentCommit.getId());
+        System.out.println("remove id " + currentCommit.getId());
     }
 
     @Override
     public void accept(Op.Mul op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
-        prf.destValIsReady(op.getRd().ordinal());
+        prf.regValIsReady(op.getRd());
+        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.MulI op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
-        prf.destValIsReady(op.getRd().ordinal());
+        prf.regValIsReady(op.getRd());
+        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.Cmp op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
-        prf.destValIsReady(op.getRd().ordinal());
+        prf.regValIsReady(op.getRd());
+        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.Ld op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
-        prf.destValIsReady(op.getRd().ordinal());
+        prf.regValIsReady(op.getRd());
+        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.LdC op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
-        prf.destValIsReady(op.getRd().ordinal());
+        prf.regValIsReady(op.getRd());
+        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.St op) {
         mem.set(currentCommit.getValue(), op.getResult()); //addr gets stored in result in the LSU!
+        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.BrLZ op) {
-
+        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.JpLZ op) {
-
+        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.Br op) {
-
+        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.Jp op) {
-
+        cdb.remove(currentCommit.getId());
     }
 
     @Override

@@ -39,7 +39,7 @@ public class LoadStoreUnit extends Unit{
                 PipelineEntry e = in.pull();
                 pcVal = e.getPcVal();
                 flag = e.getFlag();
-                rs.set(e, prf, rf, e.getEntry().get(0));
+                rs.set(e, prf, rf, e.getEntry());
             }
         }
 //        super.readOffPipeline();
@@ -82,15 +82,19 @@ public class LoadStoreUnit extends Unit{
     }
 
     @Override
-    protected boolean isDone(){
-        boolean allBusy = true;
+    protected boolean isDone(){ //it is done when not-any are busy (none are busy)
+        boolean anyBusy = false;
         for(ReservationStation rs : rss){
-            allBusy = rs.isBusy() && allBusy;
+            anyBusy = rs.isBusy() || anyBusy;
         }
-        return !allBusy;
+        return !anyBusy;
     }
-
     //visitation
+
+    @Override
+    protected boolean attemptToRead(){
+        return true; //the case where we cannot read is handled by this readoffpipeline
+    }
 
     @Override
     public void accept(Op.Add op) {
@@ -125,23 +129,44 @@ public class LoadStoreUnit extends Unit{
     @Override
     public void accept(Op.Ld op) {
         int addr = rss.get(currentRs).getvJ() + op.getImVal(); //copied from old ALU
-        op.setResult(rob.getValOfEntry(prf.whereInRob(addr)));//this must be ready otherwise the reservation station wouldnt have released the instruction
-        //op.setResult(mem.read(addr));
-        op.setRdVal(op.getResult());
-        //prf.destValIsReady(currentOp.getRd().ordinal()); this can happen only in commit!
+        int res;
+        if(prf.isMemValUnmapped(addr)){ //from mem
+            res = mem.get(addr);
+        }else{// from rob
+            res = rob.getValOfEntry(prf.whereMemInRob(addr));
+        }
+        op.setResult(res);
+        op.setRdVal(res);
+//        rob.setValOfEntry(currentRobEntry, res);
     }
 
     @Override
     public void accept(Op.LdC op) {
-        int addr = op.getImVal(); //copied from old ALU
-        op.setResult(rob.getValOfEntry(prf.whereInRob(addr))); //this must be ready otherwise the reservation station wouldnt have released the instruction
-        op.setRdVal(op.getResult());
-        //prf.destValIsReady(currentOp.getRd().ordinal()); this can happen only in commit!
+        int addr = op.getImVal(); //either we get from mem or get from the rob
+        int res;
+        if(prf.isMemValUnmapped(addr)){ //from mem
+            res = mem.get(addr);
+        }else{// from rob
+            res = rob.getValOfEntry(prf.whereMemInRob(addr));
+        }
+        op.setResult(res); //this must be ready otherwise the reservation station wouldnt have released the instruction
+        op.setRdVal(res);
+//        rob.setValOfEntry(currentRobEntry, res);
     }
 
     @Override
     public void accept(Op.St op) {
-        op.setResult(rss.get(currentRs).getvJ() + op.getImVal()); //copied from old ALU
+        int addr = rss.get(currentRs).getvJ() + op.getImVal();
+        op.setResult(addr); //copied from old ALU
+        int res;
+        if(prf.isMemValUnmapped(addr)){ //from mem
+            res = mem.get(addr);
+            prf.pointMemAtRobEntry(addr, currentRobEntry);
+        }else{// from rob
+            res = rob.getValOfEntry(prf.whereMemInRob(addr));
+        }
+        cdb.put(currentRobEntry, List.of(res));
+        //show the updated val in prf
 
         //this goes in write result now
 //        if(prf.isRegValAtRobAndReady(op.getRd().ordinal())){

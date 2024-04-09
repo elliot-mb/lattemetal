@@ -82,6 +82,7 @@ public class Processor {
                 new PipelineRegister[]{isuAlu, isuLsu});
         this.alu = new ArithmeticLogicUnit(
                 this.cdb,
+                this.rob,
                 this.aluRs,
                 this.rf,
                 this.prf,
@@ -162,6 +163,9 @@ public class Processor {
             isu.clk();
             deu.clk();
             feu.clk();
+
+            rob.clk(); //read off the cdb
+
             if(prefec.canPush() && !pc.isDone()){//&& !(!voided.canPull() && fe.getIsBranch())) {
                 prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));
                 //pc.incr();

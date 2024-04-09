@@ -8,11 +8,13 @@ public class ArithmeticLogicUnit extends Unit {
     private final int baseRs;
     private final RegisterFile rf;
 
+    private final ReorderBuffer rob;
+
     private final PhysicalRegFile prf;
 
     private int currentRobEntry;
 
-    ArithmeticLogicUnit(Map<Integer, List<Integer>> cdb, List<ReservationStation> rs, RegisterFile rf, PhysicalRegFile prf, PipelineRegister[] ins, PipelineRegister[] outs){
+    ArithmeticLogicUnit(Map<Integer, List<Integer>> cdb, ReorderBuffer rob, List<ReservationStation> rs, RegisterFile rf, PhysicalRegFile prf, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
         this.currentOp = null;
         this.currentRs = 0;
@@ -21,6 +23,7 @@ public class ArithmeticLogicUnit extends Unit {
         this.rf = rf;
         this.cdb = cdb;
         this.prf = prf;
+        this.rob = rob;
     }
 
     @Override
@@ -31,7 +34,7 @@ public class ArithmeticLogicUnit extends Unit {
                 PipelineEntry e = in.pull();
                 pcVal = e.getPcVal();
                 flag = e.getFlag();
-                rs.set(e, prf, rf, e.getEntry().get(0)); //entry is the rob tab/entry
+                rs.set(e, prf, rf, e.getEntry()); //entry is the rob tab/entry
             }
         }
     }
@@ -53,11 +56,16 @@ public class ArithmeticLogicUnit extends Unit {
 
     @Override
     protected boolean isDone(){
-        boolean allBusy = true;
+        boolean anyBusy = false;
         for(ReservationStation rs : rss){
-            allBusy = rs.isBusy() && allBusy;
+            anyBusy = rs.isBusy() || anyBusy;
         }
-        return !allBusy;
+        return !anyBusy;
+    }
+
+    @Override
+    protected boolean attemptToRead(){
+        return true; //the case where we cannot read is handled by this readoffpipeline
     }
 
     @Override
@@ -89,34 +97,42 @@ public class ArithmeticLogicUnit extends Unit {
     public void accept(Op.Add op) {
         //modify register value = op.getRsVal() + op.getRtVal(); // i guess we can just write into the instruction
         //and then create a writeback stage
-        op.setResult(rss.get(currentRs).getvJ() + rss.get(currentRs).getvK());
-        op.setRdVal(op.getResult());
-        //prf.destValIsReady(currentOp.getRd().ordinal()); moved to rob
+        int res = rss.get(currentRs).getvJ() + rss.get(currentRs).getvK();
+        op.setResult(res);
+        op.setRdVal(res);
+        //rob.setValOfEntry(currentRobEntry, res);
+        //prf.pointRegAtRobEntry(op.getRd(), currentRobEntry);
 
     }
 
     @Override
     public void accept(Op.AddI op) {
         // modify register value = op.getRsVal() + op.getImVal();
-        op.setResult(rss.get(currentRs).getvJ() + op.getImVal());
-        op.setRdVal(op.getResult());
-//prf.destValIsReady(currentOp.getRd().ordinal()); moved to rob
+        int res = rss.get(currentRs).getvJ() + op.getImVal();
+        op.setResult(res);
+        op.setRdVal(res);
+        //rob.setValOfEntry(currentRobEntry, res);
+        //prf.pointRegAtRobEntry(op.getRd(), currentRobEntry);
     }
 
     @Override
     public void accept(Op.Mul op) {
         // modify register value = op.getRsVal() * op.getRtVal();
-        op.setResult(rss.get(currentRs).getvJ() * rss.get(currentRs).getvK());
-        op.setRdVal(op.getResult());
-//prf.destValIsReady(currentOp.getRd().ordinal()); moved to rob
+        int res = rss.get(currentRs).getvJ() * rss.get(currentRs).getvK();
+        op.setResult(res);
+        op.setRdVal(res);
+        //rob.setValOfEntry(currentRobEntry, res);
+        //prf.pointRegAtRobEntry(op.getRd(), currentRobEntry);
     }
 
     @Override
     public void accept(Op.MulI op) {
         // modify register value = op.getRsVal() * op.getImVal();
-        op.setResult(rss.get(currentRs).getvJ() * op.getImVal());
-        op.setRdVal(op.getResult());
-//prf.destValIsReady(currentOp.getRd().ordinal()); moved to rob
+        int res = rss.get(currentRs).getvJ() * op.getImVal();
+        op.setResult(res);
+        op.setRdVal(res);
+        //rob.setValOfEntry(currentRobEntry, res);
+        //prf.pointRegAtRobEntry(op.getRd(), currentRobEntry);
     }
 
     @Override
@@ -129,8 +145,9 @@ public class ArithmeticLogicUnit extends Unit {
         else if(a == b) cmpResult = 0;
         else cmpResult = 1;
         op.setResult(cmpResult);
-        op.setRdVal(op.getResult());
-//prf.destValIsReady(currentOp.getRd().ordinal()); moved to rob
+        op.setRdVal(cmpResult);
+        //rob.setValOfEntry(currentRobEntry, cmpResult);
+        //prf.pointRegAtRobEntry(op.getRd(), currentRobEntry);
     }
 
     @Override

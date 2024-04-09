@@ -18,7 +18,7 @@ public class BranchUnit extends Unit{
         pcVal = e.getPcVal();
         flag = e.getFlag();
         currentOp = e.getOp();
-        currentRobEntry = e.getEntry().get(0); //requires rob entry number otherwise they crash
+        currentRobEntry = e.getEntry(); //requires rob entry number otherwise they crash
     }
 
     @Override

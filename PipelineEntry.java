@@ -7,15 +7,19 @@ public class PipelineEntry {
     private final Integer pcVal;
     private final boolean flag; //used for a 'branch taken' bit
 
-    private final List<Integer> entry = new ArrayList<Integer>();
+    private Integer entry = null;
 
-    PipelineEntry(Instruction op, Integer pcVal, boolean flag, int... entry){
+    PipelineEntry(Instruction op, Integer pcVal, boolean flag, int entry){
         this.op = op;
         this.pcVal = pcVal;
         this.flag = flag;
-        for(int x : entry){
-            this.entry.add(x);
-        }
+        this.entry = entry;
+    }
+
+    PipelineEntry(Instruction op, Integer pcVal, boolean flag){
+        this.op = op;
+        this.pcVal = pcVal;
+        this.flag = flag;
     }
 
     PipelineEntry(){
@@ -37,9 +41,13 @@ public class PipelineEntry {
         return flag;
     }
 
-    public List<Integer> getEntry() { return entry; }
+    public Integer getEntry() {
+        if(entry == null) throw new RuntimeException("getEntry: entry is null");
+        return entry;
+    }
 
     public PipelineEntry copy(){
-        return new PipelineEntry(op.copy(), pcVal.intValue(), flag);
+        if(entry == null) return new PipelineEntry(op.copy(), pcVal.intValue(), flag);
+        return new PipelineEntry(op.copy(), pcVal.intValue(), flag, entry.intValue());
     }
 }

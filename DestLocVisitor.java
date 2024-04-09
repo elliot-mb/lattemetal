@@ -43,7 +43,7 @@ public class DestLocVisitor implements InstructionLocVisitor {
 
     @Override
     public List<Integer> accept(Op.St op) {
-        return List.of(op.getRsVal() + op.getImVal()); //this sneakily does the LSU calculation ahead of time!! this islike an addressu nit mayve idk
+        return List.of(op.getRs().ordinal());
     }
 
     @Override

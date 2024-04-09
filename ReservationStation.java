@@ -3,6 +3,7 @@ import java.util.Map;
 
 public class ReservationStation implements InstructionVoidVisitor {
     public static final int NO_DEPENDENCY = -1;
+
     public static int uId = 0;
     public final int id;
     private Instruction op;
@@ -11,7 +12,6 @@ public class ReservationStation implements InstructionVoidVisitor {
     private boolean rJ, rK, busy;
     private final ReorderBuffer rob;
     public int robEntry;
-
     private final Map<Integer, List<Integer>> cdb;
 
     ReservationStation(Map<Integer, List<Integer>> cdb, ReorderBuffer rob){
@@ -55,26 +55,26 @@ public class ReservationStation implements InstructionVoidVisitor {
         List<Integer> sources = op.visit(new SourceLocVisitor());
         List<Integer> dest = op.visit(new DestLocVisitor());
 
-        Integer regJ = sources.isEmpty() ? null : sources.get(0);
-        Integer regK = sources.size() <= 1 ? null : sources.get(1);
+        RegisterName regJ = sources.isEmpty() ? null : RegisterName.values()[sources.get(0)];
+        RegisterName regK = sources.size() <= 1 ? null : RegisterName.values()[sources.get(1)];
 
         if(regJ != null && prf.isRegValReady(regJ)){
-            vJ = prf.isDestValUnmapped(regJ) ? rf.getReg(null, regJ) : rob.getValOfEntry(prf.whereInRob(regJ));
+            vJ = prf.isRegValUnmapped(regJ) ? rf.getReg(regJ) : rob.getValOfEntry(prf.whereRegInRob(regJ));
             rJ = true; //ready up
             qJ = NO_DEPENDENCY;
         }else if(regJ != null){
-            qJ = prf.whereInRob(regJ);
+            qJ = prf.whereRegInRob(regJ);
             rJ = false;
         }
         if(regJ == null){
             rJ = true;
         }
         if(regK != null && prf.isRegValReady(regK)){
-            vK =  prf.isDestValUnmapped(regK) ? rf.getReg(null, regK) : rob.getValOfEntry(prf.whereInRob(regK));
+            vK =  prf.isRegValUnmapped(regK) ? rf.getReg(regK) : rob.getValOfEntry(prf.whereRegInRob(regK));
             rK = true; //ready up
             qK = NO_DEPENDENCY;
         }else if(regK != null){
-            qK = prf.whereInRob(regK);
+            qK = prf.whereRegInRob(regK);
             rJ = false;
         }
         if(regK == null){
@@ -82,7 +82,7 @@ public class ReservationStation implements InstructionVoidVisitor {
         }
 
         busy = true;
-        if(!dest.isEmpty()) prf.pointAtRobEntry(dest.get(0), robEntry); //tell the register file to point at the rob entry of the instruction in this rs, IF there is a result
+        if(!dest.isEmpty()) prf.pointRegAtRobEntry(RegisterName.values()[dest.get(0)], robEntry); //tell the register file to point at the rob entry of the instruction in this rs, IF there is a result
         this.robEntry = robEntry;
     }
 
@@ -91,13 +91,13 @@ public class ReservationStation implements InstructionVoidVisitor {
         if(qJ == NO_DEPENDENCY) rJ = true;
         if(qK == NO_DEPENDENCY) rK = true;
         if(qJ != NO_DEPENDENCY && cdb.containsKey(qJ)){ //qJ is memory location or register
-            System.out.println(this.id + " READ OFF COMMON DATA BUS! ROB entry " + qJ + " has this result");
+            System.out.println(id + " READ OFF COMMON DATA BUS! ROB entry" + qJ + " has this result");
             vJ = cdb.get(qJ).get(0); //broadcast this data on the first element of the list
             qJ = NO_DEPENDENCY;
             rJ = true;
         }
         if(qK != NO_DEPENDENCY && cdb.containsKey(qK)){
-            System.out.println(this.id + " READ OFF COMMON DATA BUS! reservation station " + qK + " sent this result");
+            System.out.println(id + " READ OFF COMMON DATA BUS! ROB entry " + qK + " has this result");
             vK = cdb.get(qK).get(0);
             qK = NO_DEPENDENCY;
             rK = true;

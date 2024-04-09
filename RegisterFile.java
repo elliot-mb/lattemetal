@@ -20,10 +20,12 @@ public class RegisterFile extends Block{
         setDelegate(name.ordinal(), val);
     }
 
-    public int getReg(RegisterName name, int... nameNum){
-        if(nameNum.length > 1) throw new RuntimeException("getReg: optional argument nameNum cannot be more than one long");
-        if(name == null) return read(nameNum[0]);
+    public int getReg(RegisterName name){
         return read(name.ordinal());
+    }
+
+    public int getReg(int nameNum){
+        return read(nameNum);
     }
 
     @Override

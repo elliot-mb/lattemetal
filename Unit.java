@@ -125,19 +125,27 @@ public abstract class Unit implements InstructionVoidVisitor {
         Arrays.fill(outsChoice, false);
     }
 
+    /**
+     * override this where we want to read when we are not done (e.g. where we have reservation stations)
+     * @return false
+     */
+    protected boolean attemptToRead(){
+        return false;
+    }
+
     public void clk(){
         // we have processed this op, and if its not the case that we can pull in and push out to chosen outs, we stall (return)
         if(isDone() && !(canPullOffActiveIn()))/* && (areOutsUnchosen() || canPushOnChosenOuts())))*/ return;
-        if(isDone()) readOffPipeline(); //dont re-copy if we are mid-processing
+        if(isDone() || (canPullOffActiveIn() && attemptToRead())) readOffPipeline(); //dont re-copy if we are mid-processing
         if(isUnfinished()) {
             procInstruction(); //always run at least once if isUnfinished is ever false
                                //some unit stall with this instruction like the ALU while
                                //while RSs wait for deps
         }
         if(isUnfinished()) return;
-        currentOp.visit(this); // /!\ main processing happens here /!\ (forced to be implementation-defined)
         chooseOuts(); //implementation defined unless has one output
         if(!canPushOnChosenOuts()) return; //stall a clock cycle if we cant push the result
+        currentOp.visit(this); // /!\ main processing happens here /!\ (forced to be implementation-defined)
         writeOnPipeline();
         currentOp = null; //empty out our intermediate storage to accept the next one
     }
