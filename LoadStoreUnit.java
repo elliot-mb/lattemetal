@@ -51,17 +51,29 @@ public class LoadStoreUnit extends Unit{
     protected void procInstruction() {
         for(ReservationStation rs : rss){
             if(rs.isBusy()) rs.update(); //dont update those with no instruction inside
-            //System.out.println("UPDATED AND NOW " + rs.isReady());
-            if(currentOp == null && rs.isBusy() && rs.isReady()){
+        }
+        if(currentOp == null){
+            int oldestInstructionId = Integer.MAX_VALUE;
+            int i = 0;
+            int index = -1;
+            for(ReservationStation rs : rss){
+                if(rs.isBusy() && rs.isReady() && oldestInstructionId > rs.getOp().getId()) {
+                    index = i;
+                    oldestInstructionId = rs.getOp().getId();
+                }
+                i++;
+            }
+            if(index != -1) {
+                ReservationStation rs = rss.get(index);
                 currentRobEntry = rs.robEntry;
-                counter.rst();
                 currentOp = rs.getOp();
+                counter.rst();
                 currentRs = rs.getId() - baseRs; //should only be reset after we finish processing stuff
             }
         }
 
-        if(currentOp != null && !counter.isDone()) {
-            counter.decr();
+        if(currentOp != null && !currentOp.isDone()) {
+            currentOp.decr();
         }
     }
 
