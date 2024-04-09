@@ -53,7 +53,7 @@ public abstract class Unit implements InstructionVoidVisitor {
         return res;
     }
 
-    protected int selectionPriority(){
+    protected int selectionPriority(){ //override of needed
         return oldestInInstr();
     }
 

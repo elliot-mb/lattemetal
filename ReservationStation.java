@@ -9,15 +9,16 @@ public class ReservationStation implements InstructionVoidVisitor {
     private int qJ, qK;
     private int vJ, vK;
     private boolean rJ, rK, busy;
-
+    private final ReorderBuffer rob;
     public int robEntry;
 
     private final Map<Integer, List<Integer>> cdb;
 
-    ReservationStation(Map<Integer, List<Integer>> cdb){
+    ReservationStation(Map<Integer, List<Integer>> cdb, ReorderBuffer rob){
         this.cdb = cdb;
         flush();
         this.id = uId;
+        this.rob = rob;
         uId++;
     }
 
@@ -58,22 +59,22 @@ public class ReservationStation implements InstructionVoidVisitor {
         Integer regK = sources.size() <= 1 ? null : sources.get(1);
 
         if(regJ != null && prf.isRegValReady(regJ)){
-            vJ = rf.getReg(null, regJ);
+            vJ = prf.isRegValUnmapped(regJ) ? rf.getReg(null, regJ) : rob.getValOfEntry(prf.whereInRob(regJ));
             rJ = true; //ready up
             qJ = NO_DEPENDENCY;
         }else if(regJ != null){
-            qJ = prf.whereDestVal(regJ);
+            qJ = prf.whereInRob(regJ);
             rJ = false;
         }
         if(regJ == null){
             rJ = true;
         }
         if(regK != null && prf.isRegValReady(regK)){
-            vK = rf.getReg(null, regK);
+            vK =  prf.isRegValUnmapped(regK) ? rf.getReg(null, regK) : rob.getValOfEntry(prf.whereInRob(regK));
             rK = true; //ready up
             qK = NO_DEPENDENCY;
         }else if(regK != null){
-            qK = prf.whereDestVal(regK);
+            qK = prf.whereInRob(regK);
             rJ = false;
         }
         if(regK == null){
@@ -105,7 +106,7 @@ public class ReservationStation implements InstructionVoidVisitor {
     }
 
     public boolean isReady(){
-        return (qJ  == NO_DEPENDENCY || rJ) && (qK == NO_DEPENDENCY || rK); //if qi is null that means there is no resevation station assigned to ti
+        return (qJ == NO_DEPENDENCY || rJ) && (qK == NO_DEPENDENCY || rK); //if qi is null that means there is no resevation station assigned to ti
     }
 
     public int getvJ(){

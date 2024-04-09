@@ -31,7 +31,7 @@ public class ArithmeticLogicUnit extends Unit {
                 PipelineEntry e = in.pull();
                 pcVal = e.getPcVal();
                 flag = e.getFlag();
-                rs.set(e, prf, rf, e.getEntry().get(0));
+                rs.set(e, prf, rf, e.getEntry().get(0)); //entry is the rob tab/entry
             }
         }
     }

@@ -11,15 +11,17 @@ public class IssueUnit extends Unit{
 
     private final List<ReservationStation> aluRs;
     private final List<ReservationStation> lsuRs;
+    private final PhysicalRegFile prf;
 
     private int currentRobEntry;
-
-    IssueUnit(RegisterFile rf, ReorderBuffer rob, List<ReservationStation> aluRs, List<ReservationStation> lsuRs, PipelineRegister[] ins, PipelineRegister[] outs){
+    //                          vv update rob      vv put mapping of rob to dest into prf
+    IssueUnit(RegisterFile rf, ReorderBuffer rob, PhysicalRegFile prf, List<ReservationStation> aluRs, List<ReservationStation> lsuRs, PipelineRegister[] ins, PipelineRegister[] outs){
         super(ins, outs);
         this.rf = rf;
         this.rob = rob;
         this.aluRs = aluRs;
         this.lsuRs = lsuRs;
+        this.prf = prf;
     }
 
     private boolean isAnRsFree(List<ReservationStation> rss){
@@ -55,7 +57,7 @@ public class IssueUnit extends Unit{
     }
 
     private boolean sendToAlu(Instruction op){
-        return !Utils.isLoadStore(currentOp);
+        return !Utils.isLoadStore(op);
     }
 
     @Override
@@ -70,6 +72,8 @@ public class IssueUnit extends Unit{
 
     @Override
     protected PipelineEntry makeEntryToWrite(){
+
+
         return new PipelineEntry(currentOp, pcVal, flag, currentRobEntry); //send currentRobEntry to resi station!
     }
 

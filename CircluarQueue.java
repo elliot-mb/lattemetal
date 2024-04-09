@@ -71,6 +71,8 @@ public class CircluarQueue<T> {
         return (head - i - 1 + size) % size;
     }
 
+    //returns a list line [HEAD, x_1, x_2, ..., TAIL] where TAIL things come off of, HEAD things are added on, and
+    //both head and tail are populated elements in this list
     public List<T> peekXs(){
         List<T> ret = new ArrayList<T>();
 

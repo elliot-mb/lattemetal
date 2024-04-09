@@ -53,7 +53,7 @@ public class LoadStoreUnit extends Unit{
         for(ReservationStation rs : rss){
             if(rs.isBusy()) rs.update(); //dont update those with no instruction inside
             //System.out.println("UPDATED AND NOW " + rs.isReady());
-            if(currentOp == null && rs.isReady()){
+            if(currentOp == null && rs.isBusy() && rs.isReady()){
                 currentRobEntry = rs.robEntry;
                 counter.rst();
                 currentOp = rs.getOp();
@@ -79,8 +79,6 @@ public class LoadStoreUnit extends Unit{
     @Override
     protected void writeOnPipeline(){
         super.writeOnPipeline();
-        cdb.put(currentRobEntry, Collections.singletonList(currentOp.getResult()));
-
         rss.get(currentRs).setIsBusy(false);
     }
 
@@ -98,26 +96,31 @@ public class LoadStoreUnit extends Unit{
     @Override
     public void accept(Op.Add op) {
         //pc.set(pcVal);
+        throw new RuntimeException("LoadStoreUnit.accept: instruction not valid");
     }
 
     @Override
     public void accept(Op.AddI op) {
         //pc.set(pcVal);
+        throw new RuntimeException("LoadStoreUnit.accept: instruction not valid");
     }
 
     @Override
     public void accept(Op.Mul op) {
         //pc.set(pcVal);
+        throw new RuntimeException("LoadStoreUnit.accept: instruction not valid");
     }
 
     @Override
     public void accept(Op.MulI op) {
         //pc.set(pcVal);
+        throw new RuntimeException("LoadStoreUnit.accept: instruction not valid");
     }
 
     @Override
     public void accept(Op.Cmp op) {
         //pc.set(pcVal);
+        throw new RuntimeException("LoadStoreUnit.accept: instruction not valid");
     }
 
     @Override
@@ -126,7 +129,7 @@ public class LoadStoreUnit extends Unit{
         op.setResult(mem.read(op.getResult()));
         op.setRdVal(op.getResult());
         prf.regValIsReady(currentOp.getRd().ordinal());
-        //pc.set(pcVal);
+        cdb.put(currentRobEntry, Collections.singletonList(currentOp.getResult()));
     }
 
     @Override
@@ -135,15 +138,16 @@ public class LoadStoreUnit extends Unit{
         op.setResult(mem.read(op.getResult()));
         op.setRdVal(op.getResult());
         prf.regValIsReady(currentOp.getRd().ordinal());
-        //pc.set(pcVal);
+        cdb.put(currentRobEntry, Collections.singletonList(currentOp.getResult()));
     }
 
     @Override
     public void accept(Op.St op) {
         op.setResult(rss.get(currentRs).getvJ() + op.getImVal()); //copied from old ALU
         //mem.set(op.getRdVal(), op.getResult());
-        if(prf.isRegValReady(op.getRd().ordinal())){
-            rob.setValOfEntry(currentRobEntry, rf.getReg(op.getRd()));//add to prf if the value to be written is ready!!!!! JUST FOR STORE GODDAMN IT
+        if(prf.isRegValAtRobAndReady(op.getRd().ordinal())){
+            int resultEntryLoc = prf.whereInRob(op.getRd().ordinal());
+            rob.setValOfEntry(currentRobEntry, rob.getValOfEntry(resultEntryLoc)); //copy reg value from elsewhere in the rob to the result of the store
         }
         //pc.set(pcVal);
     }

@@ -40,8 +40,8 @@ public class Processor {
     private final PipelineRegister lsuBru = new PipelineRegister(1);
     private final PipelineRegister bruWbu = new PipelineRegister(1);
     //private final PipelineRegister aluLsu = new PipelineRegister();
-    private final PipelineRegister voided = new PipelineRegister(1); //ignored pipe register to satisfy Unit inheritence
-
+    private final PipelineRegister rtired = new PipelineRegister(1); //ignored pipe register to satisfy Unit inheritence
+    private final PipelineRegister delete = new PipelineRegister(100);
     private final int DP_ACC = 2;
 
     private final int ROB_ENTRIES = 8;
@@ -49,18 +49,18 @@ public class Processor {
     Processor(InstructionCache ic, Memory... mem) throws RuntimeException{
         if(mem.length > 1) throw new RuntimeException("Processor: this constructor cannot have more than one memories");
         this.cdb = new HashMap<Integer, List<Integer>>();
-        this.rob = new ReorderBuffer(ROB_ENTRIES);
+        this.rob = new ReorderBuffer(ROB_ENTRIES, cdb);
         for(int i = 0; i < ALU_RS_COUNT; i++){
-            aluRs.add(new ReservationStation(cdb));
+            aluRs.add(new ReservationStation(cdb, rob));
         }
         for(int i = 0; i < LSU_RS_COUNT; i++){
-            lsuRs.add(new ReservationStation(cdb));
+            lsuRs.add(new ReservationStation(cdb, rob));
         }
         this.ic = ic;
         this.tally = 0;
         this.pc = new ProgramCounter(ic.numInstrs());
         this.rf = new RegisterFile(cdb);
-        this.prf = new PhysicalRegFile(cdb);
+        this.prf = new PhysicalRegFile(cdb, rob);
         this.mem = mem.length > 0 ? mem[0] : new Memory();
         this.feu = new FetchUnit(
                 this.ic,
@@ -74,6 +74,7 @@ public class Processor {
         this.isu = new IssueUnit(
                 this.rf,
                 this.rob,
+                this.prf,
                 this.aluRs,
                 this.lsuRs,
                 new PipelineRegister[]{deuIsu},
@@ -104,7 +105,7 @@ public class Processor {
                 this.rob,
                 this.cdb,
                 new PipelineRegister[]{bruWbu},
-                new PipelineRegister[]{voided});
+                new PipelineRegister[]{rtired});
     }
 
 //    private void sendSingleInstruction(){
@@ -117,7 +118,7 @@ public class Processor {
 
     private boolean isPipelineBeingUsed(){
         return prefec.canPull() || fecDec.canPull() || deuIsu.canPull() || isuAlu.canPull() || isuLsu.canPull() ||
-                bruWbu.canPull() || aluBru.canPull() || voided.canPull() || !wbu.isDone() || !lsu.isDone() ||
+                bruWbu.canPull() || aluBru.canPull() || rtired.canPull() || !wbu.isDone() || !lsu.isDone() ||
                 lsuBru.canPull() || !alu.isDone() || !deu.isDone() || !feu.isDone() || !isu.isDone();
     }
 
@@ -137,12 +138,12 @@ public class Processor {
         aluBru.flush();
         lsuBru.flush();
         bruWbu.flush();
-        voided.flush();
+        rtired.flush();
     }
 
     public Memory run(PrintStream debugOut){
         debugOut.println(ic);
-        voided.push(new PipelineEntry(Utils.opFactory.new No(), 0, false));
+        rtired.push(new PipelineEntry(Utils.opFactory.new No(), 0, false));
         int retiredInstrCount = 0;
         List<Instruction> retiredInstrs = new ArrayList<Instruction>();
 
@@ -164,13 +165,15 @@ public class Processor {
                 //pc.incr();
             }
             tally++;
-            if(voided.canPull()) {
-                retiredInstrs.add(voided.pull().getOp());
+            while(rtired.canPull()) { //if we retire more that one instruction per cycle
+                retiredInstrs.add(rtired.pull().getOp());
                 retiredInstrCount++;
             } //delete whats inside (voided is used to detect when writebacks are finished)
+            delete.flush(); // any instructions we want to throw away can be put into delete
+
             if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");
             System.out.println(cdb.keySet().toString() + cdb.values().toString());
-            cdb.clear();
+            //cdb.clear(); instead of this, do .remove whenever an instruction commits from the ROB
         }
         debugOut.println("registers (dirty): " + rf);
         debugOut.println("memory: " + mem);

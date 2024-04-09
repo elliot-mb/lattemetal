@@ -11,16 +11,35 @@ public class ReorderEntry {
         this.op = op;
         this.destination = destination;
         this.id = uId;
+        this.ready = false;
         uId++;
+    }
+
+    public int getId(){
+        return this.id;
     }
 
     public void setValue(int value){
         this.value = value;
+        this.ready = true;
     }
 
     public String toString(){
         int id =  op.getId() % 100;
         String pad = Utils.digitsInInt(op.getId()) < 2 ? "0" : "";
         return pad + id;
+    }
+
+    public boolean isReady(){
+        return ready;
+    }
+
+    public int getValue() {
+        if(!ready) throw new RuntimeException("getValue: ReorderEntry has not been evaluated");
+        return value;
+    }
+
+    public Instruction getOp(){
+        return op;
     }
 }
