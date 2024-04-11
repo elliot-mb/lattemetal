@@ -119,6 +119,18 @@ public class ReservationStation implements InstructionVoidVisitor {
         return vK;
     }
 
+    private String instrToId(Instruction op){
+        if(op == null) return "__";
+        String pad = op.getId() % 100 < 10 ? "0" : "";
+        return pad + (op.getId() % 100);
+    }
+
+
+    @Override
+    public String toString(){
+        return "" + instrToId(op);
+    }
+
     @Override
     public void accept(Op.Add op) {
         op.setRsVal(vJ);

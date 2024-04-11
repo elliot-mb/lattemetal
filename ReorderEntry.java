@@ -21,6 +21,9 @@ public class ReorderEntry {
 
     public void setValue(int value){
         this.value = value;
+    }
+
+    public void readyUp(){
         this.ready = true;
     }
 

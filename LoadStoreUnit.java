@@ -141,50 +141,56 @@ public class LoadStoreUnit extends Unit{
     @Override
     public void accept(Op.Ld op) {
         int addr = rss.get(currentRs).getvJ() + op.getImVal(); //copied from old ALU
-        int res;
-        if(prf.isMemValUnmapped(addr)){ //from mem
-            res = mem.get(addr);
-        }else{// from rob
-            res = rob.getValOfEntry(prf.whereMemInRob(addr));
-        }
+        int res = mem.get(addr);
+//        if(prf.isMemValUnmapped(addr)){ //from mem
+//            res = mem.get(addr);
+//        }else{// from rob
+//            res = rob.getValOfEntry(prf.whereMemInRob(addr));
+//        }
         op.setResult(res);
         op.setRdVal(res);
-//        rob.setValOfEntry(currentRobEntry, res);
+        rob.setValOfEntry(currentRobEntry, res);
+        rob.setEntryReady(currentRobEntry);
     }
 
     @Override
     public void accept(Op.LdC op) {
         int addr = op.getImVal(); //either we get from mem or get from the rob
-        int res;
-        if(prf.isMemValUnmapped(addr)){ //from mem
-            res = mem.get(addr);
-        }else{// from rob
-            res = rob.getValOfEntry(prf.whereMemInRob(addr));
-        }
+        int res = mem.get(addr); //this isnt always right, exactly when there is a store ahead to the same address
+        // we can detect conflicts and forward or elimiate everything here and behind in the rob
+
+//        int res;
+//        if(prf.isMemValUnmapped(addr)){ //from mem
+//            res = mem.get(addr);
+//        }else{// from rob
+//            res = rob.getValOfEntry(prf.whereMemInRob(addr));
+//        }
         op.setResult(res); //this must be ready otherwise the reservation station wouldnt have released the instruction
         op.setRdVal(res);
-//        rob.setValOfEntry(currentRobEntry, res);
+        rob.setValOfEntry(currentRobEntry, res);
+        rob.setEntryReady(currentRobEntry);
     }
 
     @Override
     public void accept(Op.St op) {
         int addr = rss.get(currentRs).getvJ() + op.getImVal();
         op.setResult(addr); //copied from old ALU
-        int res;
-        if(prf.isMemValUnmapped(addr)){ //from mem
-            res = mem.get(addr);
-            prf.pointMemAtRobEntry(addr, currentRobEntry);
-        }else{// from rob
-            res = rob.getValOfEntry(prf.whereMemInRob(addr));
-        }
-        cdb.put(currentRobEntry, List.of(res));
-        //show the updated val in prf
+        rob.setValOfEntry(currentRobEntry, addr);
+        //NOT READY ^^^^^^ since we need to retire it
+        //before its ready!
 
-        //this goes in write result now
-//        if(prf.isRegValAtRobAndReady(op.getRd().ordinal())){
-//            int resultEntryLoc = prf.whereInRob(op.getRd().ordinal());
-//            rob.setValOfEntry(currentRobEntry, rob.getValOfEntry(resultEntryLoc)); //copy reg value from elsewhere in the rob to the result of the store
+
+
+
+//        int res; this happens after commit
+//        if(prf.isMemValUnmapped(addr)){ //from mem
+//            res = mem.get(addr);
+//            prf.pointMemAtRobEntry(addr, currentRobEntry);
+//        }else{// from rob
+//            res = rob.getValOfEntry(prf.whereMemInRob(addr));
 //        }
+//        cdb.put(currentRobEntry, List.of(res));
+        //show the updated val in prf
     }
 
     @Override
@@ -208,6 +214,6 @@ public class LoadStoreUnit extends Unit{
     }
 
     protected String showUnit(){
-        return (rss.get(0).isBusy() ? "" + rss.get(0).getOp().getId() : "_") + "," + (rss.get(1).isBusy() ? "" + rss.get(1).getOp().getId() : "_") + "LS";
+        return rss.get(0).toString() + "," + rss.get(1).toString() + ":LS";
     }
 }

@@ -58,16 +58,7 @@ public class PipelineRegister {
         return xs.get(xs.size() - 1);
     }
 
-    private String instrToId(Instruction op){
-        String pad = canPull() && (op.getId() % 100) < 10 ? "0" : "";
-        return "," + (canPull() ? pad + (op.getId() % 100) : "__");
-    }
-
     public String toString(){
-        String gaps = "";
-        for(int i = 0; i < queue.getSize() - queue.getElementsIn(); i++ ){
-            gaps += ",__";
-        }
-        return "[" + gaps + queue.peekXs().stream().map(PipelineEntry::getOp).map(this::instrToId).collect(Collectors.joining()) + "]";
+        return queue.toString();
     }
 }

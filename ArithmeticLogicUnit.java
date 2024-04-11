@@ -221,6 +221,6 @@ public class ArithmeticLogicUnit extends Unit {
     }
 
     protected String showUnit(){
-        return (rss.get(0).isBusy() ? "" + rss.get(0).getOp().getId() : "_") + "," + (rss.get(1).isBusy() ? "" + rss.get(1).getOp().getId() : "_")  + "EX";
+        return rss.get(0).toString() + "," + rss.get(1).toString() + ":EX";
     }
 }

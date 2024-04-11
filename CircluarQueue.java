@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 //circular queue
 public class CircluarQueue<T> {
@@ -81,5 +82,18 @@ public class CircluarQueue<T> {
         }
 
         return ret;
+    }
+
+    private String appendComma(String uncommad){
+        return uncommad + ",";
+    }
+
+    @Override
+    public String toString(){
+        String gaps = "";
+        for(int i = 0; i < getSize() - getElementsIn(); i++ ){
+            gaps += ",__";
+        }
+        return "[" + gaps + "," + peekXs().stream().map(T::toString).map(this::appendComma).collect(Collectors.joining()) + "]";
     }
 }

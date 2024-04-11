@@ -1,6 +1,5 @@
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ReorderBuffer implements InstructionVoidVisitor{
 
@@ -14,13 +13,36 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     private ReorderEntry currentCommit;
     private boolean prfSet = false;
 
+    private final int size;
+
+    private final CircluarQueue<ReorderEntry> lsq;
+
     ReorderBuffer(int size, Map<Integer, List<Integer>> cdb, RegisterFile rf, Memory mem){
         this.buffer = new CircluarQueue<ReorderEntry>(size);
         this.cdb = cdb;
         this.rf = rf;
         this.currentCommit = null;
         this.mem = mem;
+        this.size = size;
+        this.lsq = new CircluarQueue<ReorderEntry>(size);
     }
+
+//    /**
+//     * it doesnt matter if there can only ever be one of these, there is only ever one rob
+//     */
+//    public class LoadStoreQueue{
+//
+//        private final CircluarQueue<ReorderEntry> buffer;
+//
+//        LoadStoreQueue(){
+//            this.buffer = new CircluarQueue<ReorderEntry>(size); //always big enough to fit all the loads and stores in the rob
+//        }
+//
+//        public void add(ReorderEntry re){
+//            buffer.push(re);
+//        }
+//
+//    }
 
     //avoids circular dep
     public void setPrf(PhysicalRegFile prf){
@@ -30,6 +52,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     public void add(ReorderEntry re){
         buffer.push(re);
+        if(Utils.isLoadStore(re.getOp())) lsq.push(re);
     }
 
     public boolean isFull(){
@@ -41,17 +64,25 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     }
 
     public String toString(){
-        String gaps = "";
-        for(int i = 0; i < buffer.getSize() - buffer.getElementsIn(); i++ ){
-            gaps += ",__";
-        }
-        return "[" + gaps + buffer.peekXs().stream().map(ReorderEntry::toString).map(this::appendComma).collect(Collectors.joining()) + "]";
+        return "" + buffer + "\t" +  lsq;
     }
 
-    private int locationOfEntryId(int id){
-        List<ReorderEntry> re = buffer.peekXs();
+    private ReorderEntry precedingLoadOrNull(){
+        List<ReorderEntry> xs = lsq.peekXs();
+        for(int i = xs.size() - 1; i >= 0; i--){
+            //find the closest preceding __ready__ load
+            ReorderEntry x = xs.get(i);
+            if(x.getOp().visit(new ConcreteCodeVisitor()) == Opcode.ld){
+                return x;
+            }
+        }
+        return null;
+    }
+
+    private int locationOfEntryId(int id, CircluarQueue<ReorderEntry> buff){
+        List<ReorderEntry> re = buff.peekXs();
         int index = -1;
-        int i = buffer.getElementsIn() - 1;
+        int i = buff.getElementsIn() - 1;
         for(ReorderEntry r : re){
             if(r.id == id) {
                 index = i;
@@ -62,14 +93,28 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         return index;
     }
 
-    public void setValOfEntry(int id, int val){
-        List<ReorderEntry> re = buffer.peekXs();
-        int index = locationOfEntryId(id);
-        if(index == -1) throw new RuntimeException("setValOfEntry: there is no such entry with id '" + id + "' in reorder buffer");
+    private void setValOfQueueEntry(int id, int val, CircluarQueue<ReorderEntry> buff){
+        List<ReorderEntry> re = buff.peekXs();
+        int index = locationOfEntryId(id, buff);
+        if(index == -1) throw new RuntimeException("setValOfEntry: there is no such entry with id '" + id + "' in buffer");
         ReorderEntry rChange = re.get(index);
         rChange.setValue(val);
+        rChange.readyUp();
         buffer.setElement(index, rChange);
     }
+
+    public void setValOfEntry(int id, int val){
+        setValOfQueueEntry(id, val, buffer);
+        setValOfQueueEntry(id, val, lsq);
+    }
+
+    public void setEntryReady(int id){
+        getEntry(id).readyUp();
+        getLSQEntry(id).readyUp();
+    }
+//    public void setValOfLSQEntry(int id, int val){
+//        setValOfQueueEntry(id, val, lsq);
+//    }
 
     public Integer tailId(){
         if(buffer.isEmpty()) return null;
@@ -79,36 +124,65 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     public int getValOfEntry(int id){
         List<ReorderEntry> re = buffer.peekXs();
-        int index = locationOfEntryId(id);
+        int index = locationOfEntryId(id, buffer);
         if(index == -1) throw new RuntimeException("getValOfEntry: there is no such entry with id '" + id + "' in reorder buffer");;
         return re.get(index).getValue();
     }
 
-    public ReorderEntry getEntry(int id){
-        List<ReorderEntry> re = buffer.peekXs();
-        int index = locationOfEntryId(id);
+    public ReorderEntry getLSQEntry(int id){
+        List<ReorderEntry> re = lsq.peekXs();
+        int index = locationOfEntryId(id, lsq);
         if(index == -1) throw new RuntimeException("getValOfEntry: there is no such entry with id '" + id + "' in reorder buffer");;
         return re.get(index);
     }
 
-    public void clk(){
-        if(!prfSet) throw new RuntimeException("ReorderBuffer.clk: prf not set");
-
+    public ReorderEntry getEntry(int id){
         List<ReorderEntry> re = buffer.peekXs();
+        int index = locationOfEntryId(id, buffer);
+        if(index == -1) throw new RuntimeException("getValOfEntry: there is no such entry with id '" + id + "' in reorder buffer");;
+        return re.get(index);
+    }
+
+    private void readOffCDB(CircluarQueue<ReorderEntry> buff){
+        List<ReorderEntry> re = buff.peekXs();
         // read off the cbd and into the robber
         for(ReorderEntry r: re){
-            if(r.isReady()) System.out.println("entry " + r.getId() + " is ready!");
+//            if(r.isReady()) System.out.println("entry " + r.getId() + " is ready!");
             if(cdb.containsKey(r.getId())){
                 r.setValue(cdb.get(r.getId()).get(0)); //read from the map if the id matches this rese entry (value is already in the entry before we commit!)
+                r.readyUp();
             }
         }
+    }
 
+    private void popReadyInBuffer(CircluarQueue<ReorderEntry> buff){
+        List<ReorderEntry> re = buff.peekXs();
         if(!re.isEmpty()){
             ReorderEntry willPop = re.get(re.size() - 1);
             if(willPop.isReady()){
                 //visitation to distinguish between stores, common instructions, and branches (incorrect)
+                currentCommit = buff.pop(); //accessible in visitor
+                Instruction poppedOp = currentCommit.getOp();
+                poppedOp.visit(this);
+            }
+        }
+    }
+
+
+    public void clk(){
+        if(!prfSet) throw new RuntimeException("ReorderBuffer.clk: prf not set");
+
+        readOffCDB(buffer);
+        readOffCDB(lsq); //update both
+
+        List<ReorderEntry> re = buffer.peekXs();
+        if(!re.isEmpty()){
+            ReorderEntry willPop = re.get(re.size() - 1);
+            if(willPop.isReady()){
                 currentCommit = buffer.pop(); //accessible in visitor
                 Instruction poppedOp = currentCommit.getOp();
+                if(Utils.isLoadStore(poppedOp)) lsq.pop();
+                //visitation to distinguish between stores, common instructions, and branches (incorrect)
                 poppedOp.visit(this);
             }
         }
@@ -170,6 +244,12 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     public void accept(Op.St op) {
         mem.set(currentCommit.getValue(), op.getResult()); //addr gets stored in result in the LSU!
         cdb.remove(currentCommit.getId());
+        ReorderEntry lastLoadOrNull = precedingLoadOrNull();
+        //CHECK IF THERE IS A COLLISION IN ADDRESSES
+
+        //CHECK IF THE LOAD IS READY
+
+        // IF THE LOAD IS READY,
     }
 
     @Override
