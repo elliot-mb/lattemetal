@@ -72,8 +72,8 @@ public class ReorderBuffer implements InstructionVoidVisitor{
      * @param id the item to start flushing at, flushes this item too
      */
     public void flushAfterId(int id){
+        System.out.println("FLUSH");
         shouldFlush = true;
-        ReorderEntry entry = getEntry(id);
         CircluarQueue<ReorderEntry> newBuffer = new CircluarQueue<ReorderEntry>(size);
         CircluarQueue<ReorderEntry> newLsq = new CircluarQueue<ReorderEntry>(size);
         ReorderEntry peel = buffer.pop();
@@ -138,7 +138,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         ReorderEntry rChange = re.get(index);
         rChange.setValue(val);
         rChange.readyUp();
-        buffer.setElement(index, rChange);
+        buff.setElement(index, rChange);
     }
 
     public void setValOfEntry(int id, int val){
@@ -148,7 +148,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     public void setEntryReady(int id){
         getEntry(id).readyUp();
-        getLSQEntry(id).readyUp();
+        if(Utils.isLoadStore(getEntry(id).getOp())) getLSQEntry(id).readyUp();
     }
 //    public void setValOfLSQEntry(int id, int val){
 //        setValOfQueueEntry(id, val, lsq);
@@ -170,7 +170,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     public ReorderEntry getLSQEntry(int id){
         List<ReorderEntry> re = lsq.peekXs();
         int index = locationOfEntryId(id, lsq);
-        if(index == -1) throw new RuntimeException("getValOfEntry: there is no such entry with id '" + id + "' in reorder buffer");;
+        if(index == -1) throw new RuntimeException("getValOfEntry: there is no such entry with id '" + id + "' in lsq");;
         return re.get(index);
     }
 
@@ -206,6 +206,9 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         }
     }
 
+    public boolean isEmpty(){
+        return buffer.isEmpty(); //exactly when lsq is empty
+    }
 
     public void clk(){
         if(!prfSet) throw new RuntimeException("ReorderBuffer.clk: prf not set");
@@ -213,13 +216,14 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         readOffCDB(buffer);
         readOffCDB(lsq); //update both
 
-        List<ReorderEntry> re = buffer.peekXs();
-        if(!re.isEmpty()){
-            ReorderEntry willPop = re.get(re.size() - 1);
-            if(willPop.isReady()){
+        if(!buffer.isEmpty()){
+            ReorderEntry willPop = buffer.peek();
+            ReorderEntry lsqWillPop = null;
+            if(Utils.isLoadStore(willPop.getOp())) lsqWillPop = lsq.peek();
+            if(willPop.isReady() && (lsqWillPop == null || lsqWillPop.isReady())){
                 currentCommit = buffer.pop(); //accessible in visitor
                 Instruction poppedOp = currentCommit.getOp();
-                if(Utils.isLoadStore(poppedOp)) lsq.pop();
+                if(lsqWillPop != null) lsq.pop();
                 //visitation to distinguish between stores, common instructions, and branches (incorrect)
                 poppedOp.visit(this);
             }
@@ -293,7 +297,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
             //flushhh
             pc.set(lastLoadOrNull.getPcVal());
             flushAfterId(lastLoadOrNull.getId());
-        }else if(collide){ // OTHERWISE, JUST UPDATE THE VALUE OF THE LOAD via the CDB
+        }else if(collide){ // OTHERWISE, JUST UPDATE THE VALUE OF THE LOAD
             lastLoadOrNull.setValue(op.getResult());
             lastLoadOrNull.readyUp(); //make sure its ready
         }

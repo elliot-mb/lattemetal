@@ -20,6 +20,11 @@ public class FetchUnit extends Unit {
 
     @Override
     protected void procInstruction() {
+        if(pc.getCount() == ic.numInstrs()) {
+            currentOp = Utils.opFactory.new No();
+            counter.finish();
+            return;
+        }
         counter.decr();
         currentOp = ic.getInstruction(pc.getCount());
     }
@@ -28,14 +33,15 @@ public class FetchUnit extends Unit {
     protected void readOffPipeline(){
         super.readOffPipeline();
         counter.rst();
+        pc.set(pcVal + 1);
     }
-
-    @Override
-    protected void writeOnPipeline() {
-        //incr then write the incremented value on pipeline
-        currentOp.visit(this);
-        super.writeOnPipeline();
-    }
+//
+//    @Override
+//    protected void writeOnPipeline() {
+//        //incr then write the incremented value on pipeline
+//        currentOp.visit(this);
+//        super.writeOnPipeline();
+//    }
 
     @Override
     public void flush(){

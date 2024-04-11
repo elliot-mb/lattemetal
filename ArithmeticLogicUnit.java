@@ -58,7 +58,7 @@ public class ArithmeticLogicUnit extends Unit {
             if(index != -1) {
                 ReservationStation rs = rss.get(index);
                 currentRobEntry = rs.robEntry;
-                currentOp = rs.getOp();
+                currentOp = rob.getEntry(currentRobEntry).getOp(); //get it right from the rob so its the same reference! (we need to modify op fields...)
                 currentOp.rst();
                 currentRs = index; //should only be reset after we finish processing stuff
             }
@@ -188,6 +188,18 @@ public class ArithmeticLogicUnit extends Unit {
         //  store register value at offset address
         //op.setResult(op.getRsVal() + op.getImVal()); //calculate offset
         //fwd.setSlotReg(null); //doesnt correspond to a register
+        System.out.println(op);
+        System.out.println(op);
+        System.out.println(op);
+        System.out.println(op);
+        System.out.println(op);
+        System.out.println(op);System.out.println(op);System.out.println(op);System.out.println(op);System.out.println(op);System.out.println(op);
+
+
+
+
+
+
         throw new RuntimeException("ArithmeticLogicUnit.accept: store instruction not valid");
 
     }

@@ -163,6 +163,14 @@ public class IssueUnit extends Unit{
         rob.add(e);
     }
 
+    @Override
+    public void accept(Op.No op){
+        ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST, pcVal);
+        currentRobEntry = e.id;
+        rob.add(e);
+        rob.setEntryReady(currentRobEntry); //never let a no-op hold anything up, instantly ready
+    }
+
     protected String showUnit(){
         return "IS";
     }

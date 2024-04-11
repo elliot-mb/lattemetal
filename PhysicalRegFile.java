@@ -26,10 +26,10 @@ public class PhysicalRegFile {
         return !resultStatus.containsKey(mem + MEM_OFFSET);
     }
     public boolean isRegValReady(RegisterName reg){
-        return isRegValAtRobAndReady(reg) || isRegValUnmapped(reg);
+        return isRegValUnmapped(reg) || isRegValAtRobAndReady(reg);
     }
     public boolean isMemValReady(int mem){
-        return isMemValAtRobAndReady(mem) || isMemValUnmapped(mem);
+        return  isMemValUnmapped(mem) || isMemValAtRobAndReady(mem);
     }
     public void regValIsReady(RegisterName r) { resultStatus.remove(r.ordinal()); } // there is no res station it corresponds to
 

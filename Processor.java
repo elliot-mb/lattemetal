@@ -33,7 +33,7 @@ public class Processor {
 
     private final PipelineRegister prefec = new PipelineRegister(1); //just to pass the pc value to the fetch unit, and increment it!
     private final PipelineRegister fecDec = new PipelineRegister(1);
-    private final PipelineRegister deuIsu = new PipelineRegister(2); //instruction queue!!
+    private final PipelineRegister deuIsu = new PipelineRegister(1); //instruction queue!!
     private final PipelineRegister isuAlu = new PipelineRegister(1);
     private final PipelineRegister isuLsu = new PipelineRegister(1);
     private final PipelineRegister aluBru = new PipelineRegister(1);
@@ -122,7 +122,7 @@ public class Processor {
     private boolean isPipelineBeingUsed(){
         return prefec.canPull() || fecDec.canPull() || deuIsu.canPull() || isuAlu.canPull() || isuLsu.canPull() ||
                 bruWbu.canPull() || aluBru.canPull() || rtired.canPull() || !wbu.isDone() || !lsu.isDone() ||
-                lsuBru.canPull() || !alu.isDone() || !deu.isDone() || !feu.isDone() || !isu.isDone();
+                lsuBru.canPull() || !alu.isDone() || !deu.isDone() || !feu.isDone() || !isu.isDone() || !rob.isEmpty();
     }
 
     private void flushPipeline(){
@@ -144,6 +144,12 @@ public class Processor {
         rtired.flush();
     }
 
+    private String pipelineToString(){
+        return "\t[" + prefec + feu + " " + fecDec + " " + deu + " " + deuIsu+ " " + isu + " " + "(" + isuAlu + ","
+                + isuLsu + ") (" + alu + ", " + lsu + ") (" + aluBru + "," + lsuBru + ") " + bru + " " + bruWbu + " "
+                + wbu + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + "\t" + rob;
+    }
+
     public Memory run(PrintStream debugOut){
         debugOut.println(ic);
         rtired.push(new PipelineEntry(Utils.opFactory.new No(), 0, false));
@@ -152,9 +158,7 @@ public class Processor {
 
         //AbstractMap<Instruction, Integer> inFlights = new HashMap<Instruction, Integer>();
         while(isPipelineBeingUsed() || !pc.isDone()){
-            debugOut.println("\t[" + prefec + feu + " " + fecDec + " " + deu + " " + deuIsu+ " " + isu + " " + "(" + isuAlu + ","
-                    + isuLsu + ") (" + alu + ", " + lsu + ") (" + aluBru + "," + lsuBru + ") " + bru + " " + bruWbu + " "
-                    + wbu + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + retiredInstrCount + "\t" + rob);
+            debugOut.println(pipelineToString());
             wbu.clk();
             bru.clk();
             if(bru.needsFlushing()) flushPipeline();
@@ -182,7 +186,7 @@ public class Processor {
 
             if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");
             System.out.println(cdb.keySet().toString() + cdb.values().toString());
-            //cdb.clear(); instead of this, do .remove whenever an instruction commits from the ROB
+            cdb.clear();
         }
         debugOut.println("registers (dirty): " + rf);
         debugOut.println("memory: " + mem);

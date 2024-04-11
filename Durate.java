@@ -26,4 +26,8 @@ public class Durate {
         count = duration;
     }
 
+    public void finish(){
+        count = 0;
+    }
+
 }

@@ -60,6 +60,6 @@ public class PipelineEntry {
 
     @Override
     public String toString(){
-        return "" + instrToId(op);
+        return op.toString();//"" + instrToId(op);
     }
 }

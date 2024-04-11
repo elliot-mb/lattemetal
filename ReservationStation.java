@@ -52,6 +52,13 @@ public class ReservationStation implements InstructionVoidVisitor {
 
     public void set(PipelineEntry e, PhysicalRegFile prf, RegisterFile rf, int robEntry){
         op = e.getOp();
+        if(op.visit(new ConcreteCodeVisitor()) == Opcode.no) {
+            rJ = true;
+            rK = true;
+            busy = true;
+            this.robEntry = robEntry;
+            return;
+        }
         List<Integer> sources = op.visit(new SourceLocVisitor());
         List<Integer> dest = op.visit(new DestLocVisitor());
 
@@ -75,10 +82,10 @@ public class ReservationStation implements InstructionVoidVisitor {
             qK = NO_DEPENDENCY;
         }else if(regK != null){
             qK = prf.whereRegInRob(regK);
-            rJ = false;
+            rK = false;
         }
         if(regK == null){
-            rJ = true;
+            rK = true;
         }
 
         busy = true;

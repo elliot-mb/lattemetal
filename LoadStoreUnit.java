@@ -66,7 +66,7 @@ public class LoadStoreUnit extends Unit{
             if(index != -1) {
                 ReservationStation rs = rss.get(index);
                 currentRobEntry = rs.robEntry;
-                currentOp = rs.getOp();
+                currentOp = rob.getEntry(currentRobEntry).getOp(); //get it right from the rob so its the same reference! (we need to modify op fields...)
                 counter.rst();
                 currentRs = index; //should only be reset after we finish processing stuff
             }
@@ -159,7 +159,6 @@ public class LoadStoreUnit extends Unit{
         op.setResult(addr); //the offset location
         op.setRdVal(res);
         rob.setValOfEntry(currentRobEntry, res); //value of rob is mem at the offset location
-        rob.setEntryReady(currentRobEntry);
     }
 
     @Override
@@ -177,14 +176,13 @@ public class LoadStoreUnit extends Unit{
         op.setResult(addr); //the offset location
         op.setRdVal(res);
         rob.setValOfEntry(currentRobEntry, res);
-        rob.setEntryReady(currentRobEntry);
     }
 
     @Override
     public void accept(Op.St op) {
         int addr = rss.get(currentRs).getvJ() + op.getImVal();
-        op.setResult(addr); //copied from old ALU
-        rob.setValOfEntry(currentRobEntry, addr);
+        op.setResult(addr);
+//        rob.setValOfEntry(currentRobEntry, addr);
         //NOT READY ^^^^^^ since we need to retire it
         //before its ready!
 
