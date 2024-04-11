@@ -83,6 +83,14 @@ public class LoadStoreUnit extends Unit{
     }
 
     @Override
+    public void flush(){
+        super.flush();
+        for(ReservationStation r : rss){
+            r.flush();
+        }
+    }
+
+    @Override
     protected PipelineEntry makeEntryToWrite(){
         return new PipelineEntry(currentOp, pcVal, flag, currentRobEntry); //send currentRobEntry to resi station!
     }
@@ -91,6 +99,7 @@ public class LoadStoreUnit extends Unit{
     protected void writeOnPipeline(){
         super.writeOnPipeline();
         rss.get(currentRs).setIsBusy(false);
+        rss.get(currentRs).flush();
     }
 
     @Override
@@ -147,9 +156,9 @@ public class LoadStoreUnit extends Unit{
 //        }else{// from rob
 //            res = rob.getValOfEntry(prf.whereMemInRob(addr));
 //        }
-        op.setResult(res);
+        op.setResult(addr); //the offset location
         op.setRdVal(res);
-        rob.setValOfEntry(currentRobEntry, res);
+        rob.setValOfEntry(currentRobEntry, res); //value of rob is mem at the offset location
         rob.setEntryReady(currentRobEntry);
     }
 
@@ -165,7 +174,7 @@ public class LoadStoreUnit extends Unit{
 //        }else{// from rob
 //            res = rob.getValOfEntry(prf.whereMemInRob(addr));
 //        }
-        op.setResult(res); //this must be ready otherwise the reservation station wouldnt have released the instruction
+        op.setResult(addr); //the offset location
         op.setRdVal(res);
         rob.setValOfEntry(currentRobEntry, res);
         rob.setEntryReady(currentRobEntry);

@@ -51,7 +51,8 @@ public class Processor {
         this.cdb = new HashMap<Integer, List<Integer>>();
         this.mem = mem.length > 0 ? mem[0] : new Memory();
         this.rf = new RegisterFile(cdb);
-        this.rob = new ReorderBuffer(ROB_ENTRIES, cdb, rf, this.mem);
+        this.pc = new ProgramCounter(ic.numInstrs());
+        this.rob = new ReorderBuffer(ROB_ENTRIES, cdb, rf, this.mem, this.pc);
         for(int i = 0; i < ALU_RS_COUNT; i++){
             aluRs.add(new ReservationStation(cdb, rob));
         }
@@ -60,7 +61,6 @@ public class Processor {
         }
         this.ic = ic;
         this.tally = 0;
-        this.pc = new ProgramCounter(ic.numInstrs());
         this.prf = new PhysicalRegFile(cdb, rob);
         this.rob.setPrf(prf); //avoid circular dependency
         this.feu = new FetchUnit(
@@ -126,7 +126,7 @@ public class Processor {
     }
 
     private void flushPipeline(){
-        //System.out.println("flush");
+        System.out.println("flush");
         feu.flush();
         deu.flush();
         isu.flush();
@@ -158,6 +158,7 @@ public class Processor {
             wbu.clk();
             bru.clk();
             if(bru.needsFlushing()) flushPipeline();
+            bru.doneFlushing();
             lsu.clk();
             alu.clk();
             isu.clk();
@@ -165,6 +166,8 @@ public class Processor {
             feu.clk();
 
             rob.clk(); //read off the cdb
+            if(rob.needsFlushing()) flushPipeline();
+            rob.doneFlushing();
 
             if(prefec.canPush() && !pc.isDone()){//&& !(!voided.canPull() && fe.getIsBranch())) {
                 prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));

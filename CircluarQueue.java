@@ -84,6 +84,10 @@ public class CircluarQueue<T> {
         return ret;
     }
 
+    public T peek(){
+        return xs.get(itemIFromHead(elementsIn - 1));
+    }
+
     private String appendComma(String uncommad){
         return uncommad + ",";
     }

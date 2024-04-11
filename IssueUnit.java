@@ -81,84 +81,84 @@ public class IssueUnit extends Unit{
 
     @Override
     public void accept(Op.Add op) {
-        ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal());
+        ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
         currentRobEntry = e.id;
         rob.add(e);
     }
 
     @Override
     public void accept(Op.AddI op) {
-        ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal());
+        ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
         currentRobEntry = e.id;
         rob.add(e);
     }
 
     @Override
     public void accept(Op.Mul op) {
-        ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal());
+        ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
         currentRobEntry = e.id;
         rob.add(e);
     }
 
     @Override
     public void accept(Op.MulI op) {
-        ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal());
+        ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
         currentRobEntry = e.id;
         rob.add(e);
     }
 
     @Override
     public void accept(Op.Cmp op) {
-        ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal());
+        ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
         currentRobEntry = e.id;
         rob.add(e);
     }
 
     @Override
     public void accept(Op.Ld op) {
-        ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal());
+        ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
         currentRobEntry = e.id;
         rob.add(e);
     }
 
     @Override
     public void accept(Op.LdC op) {
-        ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal());
+        ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
         currentRobEntry = e.id;
         rob.add(e);
     }
 
     @Override
     public void accept(Op.St op) {
-        ReorderEntry e = new ReorderEntry(op, op.getRsVal() + op.getIm());
+        ReorderEntry e = new ReorderEntry(op, op.getRsVal() + op.getIm(), pcVal);
         currentRobEntry = e.id;
         rob.add(e);
     }
 
     @Override
     public void accept(Op.BrLZ op) {
-        ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST);
+        ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST, pcVal);
         currentRobEntry = e.id;
         rob.add(e);
     }
 
     @Override
     public void accept(Op.JpLZ op) {
-        ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST);
+        ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST, pcVal);
         currentRobEntry = e.id;
         rob.add(e);
     }
 
     @Override
     public void accept(Op.Br op) {
-        ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST);
+        ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST, pcVal);
         currentRobEntry = e.id;
         rob.add(e);
     }
 
     @Override
     public void accept(Op.Jp op) {
-        ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST);
+        ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST, pcVal);
         currentRobEntry = e.id;
         rob.add(e);
     }

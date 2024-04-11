@@ -106,6 +106,7 @@ public class ArithmeticLogicUnit extends Unit {
         super.writeOnPipeline();
 //        cdb.put(currentRobEntry, Collections.singletonList(currentOp.getResult()));
         rss.get(currentRs).setIsBusy(false);
+        rss.get(currentRs).flush();
     }
 
     @Override

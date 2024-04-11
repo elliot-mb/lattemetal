@@ -6,13 +6,19 @@ public class ReorderEntry {
     private final int destination; // register number OR memory address for where instruction result is written
     private int value; //holds the instruciton result until commital
     private boolean ready; //false if still executing, true otherwise
+    private final int pcVal;
 
-    ReorderEntry(Instruction op, int destination){
+    ReorderEntry(Instruction op, int destination, int pcVal){
         this.op = op;
         this.destination = destination;
         this.id = uId;
         this.ready = false;
+        this.pcVal = pcVal; //used for flushing and resetting!
         uId++;
+    }
+
+    public int getPcVal(){
+        return pcVal;
     }
 
     public int getId(){

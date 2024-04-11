@@ -41,9 +41,7 @@ public class BranchUnit extends Unit{
         return new PipelineEntry(currentOp, pcVal, flag, currentRobEntry); //send currentRobEntry to resi station!
     }
 
-    @Override
-    public void flush(){
-        super.flush();
+    public void doneFlushing(){
         shouldFlush = false; //once we flush we dont want to flush again next cycle
     }
 

@@ -1,10 +1,11 @@
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class ReorderBuffer implements InstructionVoidVisitor{
 
     public static final int NO_DEST = -1;
-    private final CircluarQueue<ReorderEntry> buffer;
+    private CircluarQueue<ReorderEntry> buffer;
     private final Map<Integer, List<Integer>> cdb;
     private final RegisterFile rf;
     private PhysicalRegFile prf;
@@ -15,9 +16,13 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     private final int size;
 
-    private final CircluarQueue<ReorderEntry> lsq;
+    private CircluarQueue<ReorderEntry> lsq;
 
-    ReorderBuffer(int size, Map<Integer, List<Integer>> cdb, RegisterFile rf, Memory mem){
+    private final ProgramCounter pc;
+
+    private boolean shouldFlush = false;
+
+    ReorderBuffer(int size, Map<Integer, List<Integer>> cdb, RegisterFile rf, Memory mem, ProgramCounter pc){
         this.buffer = new CircluarQueue<ReorderEntry>(size);
         this.cdb = cdb;
         this.rf = rf;
@@ -25,6 +30,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         this.mem = mem;
         this.size = size;
         this.lsq = new CircluarQueue<ReorderEntry>(size);
+        this.pc = pc;
     }
 
 //    /**
@@ -48,6 +54,38 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     public void setPrf(PhysicalRegFile prf){
         this.prf = prf;
         prfSet = true;
+    }
+
+    public boolean needsFlushing(){
+        return shouldFlush;
+    }
+
+    public void doneFlushing(){
+        shouldFlush = false;
+    }
+
+    /**
+     * the queue is like
+     *   head v           v tail
+     * [_, _, e, d, c, b, a] and we say 'flush from c'
+     * [_, _, _, _, _, b, a] note it is inclusive
+     * @param id the item to start flushing at, flushes this item too
+     */
+    public void flushAfterId(int id){
+        shouldFlush = true;
+        ReorderEntry entry = getEntry(id);
+        CircluarQueue<ReorderEntry> newBuffer = new CircluarQueue<ReorderEntry>(size);
+        CircluarQueue<ReorderEntry> newLsq = new CircluarQueue<ReorderEntry>(size);
+        ReorderEntry peel = buffer.pop();
+        while(peel.getId() != id){
+            if(peel.getId() == lsq.peek().getId()){
+                newLsq.push(lsq.pop()); //should include just the same instructions as the main rob
+            }
+            newBuffer.push(peel);
+            peel = buffer.pop();
+        }
+        buffer = newBuffer;
+        lsq = newLsq;
     }
 
     public void add(ReorderEntry re){
@@ -82,13 +120,13 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     private int locationOfEntryId(int id, CircluarQueue<ReorderEntry> buff){
         List<ReorderEntry> re = buff.peekXs();
         int index = -1;
-        int i = buff.getElementsIn() - 1;
+        int i = 0;
         for(ReorderEntry r : re){
             if(r.id == id) {
                 index = i;
                 break;
             }
-            i--;
+            i++;
         }
         return index;
     }
@@ -245,11 +283,20 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         mem.set(currentCommit.getValue(), op.getResult()); //addr gets stored in result in the LSU!
         cdb.remove(currentCommit.getId());
         ReorderEntry lastLoadOrNull = precedingLoadOrNull();
+        if(lastLoadOrNull == null) return; //no load precedes
+
         //CHECK IF THERE IS A COLLISION IN ADDRESSES
-
+        boolean collide = lastLoadOrNull.getOp().getResult() == op.getResult();
         //CHECK IF THE LOAD IS READY
-
-        // IF THE LOAD IS READY,
+        // IF THE LOAD IS READY, FLUSH THE PIPELINE FROM HERE BACK AND RESET THE PC
+        if(collide && lastLoadOrNull.isReady()){
+            //flushhh
+            pc.set(lastLoadOrNull.getPcVal());
+            flushAfterId(lastLoadOrNull.getId());
+        }else if(collide){ // OTHERWISE, JUST UPDATE THE VALUE OF THE LOAD via the CDB
+            lastLoadOrNull.setValue(op.getResult());
+            lastLoadOrNull.readyUp(); //make sure its ready
+        }
     }
 
     @Override
