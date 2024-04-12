@@ -66,6 +66,17 @@ public class Utils {
         return p.run(quiet ? silencer : System.out);
     }
 
+    public static boolean isNoOP(Instruction op){
+        return op.visit(new ConcreteCodeVisitor()).equals(Opcode.no);
+    }
+
+    public static String twoDigitInstrId(Instruction op){
+        if(op == null) return "__";
+        if(Utils.isNoOP(op)) return "NO";
+        String pad = op.getId() % 100 < 10 ? "0" : "";
+        return pad + (op.getId() % 100);
+    }
+
     public static void assertTrue(boolean b){
         if(!b) System.out.println("assertTrue: provided false argument");
     }

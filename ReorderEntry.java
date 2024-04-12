@@ -34,9 +34,7 @@ public class ReorderEntry {
     }
 
     public String toString(){
-        int id =  op.getId() % 100;
-        String pad = Utils.digitsInInt(op.getId()) < 2 ? "0" : "";
-        return pad + id;
+        return Utils.twoDigitInstrId(op);
     }
 
     public boolean isReady(){

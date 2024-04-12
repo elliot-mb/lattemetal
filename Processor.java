@@ -152,9 +152,10 @@ public class Processor {
 
     public Memory run(PrintStream debugOut){
         debugOut.println(ic);
-        rtired.push(new PipelineEntry(Utils.opFactory.new No(), 0, false));
+//        rtired.push(new PipelineEntry(Utils.opFactory.new No(), 0, false));
         int retiredInstrCount = 0;
         List<Instruction> retiredInstrs = new ArrayList<Instruction>();
+        pc.set(-1);
 
         //AbstractMap<Instruction, Integer> inFlights = new HashMap<Instruction, Integer>();
         while(isPipelineBeingUsed() || !pc.isDone()){
@@ -173,10 +174,11 @@ public class Processor {
             if(rob.needsFlushing()) flushPipeline();
             rob.doneFlushing();
 
-            if(prefec.canPush() && !pc.isDone()){//&& !(!voided.canPull() && fe.getIsBranch())) {
+            if (prefec.canPush() && !pc.isDone()) {//&& !(!voided.canPull() && fe.getIsBranch())) {
                 prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));
                 //pc.incr();
             }
+
             tally++;
             while(rtired.canPull()) { //if we retire more that one instruction per cycle
                 retiredInstrs.add(rtired.pull().getOp());

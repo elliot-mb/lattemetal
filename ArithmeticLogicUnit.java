@@ -85,7 +85,7 @@ public class ArithmeticLogicUnit extends Unit {
 
     @Override
     protected boolean isUnfinished() {
-        return currentOp == null || !currentOp.isDone(); //if we arent done with the inner up, and its not blank
+        return (currentOp == null || !currentOp.isDone()); //if we arent done with the inner up, and its not blank
     }
 
     @Override

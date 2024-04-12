@@ -51,15 +51,8 @@ public class PipelineEntry {
         return new PipelineEntry(op.copy(), pcVal.intValue(), flag, entry.intValue());
     }
 
-    private String instrToId(Instruction op){
-        if(op == null) return "__";
-        String pad = op.getId() % 100 < 10 ? "0" : "";
-        return pad + (op.getId() % 100);
-    }
-
-
     @Override
     public String toString(){
-        return "" + instrToId(op);//"" + instrToId(op);"" + instrToId(op) + "=" + op.toString();
+        return Utils.twoDigitInstrId(op);//"" + instrToId(op);"" + instrToId(op) + "=" + op.toString();
     }
 }

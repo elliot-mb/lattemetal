@@ -236,56 +236,55 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     public void accept(Op.Add op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
         prf.regValIsReady(op.getRd());
-        cdb.remove(currentCommit.getId());
+//        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.AddI op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
         prf.regValIsReady(op.getRd());
-        cdb.remove(currentCommit.getId());
-        System.out.println("remove id " + currentCommit.getId());
+//        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.Mul op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
         prf.regValIsReady(op.getRd());
-        cdb.remove(currentCommit.getId());
+//        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.MulI op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
         prf.regValIsReady(op.getRd());
-        cdb.remove(currentCommit.getId());
+//        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.Cmp op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
         prf.regValIsReady(op.getRd());
-        cdb.remove(currentCommit.getId());
+//        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.Ld op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
         prf.regValIsReady(op.getRd());
-        cdb.remove(currentCommit.getId());
+//        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.LdC op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
         prf.regValIsReady(op.getRd());
-        cdb.remove(currentCommit.getId());
+//        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.St op) {
         mem.set(currentCommit.getValue(), op.getResult()); //addr gets stored in result in the LSU!
-        cdb.remove(currentCommit.getId());
+//        cdb.remove(currentCommit.getId());
         ReorderEntry lastLoadOrNull = precedingLoadOrNull();
         if(lastLoadOrNull == null) return; //no load precedes
 

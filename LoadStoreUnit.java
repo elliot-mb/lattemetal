@@ -180,7 +180,7 @@ public class LoadStoreUnit extends Unit{
 
     @Override
     public void accept(Op.St op) {
-        int addr = rss.get(currentRs).getvJ() + op.getImVal();
+        int addr = rss.get(currentRs).getvK() + op.getImVal();
         op.setResult(addr);
 //        rob.setValOfEntry(currentRobEntry, addr);
         //NOT READY ^^^^^^ since we need to retire it

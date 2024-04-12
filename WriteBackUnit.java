@@ -88,13 +88,13 @@ public class WriteBackUnit extends Unit{
     @Override
     public void accept(Op.Ld op) {
         //setRdToRes(op.getRd(), op.getResult());
-        cdb.put(currentRobEntry, Collections.singletonList(currentOp.getResult()));
+        cdb.put(currentRobEntry, Collections.singletonList(op.getRdVal()));
     }
 
     @Override
     public void accept(Op.LdC op) {
         //setRdToRes(op.getRd(), op.getResult());
-        cdb.put(currentRobEntry, Collections.singletonList(currentOp.getResult()));
+        cdb.put(currentRobEntry, Collections.singletonList(op.getRdVal()));
     }
 
     @Override
