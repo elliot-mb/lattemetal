@@ -13,7 +13,7 @@ public class WriteBackUnit extends Unit{
 
     private int currentRobEntry;
 
-    WriteBackUnit(RegisterFile rf, ReorderBuffer rob, PhysicalRegFile prf, Map<Integer, List<Integer>> cdb, PipelineRegister[] ins, PipelineRegister[] outs){
+    WriteBackUnit(RegisterFile rf, ReorderBuffer rob, PhysicalRegFile prf, Map<Integer, List<Integer>> cdb, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
         this.rf = rf;
         this.rob = rob;
@@ -23,7 +23,7 @@ public class WriteBackUnit extends Unit{
 
     @Override
     protected void readOffPipeline(){
-        TubeLike in = ins[selectionPriority()];
+        PipeLike in = ins[selectionPriority()];
         PipelineEntry e = in.pull();
         pcVal = e.getPcVal();
         flag = e.getFlag();

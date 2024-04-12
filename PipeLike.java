@@ -1,4 +1,4 @@
-public interface TubeLike {
+public interface PipeLike {
 
     public boolean canPull();
     public boolean canPush();

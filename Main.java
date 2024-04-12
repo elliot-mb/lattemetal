@@ -61,7 +61,7 @@ public class Main {
 
         if(testing){
             Test.test();
-            System.out.println("tests passed");
+            //System.out.println("tests passed");
             return;
         }
 

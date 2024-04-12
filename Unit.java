@@ -10,16 +10,17 @@ public abstract class Unit implements InstructionVoidVisitor {
 
     protected static final boolean STATIC_PREDICT_BR_TAKEN = true;
 
-    protected final TubeLike[] ins;
-    protected final TubeLike[] outs;
+    protected final PipeLike[] ins;
+    protected final PipeLike[] outs;
 
     protected final boolean[] outsChoice;
 
     protected Instruction currentOp;
+    protected int currentRobEntry;
     protected int pcVal;
     protected boolean flag;
 
-    Unit(TubeLike[] ins, TubeLike[] outs){
+    Unit(PipeLike[] ins, PipeLike[] outs){
         if(ins.length == 0 || outs.length == 0) throw new RuntimeException("Unit: provide at least one input and at least one output pipereg");
         this.ins = ins;
         this.outs = outs;
@@ -30,7 +31,7 @@ public abstract class Unit implements InstructionVoidVisitor {
     protected List<Integer> getActiveIn(){
         List<Integer> inActive = new ArrayList<Integer>();
         int i = 0;
-        for(TubeLike in : ins){
+        for(PipeLike in : ins){
             if(in.canPull()) {
                 inActive.add(i);
             }
@@ -43,7 +44,7 @@ public abstract class Unit implements InstructionVoidVisitor {
         int lowest = Integer.MAX_VALUE;
         int i = 0;
         int res = -1;
-        for(TubeLike in : ins){
+        for(PipeLike in : ins){
             if(in.canPull()) {
                 lowest = Math.min(in.peek().getOp().getId(), lowest);
                 res = i;
@@ -59,7 +60,7 @@ public abstract class Unit implements InstructionVoidVisitor {
 
     //default implementations
     protected void readOffPipeline(){
-        TubeLike in = ins[selectionPriority()];
+        PipeLike in = ins[selectionPriority()];
         PipelineEntry e = in.pull();
         pcVal = e.getPcVal();
         flag = e.getFlag();
@@ -73,7 +74,7 @@ public abstract class Unit implements InstructionVoidVisitor {
     protected void writeOnPipeline(){
         if(areOutsUnchosen()) throw new RuntimeException("writeOnPipeline: choose outputs before writing on the pipeline");
         int i = 0;
-        for(TubeLike out : outs){
+        for(PipeLike out : outs){
             if(outsChoice[i]){
                 if(!out.canPush()) throw new RuntimeException("writeOnPipeline: chosen output cannot be written to, please check before calling");
                 PipelineEntry e = makeEntryToWrite();
@@ -101,7 +102,7 @@ public abstract class Unit implements InstructionVoidVisitor {
     private boolean canPushOnChosenOuts(){
         int i = 0;
         boolean ok = false;
-        for(TubeLike out : outs){
+        for(PipeLike out : outs){
             if(outsChoice[i] && !out.canPush()) return false;
             if(outsChoice[i]) ok = true; // we must pick at least somewhere to write the output
             i++;
@@ -114,7 +115,7 @@ public abstract class Unit implements InstructionVoidVisitor {
 
     private boolean areOutsUnchosen(){
         int i = 0;
-        for(TubeLike out : outs) {
+        for(PipeLike out : outs) {
             if (outsChoice[i]) return false; // we must pick at least somewhere to write the output
             i++;
         }
@@ -124,19 +125,19 @@ public abstract class Unit implements InstructionVoidVisitor {
     private void rstChosenOuts(){
         Arrays.fill(outsChoice, false);
     }
-
-    /**
-     * override this where we want to read when we are not done (e.g. where we have reservation stations)
-     * @return must be false if the unit cannot handle empty input pipeline buffers in its overloaded readOffPipeline method
-     */
-    protected boolean attemptToRead(){
-        return false;
-    }
+//
+//    /**
+//     * override this where we want to read when we are not done (e.g. where we have reservation stations)
+//     * @return must be false if the unit cannot handle empty input pipeline buffers in its overloaded readOffPipeline method
+//     */
+//    protected boolean attemptToRead(){
+//        return false;
+//    }
 
     public void clk(){
         // we have processed this op, and if its not the case that we can pull in and push out to chosen outs, we stall (return)
         if(isDone() && !(canPullOffActiveIn()))/* && (areOutsUnchosen() || canPushOnChosenOuts())))*/ return;
-        if(isDone() || attemptToRead()) readOffPipeline(); //dont re-copy if we are mid-processing
+        if(isDone()) readOffPipeline(); //dont re-copy if we are mid-processing
         if(isUnfinished()) {
             procInstruction(); //always run at least once if isUnfinished is ever false
                                //some unit stall with this instruction like the ALU while

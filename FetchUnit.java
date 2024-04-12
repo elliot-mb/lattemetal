@@ -12,7 +12,7 @@ public class FetchUnit extends Unit {
 
     private final Durate counter = new Durate(FETCH_LATENCY);
 
-    FetchUnit(InstructionCache ic, ProgramCounter pc, PipelineRegister[] ins, PipelineRegister[] outs){
+    FetchUnit(InstructionCache ic, ProgramCounter pc, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
         this.ic = ic;
         this.pc = pc;

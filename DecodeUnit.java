@@ -6,7 +6,7 @@ public class DecodeUnit extends Unit{
 
     private boolean hasRun;
 
-    DecodeUnit(RegisterFile rf, PipelineRegister[] ins, PipelineRegister[] outs){
+    DecodeUnit(RegisterFile rf, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
         this.rf = rf;
     }
