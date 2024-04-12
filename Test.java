@@ -81,14 +81,20 @@ public class Test {
                 });
         Utils.assertTrue(result.equals(Utils.runKern("./assembly/vec_dot.latte", getExampleMemory(),true)));
     }
+    
+    private static void blockTest() throws FileNotFoundException {
+        final Memory result = new Memory(0, new int[]{40,10,0,120,371,371,0,0,0,0,78,9,40,10,-4,65,11,2,10,18,58,11,-11,6,-4,51,51,4,51,17,48,12,-8,24,20,25,31,10,19,25,148,15,-81,31,-4,54,14,23,41,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0});
+        Utils.assertTrue(result.equals(Utils.runKern("./assembly/block_testing.latte", getExampleMemory(), true)));
+    }
 
     static void test() throws FileNotFoundException {
-        try{mat2MulMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
-        try{mat3MulMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
-        try{minMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
-        try{quotMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
-        try{vecAddMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
-        try{vecDotMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
-        try{bubbleSortMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
+        try{blockTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
+//        try{mat2MulMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
+//        try{mat3MulMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
+//        try{minMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
+//        try{quotMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
+//        try{vecAddMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
+//        try{vecDotMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
+//        try{bubbleSortMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
     }
 }

@@ -10,8 +10,8 @@ public abstract class Unit implements InstructionVoidVisitor {
 
     protected static final boolean STATIC_PREDICT_BR_TAKEN = true;
 
-    protected final PipelineRegister[] ins;
-    protected final PipelineRegister[] outs;
+    protected final TubeLike[] ins;
+    protected final TubeLike[] outs;
 
     protected final boolean[] outsChoice;
 
@@ -19,7 +19,7 @@ public abstract class Unit implements InstructionVoidVisitor {
     protected int pcVal;
     protected boolean flag;
 
-    Unit(PipelineRegister[] ins, PipelineRegister[] outs){
+    Unit(TubeLike[] ins, TubeLike[] outs){
         if(ins.length == 0 || outs.length == 0) throw new RuntimeException("Unit: provide at least one input and at least one output pipereg");
         this.ins = ins;
         this.outs = outs;
@@ -30,7 +30,7 @@ public abstract class Unit implements InstructionVoidVisitor {
     protected List<Integer> getActiveIn(){
         List<Integer> inActive = new ArrayList<Integer>();
         int i = 0;
-        for(PipelineRegister in : ins){
+        for(TubeLike in : ins){
             if(in.canPull()) {
                 inActive.add(i);
             }
@@ -43,7 +43,7 @@ public abstract class Unit implements InstructionVoidVisitor {
         int lowest = Integer.MAX_VALUE;
         int i = 0;
         int res = -1;
-        for(PipelineRegister in : ins){
+        for(TubeLike in : ins){
             if(in.canPull()) {
                 lowest = Math.min(in.peek().getOp().getId(), lowest);
                 res = i;
@@ -59,7 +59,7 @@ public abstract class Unit implements InstructionVoidVisitor {
 
     //default implementations
     protected void readOffPipeline(){
-        PipelineRegister in = ins[selectionPriority()];
+        TubeLike in = ins[selectionPriority()];
         PipelineEntry e = in.pull();
         pcVal = e.getPcVal();
         flag = e.getFlag();
@@ -73,7 +73,7 @@ public abstract class Unit implements InstructionVoidVisitor {
     protected void writeOnPipeline(){
         if(areOutsUnchosen()) throw new RuntimeException("writeOnPipeline: choose outputs before writing on the pipeline");
         int i = 0;
-        for(PipelineRegister out : outs){
+        for(TubeLike out : outs){
             if(outsChoice[i]){
                 if(!out.canPush()) throw new RuntimeException("writeOnPipeline: chosen output cannot be written to, please check before calling");
                 PipelineEntry e = makeEntryToWrite();
@@ -101,7 +101,7 @@ public abstract class Unit implements InstructionVoidVisitor {
     private boolean canPushOnChosenOuts(){
         int i = 0;
         boolean ok = false;
-        for(PipelineRegister out : outs){
+        for(TubeLike out : outs){
             if(outsChoice[i] && !out.canPush()) return false;
             if(outsChoice[i]) ok = true; // we must pick at least somewhere to write the output
             i++;
@@ -114,7 +114,7 @@ public abstract class Unit implements InstructionVoidVisitor {
 
     private boolean areOutsUnchosen(){
         int i = 0;
-        for(PipelineRegister out : outs) {
+        for(TubeLike out : outs) {
             if (outsChoice[i]) return false; // we must pick at least somewhere to write the output
             i++;
         }

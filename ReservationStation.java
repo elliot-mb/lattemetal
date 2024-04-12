@@ -50,7 +50,7 @@ public class ReservationStation implements InstructionVoidVisitor {
         this.robEntry = 0;
     }
 
-    public void set(PipelineEntry e, PhysicalRegFile prf, RegisterFile rf, int robEntry){
+    public void set(PipelineEntry e, PhysicalRegFile prf, RegisterFile rf){
         op = e.getOp();
         if(Utils.isNoOP(op)) {
             qJ = NO_DEPENDENCY;
@@ -58,7 +58,7 @@ public class ReservationStation implements InstructionVoidVisitor {
             qK = NO_DEPENDENCY;
             rK = true;
             busy = true;
-            this.robEntry = robEntry;
+            this.robEntry = e.getEntry();
             return;
         }
         List<Integer> sources = op.visit(new SourceLocVisitor());
@@ -91,8 +91,8 @@ public class ReservationStation implements InstructionVoidVisitor {
         }
 
         busy = true;
-        if(!dest.isEmpty()) prf.pointRegAtRobEntry(RegisterName.values()[dest.get(0)], robEntry); //tell the register file to point at the rob entry of the instruction in this rs, IF there is a result
-        this.robEntry = robEntry;
+        if(!dest.isEmpty()) prf.pointRegAtRobEntry(RegisterName.values()[dest.get(0)], e.getEntry()); //tell the register file to point at the rob entry of the instruction in this rs, IF there is a result
+        this.robEntry = e.getEntry();
     }
 
     //checks if either dependant RSs have finished!

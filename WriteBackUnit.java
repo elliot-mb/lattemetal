@@ -23,7 +23,7 @@ public class WriteBackUnit extends Unit{
 
     @Override
     protected void readOffPipeline(){
-        PipelineRegister in = ins[selectionPriority()];
+        TubeLike in = ins[selectionPriority()];
         PipelineEntry e = in.pull();
         pcVal = e.getPcVal();
         flag = e.getFlag();

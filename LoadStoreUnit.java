@@ -35,11 +35,11 @@ public class LoadStoreUnit extends Unit{
     protected void readOffPipeline(){
         for(ReservationStation rs : rss){
             if(canPullOffActiveIn() && !rs.isBusy() && ins[selectionPriority()].canPull()){ //can read multiple times off the queue
-                PipelineRegister in = ins[selectionPriority()];
+                TubeLike in = ins[selectionPriority()];
                 PipelineEntry e = in.pull();
                 pcVal = e.getPcVal();
                 flag = e.getFlag();
-                rs.set(e, prf, rf, e.getEntry());
+                rs.set(e, prf, rf);
             }
         }
 //        super.readOffPipeline();
