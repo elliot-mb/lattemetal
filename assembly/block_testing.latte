@@ -28,3 +28,5 @@ addi s8 a6 #10 --371
 st s8 zero #4 -- this should store 371 is WAW is respected here
 
 -- WAR
+st s8 zero #5
+addi s8 zero #1000 --will be the wrong value if this finished before the one above
