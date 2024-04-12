@@ -8,7 +8,7 @@ public class ReservationGroup implements TubeLike, InstructionVoidVisitor{ //to 
     private final List<ReservationStation> rss;
 
     private int currentRobEntry;
-    private int currentRs;
+    private ReservationStation currentRes;
 
     private static final int NO_INDEX = -1;
 
@@ -65,25 +65,25 @@ public class ReservationGroup implements TubeLike, InstructionVoidVisitor{ //to 
      *
      * @return null if there are no reservation stations ready to go
      */
-    public Instruction requestOpOrNull(ReorderBuffer rob){
-        Instruction ret = null;
-        int index = rsWithOldestOp();
-        if(index != -1) {
-            ReservationStation rs = rss.get(index);
-            currentRobEntry = rs.robEntry;
-            ret = rob.getEntry(currentRobEntry).getOp(); //get it right from the rob so its the same reference! (we need to modify op fields...)
-            ret.rst();
-            currentRs = index; //should only be reset after we finish processing stuff
-        }
-        return ret;
-    }
+//    public Instruction requestOpOrNull(ReorderBuffer rob){
+//        Instruction ret = null;
+//        int index = rsWithOldestOp();
+//        if(index != -1) {
+//            ReservationStation rs = rss.get(index);
+//            currentRobEntry = rs.robEntry;
+//            ret = rob.getEntry(currentRobEntry).getOp(); //get it right from the rob so its the same reference! (we need to modify op fields...)
+//            ret.rst();
+//            currentRs = index; //should only be reset after we finish processing stuff
+//        }
+//        return ret;
+//    }
 
     public int getCurrentRobEntry(){
         return currentRobEntry;
     }
 
-    public int getCurrentRs(){
-        return currentRs;
+    public ReservationStation getCurrentRes(){
+        return currentRes;
     }
 
     public List<ReservationStation> getFreeRss(){
@@ -133,14 +133,92 @@ public class ReservationGroup implements TubeLike, InstructionVoidVisitor{ //to 
     public PipelineEntry pull() {
         if(!canPull()) throw new RuntimeException("pull: no ready reservation stations");
         int index = rsWithOldestOp();
-        ReservationStation rs = rss.get(index);
+        currentRes = rss.get(index);
         PipelineEntry fresh = rsToEntry.get(index).copy();
         rsToEntry.remove(index);
-        return new PipelineEntry(rs.getOp(), fresh.getPcVal(), fresh.getFlag(), fresh.getEntry());
+
+        //visitation that fills in fields from reservation station
+        currentRes.getOp().visit(this);
+
+        PipelineEntry ret = new PipelineEntry(currentRes.getOp(), fresh.getPcVal(), fresh.getFlag(), fresh.getEntry());
+        currentRes = null;
+        return ret;
     }
 
     @Override
     public PipelineEntry peek() {
         return null;
+    }
+
+    // visitation
+    // visitation to update values in instructions!
+    // visitation
+
+    @Override
+    public void accept(Op.Add op) {
+        op.setRsVal(currentRes.getvJ());
+        op.setRtVal(currentRes.getvK()); //assign what we know from the reservation stations!
+    }
+
+    @Override
+    public void accept(Op.AddI op) {
+        op.setRsVal(currentRes.getvJ());
+    }
+
+    @Override
+    public void accept(Op.Mul op) {
+        op.setRsVal(currentRes.getvJ());
+        op.setRtVal(currentRes.getvK());
+    }
+
+    @Override
+    public void accept(Op.MulI op) {
+        op.setRsVal(currentRes.getvJ());
+    }
+
+    @Override
+    public void accept(Op.Cmp op) {
+        op.setRsVal(currentRes.getvJ());
+        op.setRtVal(currentRes.getvK());
+    }
+
+    @Override
+    public void accept(Op.Ld op) {
+        op.setRsVal(currentRes.getvJ());
+    }
+
+    @Override
+    public void accept(Op.LdC op) {
+        //no register read dependencies
+    }
+
+    @Override
+    public void accept(Op.St op) {
+        op.setRsVal(currentRes.getvK()); //second dependant is needed for address calc
+    }
+
+    @Override
+    public void accept(Op.BrLZ op) {
+        op.setRdVal(currentRes.getvJ());
+    }
+
+    @Override
+    public void accept(Op.JpLZ op) {
+        op.setRdVal(currentRes.getvJ());
+    }
+
+    @Override
+    public void accept(Op.Br op) {
+
+    }
+
+    @Override
+    public void accept(Op.Jp op) {
+
+    }
+
+    @Override
+    public void accept(Op.No op) {
+
     }
 }
