@@ -3,7 +3,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ReservationGroup implements TubeLike{ //to set up grouped reservation stations!
+public class ReservationGroup implements TubeLike, InstructionVoidVisitor{ //to set up grouped reservation stations!
 
     private final List<ReservationStation> rss;
 
@@ -18,7 +18,7 @@ public class ReservationGroup implements TubeLike{ //to set up grouped reservati
 
     private final Map<Integer, PipelineEntry> rsToEntry; //so we can load all the other junk that comes with a pipeiregentry
 
-    ReservationGroup(int size, Map<Integer, List<Integer>> cdb, ReorderBuffer rob, RegisterFile rf, PhysicalRegFile prf,){
+    ReservationGroup(int size, Map<Integer, List<Integer>> cdb, ReorderBuffer rob, RegisterFile rf, PhysicalRegFile prf){
         this.rss = new ArrayList<ReservationStation>(size);
         for(int i = 0; i < size; i++){
             rss.add(new ReservationStation(cdb, rob));
@@ -135,6 +135,7 @@ public class ReservationGroup implements TubeLike{ //to set up grouped reservati
         int index = rsWithOldestOp();
         ReservationStation rs = rss.get(index);
         PipelineEntry fresh = rsToEntry.get(index).copy();
+        rsToEntry.remove(index);
         return new PipelineEntry(rs.getOp(), fresh.getPcVal(), fresh.getFlag(), fresh.getEntry());
     }
 
