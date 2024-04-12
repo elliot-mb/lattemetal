@@ -72,7 +72,7 @@ public class LoadStoreUnit extends Unit{
             }
         }
 
-        if(currentOp != null && !counter.isDone()) {
+        if(currentOp != null && !counter.isDone()){
             counter.decr();
         }
     }

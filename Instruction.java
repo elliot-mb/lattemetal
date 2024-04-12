@@ -45,6 +45,9 @@ public abstract class Instruction extends Durate {
     public void setResult(Integer result){
         this.result = result;
     }
+    public boolean hasResult(){
+        return result != null;
+    }
     public int getResult(){
         if(result == null) throw new RuntimeException("getResult: result is null and has not been set");
         return result;

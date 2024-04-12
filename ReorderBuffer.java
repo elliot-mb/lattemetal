@@ -288,6 +288,10 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         ReorderEntry lastLoadOrNull = precedingLoadOrNull();
         if(lastLoadOrNull == null) return; //no load precedes
 
+        //IF THE LOAD IS NOT COLLIDING AND NOT READY (NOT EVEN PROCESSED, so is not colliding by virtue of not having
+        // worked out the effective address) we dont do anything and the
+        if(!lastLoadOrNull.getOp().hasResult()) return;
+
         //CHECK IF THERE IS A COLLISION IN ADDRESSES
         boolean collide = lastLoadOrNull.getOp().getResult() == op.getResult();
         //CHECK IF THE LOAD IS READY
