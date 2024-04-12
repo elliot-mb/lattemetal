@@ -33,7 +33,7 @@ public class Processor {
 
     private final PipelineRegister prefec = new PipelineRegister(1); //just to pass the pc value to the fetch unit, and increment it!
     private final PipelineRegister fecDec = new PipelineRegister(1);
-    private final PipelineRegister deuIsu = new PipelineRegister(1); //instruction queue!!
+    private final PipelineRegister deuIsu = new PipelineRegister(20); //instruction queue!!
     private final PipelineRegister isuAlu = new PipelineRegister(1);
     private final PipelineRegister isuLsu = new PipelineRegister(1);
     private final PipelineRegister aluBru = new PipelineRegister(1);
