@@ -1,6 +1,5 @@
 
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class IssueUnit extends Unit{
@@ -9,18 +8,14 @@ public class IssueUnit extends Unit{
 
     private final ReorderBuffer rob;
 
-    private final List<ReservationStation> aluRs;
-    private final List<ReservationStation> lsuRs;
     private final PhysicalRegFile prf;
 
     private int currentRobEntry;
     //                          vv update rob      vv put mapping of rob to dest into prf
-    IssueUnit(RegisterFile rf, ReorderBuffer rob, PhysicalRegFile prf, List<ReservationStation> aluRs, List<ReservationStation> lsuRs, PipelineRegister[] ins, PipelineRegister[] outs){
+    IssueUnit(RegisterFile rf, ReorderBuffer rob, PhysicalRegFile prf, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
         this.rf = rf;
         this.rob = rob;
-        this.aluRs = aluRs;
-        this.lsuRs = lsuRs;
         this.prf = prf;
     }
 
@@ -53,7 +48,7 @@ public class IssueUnit extends Unit{
 
     @Override
     protected boolean isUnfinished() {
-        return rob.isFull() || (!sendToAlu(currentOp) && !isAnRsFree(lsuRs)) || (sendToAlu(currentOp) && !isAnRsFree(aluRs));
+        return rob.isFull();
     }
 
     private boolean sendToAlu(Instruction op){

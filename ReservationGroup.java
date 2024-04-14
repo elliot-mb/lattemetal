@@ -3,7 +3,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ReservationGroup implements TubeLike, InstructionVoidVisitor{ //to set up grouped reservation stations!
+public class ReservationGroup implements PipeLike, InstructionVoidVisitor{ //to set up grouped reservation stations!
 
     private final List<ReservationStation> rss;
 
@@ -47,12 +47,12 @@ public class ReservationGroup implements TubeLike, InstructionVoidVisitor{ //to 
      * see whos available
      * @return index of oldest ready reservation station
      */
-    private int rsWithOldestOp(){
+    private int rsWithOldestOpReady(){
         int oldestInstructionId = Integer.MAX_VALUE;
         int i = 0;
         int index = NO_INDEX;
         for(ReservationStation rs : rss){
-            if(rs.isBusy() && rs.isReady() && oldestInstructionId > rs.getOp().getId()) {
+            if(rsToEntry.containsKey(i) && rs.isReady() && oldestInstructionId > rs.getOp().getId()) {
                 index = i;
                 oldestInstructionId = rs.getOp().getId();
             }
@@ -94,17 +94,17 @@ public class ReservationGroup implements TubeLike, InstructionVoidVisitor{ //to 
         return freeRss;
     }
 
-    public List<ReservationStation> getReadyRss(){
+    public List<ReservationStation> getReadyAndFullRss(){
         List<ReservationStation> readyRss = new ArrayList<ReservationStation>();
         for(ReservationStation rs : rss){
-            if(rs.isReady()) readyRss.add(rs);
+            if(rs.isReady() && rs.getOp() != null) readyRss.add(rs);
         }
         return readyRss;
     }
 
     @Override
     public boolean canPull() {
-        return getReadyRss().size() > 0;
+        return rsToEntry.size() > 0 && getReadyAndFullRss().size() > 0;
     }
 
     @Override
@@ -124,30 +124,34 @@ public class ReservationGroup implements TubeLike, InstructionVoidVisitor{ //to 
         if(!canPush()) throw new RuntimeException("push: no free reservation stations");
         int index = rsFirstFree(); //cannot be -1 as we have just confirmed we can in fact push
         ReservationStation firstFree = rss.get(index);
-        PipelineEntry fresh = e.copy();
-        firstFree.set(fresh, prf, rf); //first free reservation station
-        rsToEntry.put(index, fresh);
+//        PipelineEntry fresh = e.copy();
+        firstFree.set(e, prf, rf); //first free reservation station
+        rsToEntry.put(index, e);
     }
 
     @Override
     public PipelineEntry pull() {
-        if(!canPull()) throw new RuntimeException("pull: no ready reservation stations");
-        int index = rsWithOldestOp();
+        if(!canPull()) throw new RuntimeException("pull: no mappings to pipeentries");
+        int index = rsWithOldestOpReady();
         currentRes = rss.get(index);
-        PipelineEntry fresh = rsToEntry.get(index).copy();
-        rsToEntry.remove(index);
+        PipelineEntry e = rsToEntry.get(index);
 
         //visitation that fills in fields from reservation station
         currentRes.getOp().visit(this);
+        PipelineEntry ret = new PipelineEntry(currentRes.getOp(), e.getPcVal(), e.getFlag(), e.getEntry());
 
-        PipelineEntry ret = new PipelineEntry(currentRes.getOp(), fresh.getPcVal(), fresh.getFlag(), fresh.getEntry());
+        //cleanup
+        rsToEntry.remove(index); //dont map this reservation station to an entry
+        currentRes.setIsBusy(false);
+        currentRes.flush();
         currentRes = null;
+
         return ret;
     }
 
     @Override
     public PipelineEntry peek() {
-        return null;
+        return rsToEntry.get(rsWithOldestOpReady());
     }
 
     // visitation
@@ -220,5 +224,10 @@ public class ReservationGroup implements TubeLike, InstructionVoidVisitor{ //to 
     @Override
     public void accept(Op.No op) {
 
+    }
+
+    @Override
+    public String toString(){
+        return rsToEntry.toString();
     }
 }

@@ -27,9 +27,11 @@ public class Processor {
     private static final int ALU_RS_COUNT = 2;
     private static final int LSU_RS_COUNT = 2;
 
-    private final List<ReservationStation> aluRs = new ArrayList<ReservationStation>();
-    private final List<ReservationStation> lsuRs = new ArrayList<ReservationStation>();
-    //lsu? load store buffers?
+//    private final List<ReservationStation> aluRs = new ArrayList<ReservationStation>();
+//    private final List<ReservationStation> lsuRs = new ArrayList<ReservationStation>();
+//    //lsu? load store buffers?
+    private final ReservationGroup execRss;
+    private final ReservationGroup lsuRss;
 
     private final PipelineRegister prefec = new PipelineRegister(1); //just to pass the pc value to the fetch unit, and increment it!
     private final PipelineRegister fecDec = new PipelineRegister(1);
@@ -53,62 +55,56 @@ public class Processor {
         this.rf = new RegisterFile(cdb);
         this.pc = new ProgramCounter(ic.numInstrs());
         this.rob = new ReorderBuffer(ROB_ENTRIES, cdb, rf, this.mem, this.pc);
-        for(int i = 0; i < ALU_RS_COUNT; i++){
-            aluRs.add(new ReservationStation(cdb, rob));
-        }
-        for(int i = 0; i < LSU_RS_COUNT; i++){
-            lsuRs.add(new ReservationStation(cdb, rob));
-        }
         this.ic = ic;
         this.tally = 0;
         this.prf = new PhysicalRegFile(cdb, rob);
         this.rob.setPrf(prf); //avoid circular dependency
+
+        this.execRss = new ReservationGroup(ALU_RS_COUNT, cdb, rob, rf, prf);
+        this.lsuRss = new ReservationGroup(LSU_RS_COUNT, cdb, rob, rf, prf);
+
         this.feu = new FetchUnit(
                 this.ic,
                 this.pc,
-                new PipelineRegister[]{prefec},
-                new PipelineRegister[]{fecDec});
+                new PipeLike[]{prefec},
+                new PipeLike[]{fecDec});
         this.deu = new DecodeUnit(
                 this.rf,
-                new PipelineRegister[]{fecDec},
-                new PipelineRegister[]{deuIsu}); //loadstores go down the latter pipe
+                new PipeLike[]{fecDec},
+                new PipeLike[]{deuIsu}); //loadstores go down the latter pipe
         this.isu = new IssueUnit(
                 this.rf,
                 this.rob,
                 this.prf,
-                this.aluRs,
-                this.lsuRs,
-                new PipelineRegister[]{deuIsu},
-                new PipelineRegister[]{isuAlu, isuLsu});
+                new PipeLike[]{deuIsu},
+                new PipeLike[]{execRss, lsuRss});
         this.alu = new ArithmeticLogicUnit(
                 this.cdb,
                 this.rob,
-                this.aluRs,
                 this.rf,
                 this.prf,
-                new PipelineRegister[]{isuAlu},
-                new PipelineRegister[]{aluBru});
+                new PipeLike[]{execRss},
+                new PipeLike[]{aluBru});
         this.lsu = new LoadStoreUnit(
                 this.mem,
-                this.lsuRs,
                 this.rf,
                 this.prf,
                 this.cdb,
                 this.rob,
-                new PipelineRegister[]{isuLsu},
-                new PipelineRegister[]{lsuBru});
+                new PipeLike[]{lsuRss},
+                new PipeLike[]{lsuBru});
         this.bru = new BranchUnit(
                 this.pc,
-                new PipelineRegister[]{aluBru, lsuBru},
-                new PipelineRegister[]{bruWbu}
+                new PipeLike[]{aluBru, lsuBru},
+                new PipeLike[]{bruWbu}
         );
         this.wbu = new WriteBackUnit(
                 this.rf,
                 this.rob,
                 this.prf,
                 this.cdb,
-                new PipelineRegister[]{bruWbu},
-                new PipelineRegister[]{rtired});
+                new PipeLike[]{bruWbu},
+                new PipeLike[]{rtired});
     }
 
 //    private void sendSingleInstruction(){
@@ -145,8 +141,8 @@ public class Processor {
     }
 
     private String pipelineToString(){
-        return "\t[" + prefec + feu + " " + fecDec + " " + deu + " " + deuIsu+ " " + isu + " " + "(" + isuAlu + ","
-                + isuLsu + ") (" + alu + ", " + lsu + ") (" + aluBru + "," + lsuBru + ") " + bru + " " + bruWbu + " "
+        return "\t[" + prefec + feu + " " + fecDec + " " + deu + " " + deuIsu+ " " + isu + " " + "(" + execRss + ","
+                + lsuRss + ") (" + alu + ", " + lsu + ") (" + aluBru + "," + lsuBru + ") " + bru + " " + bruWbu + " "
                 + wbu + "]\t@" + tally + "\tpc " + pc.getCount() + "\t" + "\t" + rob;
     }
 
@@ -169,6 +165,10 @@ public class Processor {
             isu.clk();
             deu.clk();
             feu.clk();
+
+            //update these once the cdb has been fully utilised!
+            execRss.update(); //update reservation groups!
+            lsuRss.update();
 
             rob.clk(); //read off the cdb
             if(rob.needsFlushing()) flushPipeline();

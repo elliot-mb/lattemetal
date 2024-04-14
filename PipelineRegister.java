@@ -1,8 +1,7 @@
 import java.util.List;
-import java.util.stream.Collectors;
 
 //these will become little queues now
-public class PipelineRegister implements TubeLike {
+public class PipelineRegister implements PipeLike {
 
     private final int size;
     private CircluarQueue<PipelineEntry> queue;

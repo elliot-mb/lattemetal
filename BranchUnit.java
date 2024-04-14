@@ -6,14 +6,14 @@ public class BranchUnit extends Unit{
 
     private int currentRobEntry;
 
-    BranchUnit(ProgramCounter pc, PipelineRegister[] ins, PipelineRegister[] outs){
+    BranchUnit(ProgramCounter pc, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
         this.pc = pc;
     }
 
     @Override
     protected void readOffPipeline(){
-        TubeLike in = ins[selectionPriority()];
+        PipeLike in = ins[selectionPriority()];
         PipelineEntry e = in.pull();
         pcVal = e.getPcVal();
         flag = e.getFlag();
