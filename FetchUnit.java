@@ -112,6 +112,7 @@ public class FetchUnit extends Unit {
             //next.setPcVal(op.getImVal());
             pc.set(op.getImVal()); //static prediciton
         }
+        op.setResult(pcVal);
     }
 
     @Override
@@ -121,18 +122,21 @@ public class FetchUnit extends Unit {
             //next.setPcVal(op.getImVal());
             pc.set(pcVal + 1 + op.getImVal());
         }
+        op.setResult(pcVal);
     }
 
     @Override
     public void accept(Op.Br op) {
 //        next.setPcVal(op.getImVal());
         pc.set(op.getImVal());
+        op.setResult(pcVal);
     }
 
     @Override
     public void accept(Op.Jp op) {
 //        next.setPcVal(op.getImVal());
         pc.set(pcVal + 1 + op.getImVal());
+        op.setResult(pcVal);
     }
 
     protected String showUnit(){

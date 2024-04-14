@@ -51,14 +51,14 @@ public class IssueUnit extends Unit{
         return rob.isFull();
     }
 
-    private boolean sendToAlu(Instruction op){
-        return !Utils.isLoadStore(op);
-    }
-
     @Override
     protected void chooseOuts(){
         //choose latter pipereg (index 1) if its a load/store, otherwise stick it to the alu
-        if(!sendToAlu(currentOp)) {
+        if(Utils.isBranch(currentOp)) {
+            outsChoice[2] = true;
+            return;
+        }
+        if(Utils.isLoadStore(currentOp)) {
             outsChoice[1] = true;
             return;
         }

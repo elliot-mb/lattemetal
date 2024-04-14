@@ -104,7 +104,7 @@ public class Processor {
                 this.rob,
                 this.prf,
                 this.cdb,
-                new PipeLike[]{bruWbu},
+                new PipeLike[]{aluWbu, lsuWbu, bruWbu},
                 new PipeLike[]{rtired});
     }
 
@@ -144,7 +144,7 @@ public class Processor {
                 feu + " " + fecDec + " " +
                 deu + " " + deuIsu+ " " +
                 isu + " " + "(" + execRss + "," + lsuRss + "," + bruRss + ") ("
-                + alu + ", " + lsu + ", " + bru + ") (" + aluWbu + "," + lsuWbu + bruWbu + ") "
+                + alu + ", " + lsu + ", " + bru + ") (" + aluWbu + "," + lsuWbu + "," + bruWbu + ") "
                 + wbu + "]\t@"
                 + tally + "\tpc " + pc.getCount() + "\t" + "\t" + rob;
     }
