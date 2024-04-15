@@ -132,28 +132,28 @@ public class IssueUnit extends Unit{
 
     @Override
     public void accept(Op.BrLZ op) {
-        ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST, pcVal);
+        ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST, op.getResult());
         currentRobEntry = e.id;
         rob.add(e);
     }
 
     @Override
     public void accept(Op.JpLZ op) {
-        ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST, pcVal);
+        ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST, op.getResult());
         currentRobEntry = e.id;
         rob.add(e);
     }
 
     @Override
     public void accept(Op.Br op) {
-        ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST, pcVal);
+        ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST, op.getResult());
         currentRobEntry = e.id;
         rob.add(e);
     }
 
     @Override
     public void accept(Op.Jp op) {
-        ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST, pcVal);
+        ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST, op.getResult());
         currentRobEntry = e.id;
         rob.add(e);
     }
