@@ -151,31 +151,25 @@ public class ArithmeticLogicUnit extends Unit {
 
     @Override
     public void accept(Op.BrLZ op) {
-        //pc.set(op.getImVal());
-        //pc.incr();
-        flag = op.getRdVal() <= 0;
-        op.setResult(op.getImVal()); //result is just set to imval
-
-//        fwd.setSlotReg(null); //doesnt correspond to a register
+        throw new RuntimeException("ArithmeticLogicUnit.accept: load instruction not valid");
     }
 
     @Override
     public void accept(Op.JpLZ op) {
-        flag = op.getRdVal() <= 0;
-        op.setResult(pcVal + op.getImVal());
-//        fwd.setSlotReg(null); //doesnt correspond to a register
+        throw new RuntimeException("ArithmeticLogicUnit.accept: load instruction not valid");
+
     }
 
     @Override
     public void accept(Op.Br op) {
-        op.setResult(op.getImVal());
-//        fwd.setSlotReg(null); //doesnt correspond to a register
+        throw new RuntimeException("ArithmeticLogicUnit.accept: load instruction not valid");
+
     }
 
     @Override
     public void accept(Op.Jp op) {
-        op.setResult(pcVal + op.getImVal());
-//        fwd.setSlotReg(null); //doesnt correspond to a register
+        throw new RuntimeException("ArithmeticLogicUnit.accept: load instruction not valid");
+
     }
 
     protected String showUnit(){

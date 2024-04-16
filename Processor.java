@@ -154,7 +154,7 @@ public class Processor {
 //        rtired.push(new PipelineEntry(Utils.opFactory.new No(), 0, false));
         int retiredInstrCount = 0;
         List<Instruction> retiredInstrs = new ArrayList<Instruction>();
-        pc.set(-1);
+        pc.set(0);
 
         //AbstractMap<Instruction, Integer> inFlights = new HashMap<Instruction, Integer>();
         while(isPipelineBeingUsed() || !pc.isDone()){

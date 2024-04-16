@@ -33,7 +33,7 @@ public class FetchUnit extends Unit {
     protected void readOffPipeline(){
         super.readOffPipeline();
         counter.rst();
-        pc.set(pcVal + 1);
+//        pc.set(pcVal + 1);
     }
 //
 //    @Override
