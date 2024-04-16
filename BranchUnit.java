@@ -47,42 +47,42 @@ public class BranchUnit extends Unit{
 
     @Override
     public void accept(Op.Add op) {
-
+        throw new RuntimeException("BranchUnit.accept: load instruction not valid");
     }
 
     @Override
     public void accept(Op.AddI op) {
-
+        throw new RuntimeException("BranchUnit.accept: load instruction not valid");
     }
 
     @Override
     public void accept(Op.Mul op) {
-
+        throw new RuntimeException("BranchUnit.accept: load instruction not valid");
     }
 
     @Override
     public void accept(Op.MulI op) {
-
+        throw new RuntimeException("BranchUnit.accept: load instruction not valid");
     }
 
     @Override
     public void accept(Op.Cmp op) {
-
+        throw new RuntimeException("BranchUnit.accept: load instruction not valid");
     }
 
     @Override
     public void accept(Op.Ld op) {
-
+        throw new RuntimeException("BranchUnit.accept: load instruction not valid");
     }
 
     @Override
     public void accept(Op.LdC op) {
-
+        throw new RuntimeException("BranchUnit.accept: load instruction not valid");
     }
 
     @Override
     public void accept(Op.St op) {
-
+        throw new RuntimeException("BranchUnit.accept: load instruction not valid");
     }
 
     @Override
