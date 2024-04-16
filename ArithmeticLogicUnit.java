@@ -61,9 +61,6 @@ public class ArithmeticLogicUnit extends Unit {
         int res = op.getRdVal() + op.getRtVal();
         op.setResult(res);
         op.setRdVal(res);
-        //rob.setValOfEntry(currentRobEntry, res);
-        //prf.pointRegAtRobEntry(op.getRd(), currentRobEntry);
-
     }
 
     @Override
@@ -72,8 +69,6 @@ public class ArithmeticLogicUnit extends Unit {
         int res = op.getRsVal() + op.getImVal();
         op.setResult(res);
         op.setRdVal(res);
-        //rob.setValOfEntry(currentRobEntry, res);
-        //prf.pointRegAtRobEntry(op.getRd(), currentRobEntry);
     }
 
     @Override
@@ -82,8 +77,6 @@ public class ArithmeticLogicUnit extends Unit {
         int res = op.getRsVal() * op.getRtVal();
         op.setResult(res);
         op.setRdVal(res);
-        //rob.setValOfEntry(currentRobEntry, res);
-        //prf.pointRegAtRobEntry(op.getRd(), currentRobEntry);
     }
 
     @Override
@@ -92,8 +85,6 @@ public class ArithmeticLogicUnit extends Unit {
         int res = op.getRsVal() * op.getImVal();
         op.setResult(res);
         op.setRdVal(res);
-        //rob.setValOfEntry(currentRobEntry, res);
-        //prf.pointRegAtRobEntry(op.getRd(), currentRobEntry);
     }
 
     @Override
@@ -107,46 +98,21 @@ public class ArithmeticLogicUnit extends Unit {
         else cmpResult = 1;
         op.setResult(cmpResult);
         op.setRdVal(cmpResult);
-        //rob.setValOfEntry(currentRobEntry, cmpResult);
-        //prf.pointRegAtRobEntry(op.getRd(), currentRobEntry);
     }
 
     @Override
     public void accept(Op.Ld op) {
-//        op.setResult(op.getRsVal() + op.getImVal()); //calculate offset
-//        fwd.setSlotReg(null); //doesnt correspond to a register because the result comes from the LSU
-//        fwd.setSlot(currentOp.getResult());
         throw new RuntimeException("ArithmeticLogicUnit.accept: load instruction not valid");
     }
 
     @Override
     public void accept(Op.LdC op) {
-//        op.setResult(op.getImVal());
-//        fwd.setSlotReg(op.getRd());
-//        fwd.setSlot(currentOp.getResult());
         throw new RuntimeException("ArithmeticLogicUnit.accept: load instruction not valid");
     }
 
     @Override
     public void accept(Op.St op) {
-        //throw new RuntimeException("ArithmeticLogicUnit.accept: cannot accept a store instruction!");
-        //  store register value at offset address
-        //op.setResult(op.getRsVal() + op.getImVal()); //calculate offset
-        //fwd.setSlotReg(null); //doesnt correspond to a register
-        System.out.println(op);
-        System.out.println(op);
-        System.out.println(op);
-        System.out.println(op);
-        System.out.println(op);
-        System.out.println(op);System.out.println(op);System.out.println(op);System.out.println(op);System.out.println(op);System.out.println(op);
-
-
-
-
-
-
         throw new RuntimeException("ArithmeticLogicUnit.accept: store instruction not valid");
-
     }
 
     @Override
