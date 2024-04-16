@@ -56,8 +56,6 @@ public class ArithmeticLogicUnit extends Unit {
 
     @Override
     public void accept(Op.Add op) {
-        //modify register value = op.getRsVal() + op.getRtVal(); // i guess we can just write into the instruction
-        //and then create a writeback stage
         int res = op.getRdVal() + op.getRtVal();
         op.setResult(res);
         op.setRdVal(res);
@@ -65,7 +63,6 @@ public class ArithmeticLogicUnit extends Unit {
 
     @Override
     public void accept(Op.AddI op) {
-        // modify register value = op.getRsVal() + op.getImVal();
         int res = op.getRsVal() + op.getImVal();
         op.setResult(res);
         op.setRdVal(res);
@@ -73,7 +70,6 @@ public class ArithmeticLogicUnit extends Unit {
 
     @Override
     public void accept(Op.Mul op) {
-        // modify register value = op.getRsVal() * op.getRtVal();
         int res = op.getRsVal() * op.getRtVal();
         op.setResult(res);
         op.setRdVal(res);
@@ -81,7 +77,6 @@ public class ArithmeticLogicUnit extends Unit {
 
     @Override
     public void accept(Op.MulI op) {
-        // modify register value = op.getRsVal() * op.getImVal();
         int res = op.getRsVal() * op.getImVal();
         op.setResult(res);
         op.setRdVal(res);
