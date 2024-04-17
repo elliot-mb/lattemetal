@@ -7,11 +7,11 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     private CircluarQueue<ReorderEntry> buffer;
     private final Map<Integer, List<Integer>> cdb;
     private final RegisterFile rf;
-    private RegisterAliasTable prf;
+    private RegisterAliasTable rat;
     private final Memory mem;
 
     private ReorderEntry currentCommit;
-    private boolean prfSet = false;
+    private boolean ratSet = false;
 
     private final int size;
 
@@ -20,6 +20,8 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     private final ProgramCounter pc;
 
     private boolean shouldFlush = false;
+
+    private int committed;
 
     ReorderBuffer(int size, Map<Integer, List<Integer>> cdb, RegisterFile rf, Memory mem, ProgramCounter pc){
         this.buffer = new CircluarQueue<ReorderEntry>(size);
@@ -30,6 +32,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         this.size = size;
         this.lsq = new CircluarQueue<ReorderEntry>(size);
         this.pc = pc;
+        this.committed = 0;
     }
 
 //    /**
@@ -50,9 +53,9 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 //    }
 
     //avoids circular dep
-    public void setPrf(RegisterAliasTable prf){
-        this.prf = prf;
-        prfSet = true;
+    public void setRat(RegisterAliasTable rat){
+        this.rat = rat;
+        ratSet = true;
     }
 
     public boolean needsFlushing(){
@@ -70,14 +73,13 @@ public class ReorderBuffer implements InstructionVoidVisitor{
      * [_, _, _, _, _, b, a] note it is inclusive
      * @param id the item to start flushing at, flushes this item too
      */
-    public void flushAfterId(int id){
-        System.out.println("FLUSH");
-        shouldFlush = true;
+    public void flushFrom(int id){
+        System.out.println("rob flushes from " + id);
         CircluarQueue<ReorderEntry> newBuffer = new CircluarQueue<ReorderEntry>(size);
         CircluarQueue<ReorderEntry> newLsq = new CircluarQueue<ReorderEntry>(size);
         ReorderEntry peel = buffer.pop();
         while(peel.getId() != id){
-            if(peel.getId() == lsq.peek().getId()){
+            if(!lsq.isEmpty() && peel.getId() == lsq.peek().getId()){
                 newLsq.push(lsq.pop()); //should include just the same instructions as the main rob
             }
             newBuffer.push(peel);
@@ -100,8 +102,15 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         return s + ",";
     }
 
+    public String contents() { String items = "";
+        for(ReorderEntry re : buffer.peekXs()){
+            items += ",[" + re.getId() + "]" + Utils.twoDigitInstrId(re.getOp());
+        }
+        return items;
+    }
+
     public String toString(){
-        return "" + buffer + "\t" +  lsq;
+        return "[" + contents() + "]\t" +  lsq;
     }
 
     private ReorderEntry precedingLoadOrNull(){
@@ -152,12 +161,6 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 //    public void setValOfLSQEntry(int id, int val){
 //        setValOfQueueEntry(id, val, lsq);
 //    }
-
-    public Integer tailId(){
-        if(buffer.isEmpty()) return null;
-        List<ReorderEntry> re = buffer.peekXs();
-        return re.get(re.size() - 1).id;
-    }
 
     public int getValOfEntry(int id){
         List<ReorderEntry> re = buffer.peekXs();
@@ -210,7 +213,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     }
 
     public void clk(){
-        if(!prfSet) throw new RuntimeException("ReorderBuffer.clk: prf not set");
+        if(!ratSet) throw new RuntimeException("ReorderBuffer.clk: prf not set");
 
         readOffCDB(buffer);
         readOffCDB(lsq); //update both
@@ -225,58 +228,63 @@ public class ReorderBuffer implements InstructionVoidVisitor{
                 if(lsqWillPop != null) lsq.pop();
                 //visitation to distinguish between stores, common instructions, and branches (incorrect)
                 poppedOp.visit(this);
+                committed++;
             }
         }
         //commit stage! (start with max one instruction per clock cycle)
         currentCommit = null;
     }
 
+    public int getCommitted(){
+        return committed;
+    }
+
     @Override
     public void accept(Op.Add op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
-        prf.regValIsReady(op.getRd());
+        rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.AddI op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
-        prf.regValIsReady(op.getRd());
+        rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.Mul op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
-        prf.regValIsReady(op.getRd());
+        rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.MulI op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
-        prf.regValIsReady(op.getRd());
+        rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.Cmp op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
-        prf.regValIsReady(op.getRd());
+        rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.Ld op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
-        prf.regValIsReady(op.getRd());
+        rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.LdC op) {
         rf.setReg(op.getRd(), currentCommit.getValue());
-        prf.regValIsReady(op.getRd());
+        rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
     }
 
@@ -298,7 +306,8 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         if(collide && lastLoadOrNull.isReady()){
             //flushhh
             pc.set(lastLoadOrNull.getPcVal());
-            flushAfterId(lastLoadOrNull.getId());
+            shouldFlush = true;
+            flushFrom(lastLoadOrNull.getId());
         }else if(collide){ // OTHERWISE, JUST UPDATE THE VALUE OF THE LOAD
             lastLoadOrNull.setValue(op.getResult());
             lastLoadOrNull.readyUp(); //make sure its ready

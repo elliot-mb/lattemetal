@@ -114,9 +114,14 @@ public class ReservationGroup implements PipeLike, InstructionVoidVisitor{ //to 
 
     @Override
     public void flush() {
+        flushFrom(ReservationStation.FLUSH_ALL);
+    }
+
+    public void flushFrom(int fromRobEntry) {
         for(ReservationStation rs: rss){
-            rs.flush();
+            rs.flush(fromRobEntry);
         }
+        rsToEntry.clear();
     }
 
     @Override
@@ -143,7 +148,7 @@ public class ReservationGroup implements PipeLike, InstructionVoidVisitor{ //to 
         //cleanup
         rsToEntry.remove(index); //dont map this reservation station to an entry
         currentRes.setIsBusy(false);
-        currentRes.flush();
+        currentRes.flush(ReservationStation.FLUSH_ALL);
         currentRes = null;
 
         return ret;
@@ -153,6 +158,8 @@ public class ReservationGroup implements PipeLike, InstructionVoidVisitor{ //to 
     public PipelineEntry peek() {
         return rsToEntry.get(rsWithOldestOpReady());
     }
+
+
 
     // visitation
     // visitation to update values in instructions!

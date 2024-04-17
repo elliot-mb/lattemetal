@@ -6,9 +6,12 @@ public class BranchUnit extends Unit{
 
     private int currentRobEntry;
 
+    private Integer flushAt;
+
     BranchUnit(ProgramCounter pc, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
         this.pc = pc;
+        this.flushAt = null;
     }
 
     @Override
@@ -43,6 +46,7 @@ public class BranchUnit extends Unit{
 
     public void doneFlushing(){
         shouldFlush = false; //once we flush we dont want to flush again next cycle
+        flushAt = null;
     }
 
     @Override
@@ -87,43 +91,52 @@ public class BranchUnit extends Unit{
 
     @Override
     public void accept(Op.BrLZ op) {
+        flag = op.getRdVal() <= 0;
         if(flag){
             //we only need to reset to destination if we didnt set it correctly
             //(if we predicted wrong)
-            pc.set(op.getResult());
+            pc.set(op.getImVal());
         }else{
             pc.set(pcVal);
         }
         //if we got it wrong we flush
         if(flag != STATIC_PREDICT_BR_TAKEN){
             shouldFlush = true;
+            flushAt = currentRobEntry; //after and including the current rob entry since we will otherwise be left with a stale rob entry
         }
     }
 
     @Override
     public void accept(Op.JpLZ op) {
+        flag = op.getRdVal() <= 0;
         if(flag){
-            pc.set(op.getResult());
+            pc.set(op.getImVal());
         }else{
             pc.set(pcVal);
         }
         if(flag != STATIC_PREDICT_BR_TAKEN){
             shouldFlush = true;
+            flushAt = currentRobEntry; //after and including the current rob entry since we will otherwise be left with a stale rob entry
         }
     }
 
     @Override
     public void accept(Op.Br op) {
-        pc.set(op.getResult());
+        pc.set(op.getImVal());
     }
 
     @Override
     public void accept(Op.Jp op) {
-        pc.set(op.getResult());
+        pc.set(op.getImVal());
     }
 
     public boolean needsFlushing(){
         return shouldFlush;
+    }
+
+    public int whereFlushAt(){
+        if(flushAt == null) throw new RuntimeException("whereFlushAt: flush was not requested so flushAt is null");
+        return flushAt;
     }
 
 }

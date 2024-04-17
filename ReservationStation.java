@@ -3,7 +3,7 @@ import java.util.Map;
 
 public class ReservationStation implements InstructionVoidVisitor {
     public static final int NO_DEPENDENCY = -1;
-
+    public static final int FLUSH_ALL = -1;
     public static int uId = 0;
     public final int id;
     private Instruction op;
@@ -14,9 +14,10 @@ public class ReservationStation implements InstructionVoidVisitor {
     public int robEntry;
     private final Map<Integer, List<Integer>> cdb;
 
+
     ReservationStation(Map<Integer, List<Integer>> cdb, ReorderBuffer rob){
         this.cdb = cdb;
-        flush();
+        flush(FLUSH_ALL);
         this.id = uId;
         this.rob = rob;
         uId++;
@@ -38,16 +39,19 @@ public class ReservationStation implements InstructionVoidVisitor {
         return op;
     }
 
-    public void flush(){
-        this.busy = false;
-        this.op = null;
-        this.qJ = NO_DEPENDENCY; //rob entry id
-        this.qK = NO_DEPENDENCY; //rob entry id
-        this.vJ = 0;
-        this.vK = 0;
-        this.rJ = false;
-        this.rK = false;
-        this.robEntry = 0;
+    public void flush(int fromRobEntry){
+        if(fromRobEntry <= this.robEntry){
+            this.busy = false;
+            this.op = null;
+            this.qJ = NO_DEPENDENCY; //rob entry id
+            this.qK = NO_DEPENDENCY; //rob entry id
+            this.vJ = 0;
+            this.vK = 0;
+            this.rJ = false;
+            this.rK = false;
+            this.robEntry = 0;
+        }
+
     }
 //    //this must happen in program order and so needs to be moved!
     public void set(PipelineEntry e, RegisterAliasTable rat, RegisterFile rf){
@@ -101,13 +105,13 @@ public class ReservationStation implements InstructionVoidVisitor {
         if(qJ == NO_DEPENDENCY) rJ = true;
         if(qK == NO_DEPENDENCY) rK = true;
         if(qJ != NO_DEPENDENCY && cdb.containsKey(qJ)){ //qJ is memory location or register
-            System.out.println(id + " READ OFF COMMON DATA BUS! ROB entry" + qJ + " has this result");
+            System.out.println("RS #" +id + " read rob entry " + qJ + " has this result off cdb");
             vJ = cdb.get(qJ).get(0); //broadcast this data on the first element of the list
             qJ = NO_DEPENDENCY;
             rJ = true;
         }
         if(qK != NO_DEPENDENCY && cdb.containsKey(qK)){
-            System.out.println(id + " READ OFF COMMON DATA BUS! ROB entry " + qK + " has this result");
+            System.out.println("RS #" +id + " read rob entry " + qK + " has this result off cdb");
             vK = cdb.get(qK).get(0);
             qK = NO_DEPENDENCY;
             rK = true;
@@ -131,7 +135,7 @@ public class ReservationStation implements InstructionVoidVisitor {
 
     @Override
     public String toString(){
-        return Utils.twoDigitInstrId(op);
+        return "" + Utils.twoDigitInstrId(op) + "@" + id;
     }
 
     @Override

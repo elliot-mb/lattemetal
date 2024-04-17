@@ -27,6 +27,9 @@ public class Processor {
     private static final int ALU_RS_COUNT = 2;
     private static final int LSU_RS_COUNT = 2;
     private static final int BRU_RS_COUNT = 2;
+    private static final int DP_ACC = 2;
+    private static final int ROB_INTIATES_FLUSH = -1;
+    private static final int ROB_ENTRIES = 8;
 
 //    private final List<ReservationStation> aluRs = new ArrayList<ReservationStation>();
 //    private final List<ReservationStation> lsuRs = new ArrayList<ReservationStation>();
@@ -44,9 +47,6 @@ public class Processor {
     //private final PipelineRegister aluLsu = new PipelineRegister();
     private final PipelineRegister rtired = new PipelineRegister(1); //ignored pipe register to satisfy Unit inheritence
     private final PipelineRegister delete = new PipelineRegister(100);
-    private final int DP_ACC = 2;
-
-    private final int ROB_ENTRIES = 8;
 
     Processor(InstructionCache ic, Memory... mem) throws RuntimeException{
         if(mem.length > 1) throw new RuntimeException("Processor: this constructor cannot have more than one memories");
@@ -58,7 +58,7 @@ public class Processor {
         this.ic = ic;
         this.tally = 0;
         this.rat = new RegisterAliasTable(cdb, rob);
-        this.rob.setPrf(rat); //avoid circular dependency
+        this.rob.setRat(rat); //avoid circular dependency
 
         this.execRss = new ReservationGroup(ALU_RS_COUNT, cdb, rob, rf, rat);
         this.lsuRss = new ReservationGroup(LSU_RS_COUNT, cdb, rob, rf, rat);
@@ -105,7 +105,7 @@ public class Processor {
                 this.rat,
                 this.cdb,
                 new PipeLike[]{aluWbu, lsuWbu, bruWbu},
-                new PipeLike[]{rtired});
+                new PipeLike[]{delete});
     }
 
 //    private void sendSingleInstruction(){
@@ -122,8 +122,8 @@ public class Processor {
                 lsuWbu.canPull() || !alu.isDone() || !deu.isDone() || !feu.isDone() || !isu.isDone() || !rob.isEmpty();
     }
 
-    private void flushPipeline(){
-        System.out.println("flush");
+    private void flushPipeline(int branchIdInRob){
+        System.out.println("flush from robEntry " + branchIdInRob);
         feu.flush();
         deu.flush();
         isu.flush();
@@ -137,6 +137,11 @@ public class Processor {
         lsuWbu.flush();
         bruWbu.flush();
         rtired.flush();
+        execRss.flushFrom(branchIdInRob);
+        lsuRss.flushFrom(branchIdInRob);
+        bruRss.flushFrom(branchIdInRob);
+        rat.flushFrom(branchIdInRob);
+        if(branchIdInRob != ROB_INTIATES_FLUSH) rob.flushFrom(branchIdInRob);
     }
 
     private String pipelineToString(){
@@ -161,21 +166,20 @@ public class Processor {
             debugOut.println(pipelineToString());
             wbu.clk();
             bru.clk();
-            if(bru.needsFlushing()) flushPipeline();
+            if(bru.needsFlushing()) flushPipeline(bru.whereFlushAt());
             bru.doneFlushing();
             lsu.clk();
             alu.clk();
             isu.clk();
             deu.clk();
             feu.clk();
-
             //update these once the cdb has been fully utilised!
             execRss.update(); //update reservation groups!
             lsuRss.update();
             bruRss.update();
 
             rob.clk(); //read off the cdb
-            if(rob.needsFlushing()) flushPipeline();
+            if(rob.needsFlushing()) flushPipeline(ROB_INTIATES_FLUSH);
             rob.doneFlushing();
 
             if (prefec.canPush() && !pc.isDone()) {//&& !(!voided.canPull() && fe.getIsBranch())) {
@@ -184,10 +188,10 @@ public class Processor {
             }
 
             tally++;
-            while(rtired.canPull()) { //if we retire more that one instruction per cycle
-                retiredInstrs.add(rtired.pull().getOp());
-                retiredInstrCount++;
-            } //delete whats inside (voided is used to detect when writebacks are finished)
+//            while(rtired.canPull()) { //if we retire more that one instruction per cycle
+//                retiredInstrs.add(rtired.pull().getOp());
+//                retiredInstrCount++;
+//            } //delete whats inside (voided is used to detect when writebacks are finished)
             delete.flush(); // any instructions we want to throw away can be put into delete
 
             if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");
@@ -197,7 +201,7 @@ public class Processor {
         debugOut.println("registers (dirty): " + rf);
         debugOut.println("memory: " + mem);
         debugOut.println("run: program finished in " + tally + " cycles");
-        debugOut.println("run: instructions per cycle " + Utils.toDecimalPlaces((float) retiredInstrCount / tally, DP_ACC));
+        debugOut.println("run: instructions per cycle " + Utils.toDecimalPlaces((float) rob.getCommitted() / tally, DP_ACC));
         BinaryOperator<String> newLnConn = new BinaryOperator<String>() {
             @Override
             public String apply(String s, String s2) {

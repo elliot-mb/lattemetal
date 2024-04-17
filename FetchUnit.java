@@ -36,12 +36,12 @@ public class FetchUnit extends Unit {
 //        pc.set(pcVal + 1);
     }
 //
-//    @Override
-//    protected void writeOnPipeline() {
-//        //incr then write the incremented value on pipeline
-//        currentOp.visit(this);
-//        super.writeOnPipeline();
-//    }
+    @Override
+    protected void writeOnPipeline() {
+        //incr then write the incremented value on pipeline
+        pcVal += 1;
+        super.writeOnPipeline();
+    }
 
     @Override
     public void flush(){
@@ -107,20 +107,22 @@ public class FetchUnit extends Unit {
 
     @Override
     public void accept(Op.BrLZ op) {
-        pc.set(pcVal + 1);
         if(STATIC_PREDICT_BR_TAKEN){
             //next.setPcVal(op.getImVal());
             pc.set(op.getImVal()); //static prediciton
+        }else{
+            pc.set(pcVal + 1);
         }
         op.setResult(pcVal);
     }
 
     @Override
     public void accept(Op.JpLZ op) {
-        pc.set(pcVal + 1);
         if(STATIC_PREDICT_BR_TAKEN){
             //next.setPcVal(op.getImVal());
             pc.set(pcVal + 1 + op.getImVal());
+        }else{
+            pc.set(pcVal + 1);
         }
         op.setResult(pcVal);
     }
