@@ -8,11 +8,11 @@ public class ArithmeticLogicUnit extends Unit {
 
     private final ReorderBuffer rob;
 
-    private final PhysicalRegFile prf;
+    private final RegisterAliasTable prf;
 
     private int currentRobEntry;
 
-    ArithmeticLogicUnit(Map<Integer, List<Integer>> cdb, ReorderBuffer rob, RegisterFile rf, PhysicalRegFile prf, PipeLike[] ins, PipeLike[] outs){
+    ArithmeticLogicUnit(Map<Integer, List<Integer>> cdb, ReorderBuffer rob, RegisterFile rf, RegisterAliasTable prf, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
         this.currentOp = null;
         this.rf = rf;

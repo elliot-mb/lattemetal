@@ -148,7 +148,7 @@ public abstract class Unit implements InstructionVoidVisitor {
         if(!canPushOnChosenOuts()) return; //stall a clock cycle if we cant push the result
         currentOp.visit(this); // /!\ main processing happens here /!\ (forced to be implementation-defined)
         writeOnPipeline();
-        currentOp = null; //empty out our intermediate storage to accept the next one
+        currentOp = null;
     }
 
     @Override

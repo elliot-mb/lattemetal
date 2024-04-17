@@ -14,17 +14,17 @@ public class ReservationGroup implements PipeLike, InstructionVoidVisitor{ //to 
 
     private final RegisterFile rf;
 
-    private final PhysicalRegFile prf;
+    private final RegisterAliasTable rat;
 
     private final Map<Integer, PipelineEntry> rsToEntry; //so we can load all the other junk that comes with a pipeiregentry
 
-    ReservationGroup(int size, Map<Integer, List<Integer>> cdb, ReorderBuffer rob, RegisterFile rf, PhysicalRegFile prf){
+    ReservationGroup(int size, Map<Integer, List<Integer>> cdb, ReorderBuffer rob, RegisterFile rf, RegisterAliasTable rat){
         this.rss = new ArrayList<ReservationStation>(size);
         for(int i = 0; i < size; i++){
             rss.add(new ReservationStation(cdb, rob));
         }
         this.rf = rf;
-        this.prf = prf;
+        this.rat = rat;
         this.rsToEntry = new HashMap<Integer, PipelineEntry>();
     }
 
@@ -125,7 +125,7 @@ public class ReservationGroup implements PipeLike, InstructionVoidVisitor{ //to 
         int index = rsFirstFree(); //cannot be -1 as we have just confirmed we can in fact push
         ReservationStation firstFree = rss.get(index);
 //        PipelineEntry fresh = e.copy();
-        firstFree.set(e, prf, rf); //first free reservation station
+        firstFree.set(e, rat, rf); //first free reservation station
         rsToEntry.put(index, e);
     }
 

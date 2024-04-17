@@ -1,4 +1,3 @@
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -8,7 +7,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     private CircluarQueue<ReorderEntry> buffer;
     private final Map<Integer, List<Integer>> cdb;
     private final RegisterFile rf;
-    private PhysicalRegFile prf;
+    private RegisterAliasTable prf;
     private final Memory mem;
 
     private ReorderEntry currentCommit;
@@ -51,7 +50,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 //    }
 
     //avoids circular dep
-    public void setPrf(PhysicalRegFile prf){
+    public void setPrf(RegisterAliasTable prf){
         this.prf = prf;
         prfSet = true;
     }

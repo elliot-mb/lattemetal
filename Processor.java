@@ -21,7 +21,7 @@ public class Processor {
     private final BranchUnit bru;
     private final WriteBackUnit wbu;
     private final ReorderBuffer rob;
-    private final PhysicalRegFile prf;
+    private final RegisterAliasTable rat;
     private int tally;
 
     private static final int ALU_RS_COUNT = 2;
@@ -57,12 +57,12 @@ public class Processor {
         this.rob = new ReorderBuffer(ROB_ENTRIES, cdb, rf, this.mem, this.pc);
         this.ic = ic;
         this.tally = 0;
-        this.prf = new PhysicalRegFile(cdb, rob);
-        this.rob.setPrf(prf); //avoid circular dependency
+        this.rat = new RegisterAliasTable(cdb, rob);
+        this.rob.setPrf(rat); //avoid circular dependency
 
-        this.execRss = new ReservationGroup(ALU_RS_COUNT, cdb, rob, rf, prf);
-        this.lsuRss = new ReservationGroup(LSU_RS_COUNT, cdb, rob, rf, prf);
-        this.bruRss = new ReservationGroup(BRU_RS_COUNT, cdb, rob, rf, prf);
+        this.execRss = new ReservationGroup(ALU_RS_COUNT, cdb, rob, rf, rat);
+        this.lsuRss = new ReservationGroup(LSU_RS_COUNT, cdb, rob, rf, rat);
+        this.bruRss = new ReservationGroup(BRU_RS_COUNT, cdb, rob, rf, rat);
 
         this.feu = new FetchUnit(
                 this.ic,
@@ -76,20 +76,20 @@ public class Processor {
         this.isu = new IssueUnit(
                 this.rf,
                 this.rob,
-                this.prf,
+                this.rat,
                 new PipeLike[]{deuIsu},
                 new PipeLike[]{execRss, lsuRss, bruRss});
         this.alu = new ArithmeticLogicUnit(
                 this.cdb,
                 this.rob,
                 this.rf,
-                this.prf,
+                this.rat,
                 new PipeLike[]{execRss},
                 new PipeLike[]{aluWbu});
         this.lsu = new LoadStoreUnit(
                 this.mem,
                 this.rf,
-                this.prf,
+                this.rat,
                 this.cdb,
                 this.rob,
                 new PipeLike[]{lsuRss},
@@ -102,7 +102,7 @@ public class Processor {
         this.wbu = new WriteBackUnit(
                 this.rf,
                 this.rob,
-                this.prf,
+                this.rat,
                 this.cdb,
                 new PipeLike[]{aluWbu, lsuWbu, bruWbu},
                 new PipeLike[]{rtired});

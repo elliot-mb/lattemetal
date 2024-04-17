@@ -4,15 +4,17 @@ import java.util.List;
 
 public class IssueUnit extends Unit{
 
+    private enum unitType{ exe, lsu, bru };
+
     private final RegisterFile rf;
 
     private final ReorderBuffer rob;
 
-    private final PhysicalRegFile prf;
+    private final RegisterAliasTable prf;
 
     private int currentRobEntry;
     //                          vv update rob      vv put mapping of rob to dest into prf
-    IssueUnit(RegisterFile rf, ReorderBuffer rob, PhysicalRegFile prf, PipeLike[] ins, PipeLike[] outs){
+    IssueUnit(RegisterFile rf, ReorderBuffer rob, RegisterAliasTable prf, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
         this.rf = rf;
         this.rob = rob;
@@ -47,8 +49,14 @@ public class IssueUnit extends Unit{
     }
 
     @Override
-    protected boolean isUnfinished() {
-        return rob.isFull();
+    protected boolean isUnfinished() { //is when we stall basically
+        return rob.isFull() || !outs[chooseUnit().ordinal()].canPush(); //if we cant push to the right unit! block otherwise...
+    }
+
+    private unitType chooseUnit(){
+        if(Utils.isBranch(currentOp)) return unitType.bru;
+        if(Utils.isLoadStore(currentOp)) return unitType.lsu;
+        return unitType.exe;
     }
 
     @Override

@@ -14,10 +14,10 @@ public class LoadStoreUnit extends Unit{
     private final Map<Integer, List<Integer>> cdb;
 
     private int currentRobEntry;
-    private final PhysicalRegFile prf;
+    private final RegisterAliasTable prf;
     private Durate counter = new Durate(L1_LATENCY);
 
-    LoadStoreUnit(Memory mem, RegisterFile rf, PhysicalRegFile prf, Map<Integer, List<Integer>> cdb, ReorderBuffer rob, PipeLike[] ins, PipeLike[] outs){
+    LoadStoreUnit(Memory mem, RegisterFile rf, RegisterAliasTable prf, Map<Integer, List<Integer>> cdb, ReorderBuffer rob, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
         this.mem = mem;
         this.rf = rf;

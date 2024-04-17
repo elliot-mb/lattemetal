@@ -6,14 +6,14 @@ public class WriteBackUnit extends Unit{
     private final RegisterFile rf;
 
     private final ReorderBuffer rob;
-    private final PhysicalRegFile prf;
+    private final RegisterAliasTable prf;
     private final Durate counter = new Durate(REG_LATENCY);
 
     private final Map<Integer, List<Integer>> cdb;
 
     private int currentRobEntry;
 
-    WriteBackUnit(RegisterFile rf, ReorderBuffer rob, PhysicalRegFile prf, Map<Integer, List<Integer>> cdb, PipeLike[] ins, PipeLike[] outs){
+    WriteBackUnit(RegisterFile rf, ReorderBuffer rob, RegisterAliasTable prf, Map<Integer, List<Integer>> cdb, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
         this.rf = rf;
         this.rob = rob;
