@@ -29,44 +29,31 @@ public class DecodeUnit extends Unit{
 
     @Override
     public void accept(Op.Add op) {
-        //op.setRdVal(rf.getReg(op.getRd()));
-        op.setRsVal(rf.getReg(op.getRs()));
-        op.setRtVal(rf.getReg(op.getRt()));
         currentOp = op;
     }
 
     @Override
     public void accept(Op.AddI op) {
-        //op.setRdVal(rf.getReg(op.getRd()));
-        op.setRsVal(rf.getReg(op.getRs()));
         currentOp = op;
     }
 
     @Override
     public void accept(Op.Mul op) {
-        //op.setRdVal(rf.getReg(op.getRd()));
-        op.setRsVal(rf.getReg(op.getRs()));
-        op.setRtVal(rf.getReg(op.getRt()));
         currentOp = op;
     }
 
     @Override
     public void accept(Op.MulI op) {
-        //op.setRdVal(rf.getReg(op.getRd()));
-        op.setRsVal(rf.getReg(op.getRs()));
         currentOp = op;
     }
 
     @Override
     public void accept(Op.Cmp op) {
-        op.setRsVal(rf.getReg(op.getRs()));
-        op.setRtVal(rf.getReg(op.getRt()));
         currentOp = op;
     }
 
     @Override
     public void accept(Op.Ld op) {
-        op.setRsVal(rf.getReg(op.getRs()));
         currentOp = op;
     }
 
@@ -77,20 +64,16 @@ public class DecodeUnit extends Unit{
 
     @Override
     public void accept(Op.St op) {
-        op.setRdVal(rf.getReg(op.getRd()));
-        op.setRsVal(rf.getReg(op.getRs()));
         currentOp = op;
     }
 
     @Override
     public void accept(Op.BrLZ op) {
-        op.setRdVal(rf.getReg(op.getRd()));
         currentOp = op;
     }
 
     @Override
     public void accept(Op.JpLZ op) {
-        op.setRdVal(rf.getReg(op.getRd()));
         currentOp = op;
     }
 

@@ -49,7 +49,7 @@ public class ReservationStation implements InstructionVoidVisitor {
         this.rK = false;
         this.robEntry = 0;
     }
-
+    //this must happen in program order and so needs to be moved!
     public void set(PipelineEntry e, PhysicalRegFile prf, RegisterFile rf){
         op = e.getOp();
         if(Utils.isNoOP(op)) {

@@ -56,7 +56,7 @@ public class ArithmeticLogicUnit extends Unit {
 
     @Override
     public void accept(Op.Add op) {
-        int res = op.getRdVal() + op.getRtVal();
+        int res = op.getRsVal() + op.getRtVal();
         op.setResult(res);
         op.setRdVal(res);
     }
