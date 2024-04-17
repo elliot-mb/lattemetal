@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +23,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     private boolean shouldFlush = false;
 
     private int committed;
+    private List<Instruction> committedInstrs;
 
     ReorderBuffer(int size, Map<Integer, List<Integer>> cdb, RegisterFile rf, Memory mem, ProgramCounter pc){
         this.buffer = new CircluarQueue<ReorderEntry>(size);
@@ -33,6 +35,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         this.lsq = new CircluarQueue<ReorderEntry>(size);
         this.pc = pc;
         this.committed = 0;
+        this.committedInstrs = new ArrayList<Instruction>();
     }
 
 //    /**
@@ -230,6 +233,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
                 if(lsqWillPop != null) lsq.pop();
                 //visitation to distinguish between stores, common instructions, and branches (incorrect)
                 poppedOp.visit(this);
+                committedInstrs.add(poppedOp);
                 committed++;
             }
         }
@@ -239,6 +243,10 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     public int getCommitted(){
         return committed;
+    }
+
+    public List<Instruction> getCommittedInstrs(){
+        return committedInstrs;
     }
 
     @Override

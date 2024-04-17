@@ -24,7 +24,7 @@ public class Utils {
         return xs[size - 1];
     }
 
-    public static <T> String writeList(ArrayList<T> xs){
+    public static <T> String writeList(List<T> xs){
         List<String> shows = xs.stream().map(Object::toString).toList();
         return shows.stream().reduce("", (acc, x) -> acc + "'" + x.toString() + "'" + "\r\n");
     }
