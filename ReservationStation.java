@@ -49,51 +49,52 @@ public class ReservationStation implements InstructionVoidVisitor {
         this.rK = false;
         this.robEntry = 0;
     }
-    //this must happen in program order and so needs to be moved!
-    public void set(PipelineEntry e, PhysicalRegFile prf, RegisterFile rf){
-        op = e.getOp();
-        if(Utils.isNoOP(op)) {
-            qJ = NO_DEPENDENCY;
-            rJ = true;
-            qK = NO_DEPENDENCY;
-            rK = true;
-            busy = true;
-            this.robEntry = e.getEntry();
-            return;
-        }
-        List<Integer> sources = op.visit(new SourceLocVisitor());
-        List<Integer> dest = op.visit(new DestLocVisitor());
-
-        RegisterName regJ = sources.isEmpty() ? null : RegisterName.values()[sources.get(0)];
-        RegisterName regK = sources.size() <= 1 ? null : RegisterName.values()[sources.get(1)];
-
-        if(regJ != null && prf.isRegValReady(regJ)){
-            vJ = prf.isRegValUnmapped(regJ) ? rf.getReg(regJ) : rob.getValOfEntry(prf.whereRegInRob(regJ));
-            rJ = true; //ready up
-            qJ = NO_DEPENDENCY;
-        }else if(regJ != null){
-            qJ = prf.whereRegInRob(regJ);
-            rJ = false;
-        }
-        if(regJ == null){
-            rJ = true;
-        }
-        if(regK != null && prf.isRegValReady(regK)){
-            vK =  prf.isRegValUnmapped(regK) ? rf.getReg(regK) : rob.getValOfEntry(prf.whereRegInRob(regK));
-            rK = true; //ready up
-            qK = NO_DEPENDENCY;
-        }else if(regK != null){
-            qK = prf.whereRegInRob(regK);
-            rK = false;
-        }
-        if(regK == null){
-            rK = true;
-        }
-
-        busy = true;
-        if(!dest.isEmpty()) prf.pointRegAtRobEntry(RegisterName.values()[dest.get(0)], e.getEntry()); //tell the register file to point at the rob entry of the instruction in this rs, IF there is a result
-        this.robEntry = e.getEntry();
-    }
+//    //this must happen in program order and so needs to be moved!
+//    public void set(PipelineEntry e, PhysicalRegFile prf, RegisterFile rf){
+//        op = e.getOp();
+//        if(Utils.isNoOP(op)) {
+//            qJ = NO_DEPENDENCY;
+//            rJ = true;
+//            qK = NO_DEPENDENCY;
+//            rK = true;
+//            busy = true;
+//            this.robEntry = e.getEntry();
+//            return;
+//        }
+//        List<Integer> sources = op.visit(new SourceLocVisitor());
+//        List<Integer> dest = op.visit(new DestLocVisitor());
+//
+//        RegisterName regJ = sources.isEmpty() ? null : RegisterName.values()[sources.get(0)];
+//        RegisterName regK = sources.size() <= 1 ? null : RegisterName.values()[sources.get(1)];
+//
+//        if(regJ != null && prf.isRegValReady(regJ)){
+//            vJ = prf.isRegValUnmapped(regJ) ? rf.getReg(regJ) : rob.getValOfEntry(prf.whereRegInRob(regJ));
+//            rJ = true; //ready up
+//            qJ = NO_DEPENDENCY;
+//        }else if(regJ != null){
+//            qJ = prf.whereRegInRob(regJ);
+//            rJ = false;
+//        }
+//        if(regJ == null){
+//            rJ = true;
+//        }
+//        if(regK != null && prf.isRegValReady(regK)){
+//            vK =  prf.isRegValUnmapped(regK) ? rf.getReg(regK) : rob.getValOfEntry(prf.whereRegInRob(regK));
+//            rK = true; //ready up
+//            qK = NO_DEPENDENCY;
+//        }else if(regK != null){
+//            qK = prf.whereRegInRob(regK);
+//            rK = false;
+//        }
+//        if(regK == null){
+//            rK = true;
+//        }
+//
+//        busy = true;
+//
+//        if(!dest.isEmpty()) prf.pointRegAtRobEntry(RegisterName.values()[dest.get(0)], e.getEntry()); //tell the register file to point at the rob entry of the instruction in this rs, IF there is a result
+//        this.robEntry = e.getEntry();
+//    }
 
     //checks if either dependant RSs have finished!
     public void update(){
