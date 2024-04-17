@@ -189,7 +189,9 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         for(ReorderEntry r: re){
 //            if(r.isReady()) System.out.println("entry " + r.getId() + " is ready!");
             if(cdb.containsKey(r.getId())){
-                r.setValue(cdb.get(r.getId()).get(0)); //read from the map if the id matches this rese entry (value is already in the entry before we commit!)
+                List<Integer> payload = cdb.get(r.getId());
+                //if its a branch it has no value and no payload so i dont write any value on the cdb
+                if(!payload.isEmpty()) r.setValue(payload.get(0)); //read from the map if the id matches this rese entry (value is already in the entry before we commit!)
                 r.readyUp();
             }
         }

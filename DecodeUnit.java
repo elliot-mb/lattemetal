@@ -4,8 +4,6 @@ public class DecodeUnit extends Unit{
 
     private final RegisterFile rf;
 
-    private boolean hasRun;
-
     DecodeUnit(RegisterFile rf, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
         this.rf = rf;
@@ -19,12 +17,6 @@ public class DecodeUnit extends Unit{
     @Override
     protected boolean isUnfinished() {
         return false;
-    }
-
-    @Override
-    public void flush() {
-        super.flush();
-        hasRun = false;
     }
 
     @Override

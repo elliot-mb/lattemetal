@@ -35,11 +35,6 @@ public class ArithmeticLogicUnit extends Unit {
     }
 
     @Override
-    public void flush(){
-        super.flush();
-    }
-
-    @Override
     protected void readOffPipeline(){
         PipeLike in = ins[selectionPriority()];
         PipelineEntry e = in.pull();

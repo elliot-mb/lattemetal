@@ -117,22 +117,22 @@ public class WriteBackUnit extends Unit{
 
     @Override
     public void accept(Op.BrLZ op) {
-        //nothing
+        cdb.put(currentRobEntry, List.of()); //to ready up branches we still need to broadcast something on to the bus, yea!
     }
 
     @Override
     public void accept(Op.JpLZ op) {
-        //nothing
+        cdb.put(currentRobEntry, List.of());
     }
 
     @Override
     public void accept(Op.Br op) {
-        //nothing
+        cdb.put(currentRobEntry, List.of()); //to ready up branches we still need to broadcast something on to the bus, yea!
     }
 
     @Override
     public void accept(Op.Jp op) {
-        //nothing
+        cdb.put(currentRobEntry, List.of()); //to ready up branches we still need to broadcast something on to the bus, yea! 
     }
 
     protected String showUnit(){

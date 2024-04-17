@@ -44,11 +44,6 @@ public class IssueUnit extends Unit{
     }
 
     @Override
-    public void flush(){
-        super.flush();
-    }
-
-    @Override
     protected boolean isUnfinished() { //is when we stall basically
         return rob.isFull() || !outs[chooseUnit().ordinal()].canPush(); //if we cant push to the right unit! block otherwise...
     }

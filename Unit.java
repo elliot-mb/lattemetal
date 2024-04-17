@@ -162,7 +162,7 @@ public abstract class Unit implements InstructionVoidVisitor {
         return showUnit() + (currentOp == null ? "\s_" : isUnfinished() ? "\s↘" : "\s|");//(currentOp != null ? Integer.toHexString(currentOp.getId() % 16) : "_");
     }
 
-    public void flush(){
+    public void flush(int fromRobEntry){
         currentOp = null;
         pcVal = 0;
         flag = false;

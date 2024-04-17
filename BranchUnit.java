@@ -102,7 +102,7 @@ public class BranchUnit extends Unit{
         //if we got it wrong we flush
         if(flag != STATIC_PREDICT_BR_TAKEN){
             shouldFlush = true;
-            flushAt = currentRobEntry; //after and including the current rob entry since we will otherwise be left with a stale rob entry
+            flushAt = currentRobEntry + 1; //after the current rob entry because we need to maintain program order
         }
     }
 
@@ -116,7 +116,7 @@ public class BranchUnit extends Unit{
         }
         if(flag != STATIC_PREDICT_BR_TAKEN){
             shouldFlush = true;
-            flushAt = currentRobEntry; //after and including the current rob entry since we will otherwise be left with a stale rob entry
+            flushAt = currentRobEntry + 1; //after the current rob entry because we need to maintain program order
         }
     }
 

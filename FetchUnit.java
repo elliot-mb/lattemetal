@@ -3,8 +3,6 @@
 public class FetchUnit extends Unit {
 
     private static final int FETCH_LATENCY = 1;
-    
-    private Integer whatBranchID = null; //
 
     private final InstructionCache ic;
 
@@ -41,12 +39,6 @@ public class FetchUnit extends Unit {
         //incr then write the incremented value on pipeline
         pcVal += 1;
         super.writeOnPipeline();
-    }
-
-    @Override
-    public void flush(){
-        super.flush();
-        whatBranchID = null;
     }
 //
 //    // returns null if this is not a branch

@@ -41,6 +41,10 @@ public class PipelineEntry {
         return flag;
     }
 
+    public boolean hasEntry(){
+         return entry != null;
+    }
+
     public Integer getEntry() {
         if(entry == null) throw new RuntimeException("getEntry: entry is null");
         return entry;

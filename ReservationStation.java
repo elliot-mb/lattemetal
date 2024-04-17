@@ -3,7 +3,6 @@ import java.util.Map;
 
 public class ReservationStation implements InstructionVoidVisitor {
     public static final int NO_DEPENDENCY = -1;
-    public static final int FLUSH_ALL = -1;
     public static int uId = 0;
     public final int id;
     private Instruction op;
@@ -17,7 +16,7 @@ public class ReservationStation implements InstructionVoidVisitor {
 
     ReservationStation(Map<Integer, List<Integer>> cdb, ReorderBuffer rob){
         this.cdb = cdb;
-        flush(FLUSH_ALL);
+        flush(Processor.FLUSH_ALL);
         this.id = uId;
         this.rob = rob;
         uId++;

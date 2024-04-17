@@ -31,6 +31,8 @@ public class Processor {
     private static final int ROB_INTIATES_FLUSH = -1;
     private static final int ROB_ENTRIES = 8;
 
+    public static final int FLUSH_ALL = -1;
+
 //    private final List<ReservationStation> aluRs = new ArrayList<ReservationStation>();
 //    private final List<ReservationStation> lsuRs = new ArrayList<ReservationStation>();
 //    //lsu? load store buffers?
@@ -124,22 +126,23 @@ public class Processor {
 
     private void flushPipeline(int branchIdInRob){
         System.out.println("flush from robEntry " + branchIdInRob);
-        feu.flush();
-        deu.flush();
-        isu.flush();
-        alu.flush();
-        lsu.flush();
-        wbu.flush();
-        prefec.flush();
-        fecDec.flush();
-        deuIsu.flush();
-        aluWbu.flush();
-        lsuWbu.flush();
-        bruWbu.flush();
-        rtired.flush();
-        execRss.flushFrom(branchIdInRob);
-        lsuRss.flushFrom(branchIdInRob);
-        bruRss.flushFrom(branchIdInRob);
+        feu.flush(branchIdInRob);
+        deu.flush(branchIdInRob);
+        isu.flush(branchIdInRob);
+        alu.flush(branchIdInRob);
+        lsu.flush(branchIdInRob);
+        wbu.flush(branchIdInRob);
+        bru.flush(branchIdInRob);
+        prefec.flush(branchIdInRob);
+        fecDec.flush(branchIdInRob);
+        deuIsu.flush(branchIdInRob);
+        aluWbu.flush(branchIdInRob);
+        lsuWbu.flush(branchIdInRob);
+        bruWbu.flush(branchIdInRob);
+        rtired.flush(branchIdInRob);
+        execRss.flush(branchIdInRob);
+        lsuRss.flush(branchIdInRob);
+        bruRss.flush(branchIdInRob);
         rat.flushFrom(branchIdInRob);
         if(branchIdInRob != ROB_INTIATES_FLUSH) rob.flushFrom(branchIdInRob);
     }
@@ -192,7 +195,7 @@ public class Processor {
 //                retiredInstrs.add(rtired.pull().getOp());
 //                retiredInstrCount++;
 //            } //delete whats inside (voided is used to detect when writebacks are finished)
-            delete.flush(); // any instructions we want to throw away can be put into delete
+            delete.flush(FLUSH_ALL); // any instructions we want to throw away can be put into delete
 
             if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");
             System.out.println(cdb.keySet().toString() + cdb.values().toString());

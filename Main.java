@@ -43,7 +43,7 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) throws FileNotFoundException {
-        String programPath = "./assembly/simple_branch.latte";
+        String programPath = "./assembly/simple_branch_taken.latte";
         int printWidth = 1;
         boolean testing = false;
         if(args.length >= 1){
