@@ -23,6 +23,14 @@ public class FetchUnit extends Unit {
         bruSetPC = true;
     }
 
+    public void rstBruDidSetPC(){
+        bruSetPC = false;
+    }
+
+    public boolean isBruDidSetPC(){
+        return bruSetPC;
+    }
+
     @Override
     protected void procInstruction() {
         if(pc.getCount() == ic.numInstrs()) {
@@ -41,11 +49,6 @@ public class FetchUnit extends Unit {
 //        pc.set(pcVal + 1);
     }
 //
-    @Override
-    public void clk(){
-        super.clk();
-        bruSetPC = false; //just set it false each cycle
-    }
 
     @Override
     protected void writeOnPipeline() {
@@ -111,17 +114,18 @@ public class FetchUnit extends Unit {
 
     @Override
     public void accept(Op.BrLZ op) {
+        op.setResult(pcVal + 1); //branch untaken!
         if(STATIC_PREDICT_BR_TAKEN){
             //next.setPcVal(op.getImVal());
             pcVal = op.getImVal(); //pc.set(op.getImVal()); //static prediciton
         }else{
             pcVal++;
         }
-        op.setResult(pcVal);
     }
 
     @Override
     public void accept(Op.JpLZ op) {
+        op.setResult(pcVal + 1); //branch untaken!
         if(STATIC_PREDICT_BR_TAKEN){
             //next.setPcVal(op.getImVal());
             pcVal += op.getImVal();

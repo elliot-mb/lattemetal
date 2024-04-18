@@ -203,12 +203,16 @@ public class Processor {
             if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");
             System.out.println(cdb.keySet().toString() + cdb.values().toString());
             cdb.clear();
+            if(feu.isBruDidSetPC()){ //i think do this after the fetch unit does its thing because otherwise it has interference i guess? man i hate this
+                pc.incr();
+            }
+            feu.rstBruDidSetPC();
         }
         debugOut.println("registers (dirty): " + rf);
         debugOut.println("memory: " + mem);
         debugOut.println("run: program finished in " + tally + " cycles");
         debugOut.println("run: instructions per cycle " + Utils.toDecimalPlaces((float) rob.getCommitted() / tally, DP_ACC));
-        debugOut.println("run: instructions" +  Utils.writeList(rob.getCommittedInstrs()));
+        debugOut.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
         return mem;
     }
 

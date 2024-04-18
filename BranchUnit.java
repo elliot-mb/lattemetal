@@ -108,6 +108,9 @@ public class BranchUnit extends Unit{
             if(flag){
                 pc.set(op.getImVal());
                 feu.yesBruDidSetPC();
+            }else{
+                pc.set(op.getResult()); // untaken
+                feu.yesBruDidSetPC();
             }
             shouldFlush = true;
             flushAt = currentRobEntry + 1; //after the current rob entry because we need to maintain program order
@@ -126,6 +129,9 @@ public class BranchUnit extends Unit{
         if(flag != STATIC_PREDICT_BR_TAKEN){
             if(flag){
                 pc.set(op.getImVal());
+                feu.yesBruDidSetPC();
+            }else{
+                pc.set(op.getResult()); // untaken
                 feu.yesBruDidSetPC();
             }
             shouldFlush = true;
