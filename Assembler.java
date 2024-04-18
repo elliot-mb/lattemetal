@@ -161,7 +161,7 @@ public class Assembler {
                     if (labelToLnNum.containsKey(last)) {
                         int labelLoc = labelToLnNum.get(last);
                         //if(labelLoc < lnNum) labelLoc++; //increment if its going backwards (not entirely sure why it works but it does!)
-                        int pcChange = labelLoc - lnNum - 1;
+                        int pcChange = labelLoc - lnNum;
                         tkns.set(tkns.size() - 1, String.valueOf(IMMEDIATE) + (jp ? pcChange : labelLoc));
                     }
                 }

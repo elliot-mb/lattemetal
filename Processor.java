@@ -98,6 +98,7 @@ public class Processor {
                 new PipeLike[]{lsuWbu});
         this.bru = new BranchUnit(
                 this.pc,
+                this.feu,
                 new PipeLike[]{bruRss},
                 new PipeLike[]{bruWbu}
         );
@@ -166,11 +167,18 @@ public class Processor {
 
         //AbstractMap<Instruction, Integer> inFlights = new HashMap<Instruction, Integer>();
         while(isPipelineBeingUsed() || !pc.isDone()){
-            debugOut.println(pipelineToString());
+
             wbu.clk();
             bru.clk();
+
             if(bru.needsFlushing()) flushPipeline(bru.whereFlushAt());
             bru.doneFlushing();
+            if (prefec.canPush() && !pc.isDone()) {//&& !(!voided.canPull() && fe.getIsBranch())) {
+                prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));
+                //pc.incr();
+            }
+            debugOut.println(pipelineToString());
+
             lsu.clk();
             alu.clk();
             isu.clk();
@@ -184,11 +192,6 @@ public class Processor {
             rob.clk(); //read off the cdb
             if(rob.needsFlushing()) flushPipeline(ROB_INTIATES_FLUSH);
             rob.doneFlushing();
-
-            if (prefec.canPush() && !pc.isDone()) {//&& !(!voided.canPull() && fe.getIsBranch())) {
-                prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));
-                //pc.incr();
-            }
 
             tally++;
 //            while(rtired.canPull()) { //if we retire more that one instruction per cycle

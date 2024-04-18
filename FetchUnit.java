@@ -10,10 +10,17 @@ public class FetchUnit extends Unit {
 
     private final Durate counter = new Durate(FETCH_LATENCY);
 
+    private boolean bruSetPC;
+
     FetchUnit(InstructionCache ic, ProgramCounter pc, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
         this.ic = ic;
         this.pc = pc;
+        this.bruSetPC = false;
+    }
+
+    public void yesBruDidSetPC(){
+        bruSetPC = true;
     }
 
     @Override
@@ -35,9 +42,15 @@ public class FetchUnit extends Unit {
     }
 //
     @Override
+    public void clk(){
+        super.clk();
+        bruSetPC = false; //just set it false each cycle
+    }
+
+    @Override
     protected void writeOnPipeline() {
         //incr then write the incremented value on pipeline
-        pcVal += 1;
+        if(!bruSetPC) pc.set(pcVal);
         super.writeOnPipeline();
     }
 //
@@ -59,51 +72,50 @@ public class FetchUnit extends Unit {
     //nothing happens in visitation because fetching happens in procInstruction
     @Override
     public void accept(Op.Add op) {
-        pc.set(pcVal + 1);
+        pcVal++;
     }
 
     @Override
     public void accept(Op.AddI op) {
-        pc.set(pcVal + 1);
+        pcVal++;
     }
 
     @Override
     public void accept(Op.Mul op) {
-        pc.set(pcVal + 1);
+        pcVal++;
     }
 
     @Override
     public void accept(Op.MulI op) {
-        pc.set(pcVal + 1);
+        pcVal++;
     }
 
     @Override
     public void accept(Op.Cmp op) {
-        pc.set(pcVal + 1);
-    }
+        pcVal++;}
 
     @Override
     public void accept(Op.Ld op) {
-        pc.set(pcVal + 1);
+        pcVal++;
     }
 
     @Override
     public void accept(Op.LdC op) {
-        pc.set(pcVal + 1);
+        pcVal++;
     }
 
     @Override
     public void accept(Op.St op) {
-        pc.set(pcVal + 1);
+        pcVal++;
     }
 
     @Override
     public void accept(Op.BrLZ op) {
         if(STATIC_PREDICT_BR_TAKEN){
             //next.setPcVal(op.getImVal());
-            pc.set(op.getImVal()); //static prediciton
+            pcVal = op.getImVal(); //pc.set(op.getImVal()); //static prediciton
         }else{
-            pc.set(pcVal + 1);
+            pcVal++;
         }
         op.setResult(pcVal);
     }
@@ -112,9 +124,9 @@ public class FetchUnit extends Unit {
     public void accept(Op.JpLZ op) {
         if(STATIC_PREDICT_BR_TAKEN){
             //next.setPcVal(op.getImVal());
-            pc.set(pcVal + 1 + op.getImVal());
+            pcVal += op.getImVal();
         }else{
-            pc.set(pcVal + 1);
+            pcVal++;
         }
         op.setResult(pcVal);
     }
@@ -122,14 +134,14 @@ public class FetchUnit extends Unit {
     @Override
     public void accept(Op.Br op) {
 //        next.setPcVal(op.getImVal());
-        pc.set(op.getImVal());
+        pcVal = op.getImVal();
         op.setResult(pcVal);
     }
 
     @Override
     public void accept(Op.Jp op) {
 //        next.setPcVal(op.getImVal());
-        pc.set(pcVal + 1 + op.getImVal());
+        pcVal += op.getImVal();
         op.setResult(pcVal);
     }
 
