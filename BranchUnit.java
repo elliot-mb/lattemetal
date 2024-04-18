@@ -128,7 +128,7 @@ public class BranchUnit extends Unit{
 //        }
         if(flag != STATIC_PREDICT_BR_TAKEN){
             if(flag){
-                pc.set(op.getImVal());
+                pc.set(op.getResult() + op.getImVal());
                 feu.yesBruDidSetPC();
             }else{
                 pc.set(op.getResult()); // untaken
@@ -142,11 +142,13 @@ public class BranchUnit extends Unit{
     @Override
     public void accept(Op.Br op) {
         pc.set(op.getImVal());
+        feu.yesBruDidSetPC();
     }
 
     @Override
     public void accept(Op.Jp op) {
-        pc.set(op.getImVal());
+        pc.set(op.getResult() + op.getImVal());
+        feu.yesBruDidSetPC();
     }
 
     public boolean needsFlushing(){

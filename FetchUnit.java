@@ -132,21 +132,18 @@ public class FetchUnit extends Unit {
         }else{
             pcVal++;
         }
-        op.setResult(pcVal);
     }
 
     @Override
     public void accept(Op.Br op) {
-//        next.setPcVal(op.getImVal());
+        op.setResult(pcVal + 1);
         pcVal = op.getImVal();
-        op.setResult(pcVal);
     }
 
     @Override
     public void accept(Op.Jp op) {
-//        next.setPcVal(op.getImVal());
+        op.setResult(pcVal + 1);
         pcVal += op.getImVal();
-        op.setResult(pcVal);
     }
 
     protected String showUnit(){

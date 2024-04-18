@@ -81,7 +81,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         CircluarQueue<ReorderEntry> newBuffer = new CircluarQueue<ReorderEntry>(size);
         CircluarQueue<ReorderEntry> newLsq = new CircluarQueue<ReorderEntry>(size);
         ReorderEntry peel = buffer.pop();
-        while(peel.getId() != id){
+        while(!buffer.isEmpty() && peel.getId() != id){
             if(!lsq.isEmpty() && peel.getId() == lsq.peek().getId()){
                 newLsq.push(lsq.pop()); //should include just the same instructions as the main rob
             }
