@@ -177,7 +177,7 @@ public class Processor {
                 prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));
 //                pc.incr();
             }
-            debugOut.println(pipelineToString());
+            //debugOut.println(pipelineToString());
 
             lsu.clk();
             alu.clk();
