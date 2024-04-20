@@ -15,7 +15,7 @@ addi a3 a2 #1 -- ^ (behaved correctly)
 addi a4 zero #120
 addi a5 zero #2
 -- antidependency
-st a4 a5 #1 --should store '33234' at address 2 + 1
+st a4 a5 #1 --should store '' at address 2 + 1
 addi a5 a5 #1 -- ^ (behaved correctly)
 
 -- RAW (true data dependency)

@@ -20,7 +20,7 @@ public class Processor {
     private final RegisterAliasTable rat;
     private int tally;
 
-    private static final int ALU_RS_COUNT = 2;
+    private static final int ALU_RS_COUNT = 4;
     private static final int LSU_RS_COUNT = 2;
     private static final int BRU_RS_COUNT = 2;
     private static final int DP_ACC = 2;
