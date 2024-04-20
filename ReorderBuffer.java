@@ -77,7 +77,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
      * @param id the item to start flushing at, flushes this item too
      */
     public void flushFrom(int id){
-        System.out.println("rob flushes from " + id);
+        //System.out.println("rob flushes from " + id);
         CircluarQueue<ReorderEntry> newBuffer = new CircluarQueue<ReorderEntry>(size);
         CircluarQueue<ReorderEntry> newLsq = new CircluarQueue<ReorderEntry>(size);
         ReorderEntry peel = buffer.pop();

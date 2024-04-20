@@ -19,7 +19,7 @@ public class ProgramCounter {
     }
 
     public void set(int val){
-        System.out.println("SET PC TO VAL " + val);
+        //System.out.println("SET PC TO VAL " + val);
         this.counter = val;
     }
 

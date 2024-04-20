@@ -78,7 +78,7 @@ public class Main {
                         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                 }
         );
-        Utils.runKern(programPath, exampleMemory, false);
+        Utils.runKern(programPath, exampleMemory, false, null);
 
     }
 

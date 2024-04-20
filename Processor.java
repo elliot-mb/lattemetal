@@ -125,8 +125,8 @@ public class Processor {
                 lsuWbu.canPull() || !alu.isDone() || !deu.isDone() || !feu.isDone() || !isu.isDone() || !rob.isEmpty();
     }
 
-    private void flushPipeline(int branchIdInRob){
-        System.out.println("flush from robEntry " + branchIdInRob);
+    private void flushPipeline(int branchIdInRob, PrintStream debugOut){
+        debugOut.println("flush from robEntry " + branchIdInRob);
         feu.flush(branchIdInRob);
         deu.flush(branchIdInRob);
         isu.flush(branchIdInRob);
@@ -158,7 +158,7 @@ public class Processor {
                 + tally + "\tpc " + pc.getCount() + "\t" + "\t" + rob;
     }
 
-    public Memory run(PrintStream debugOut){
+    public Memory run(PrintStream debugOut, Integer divergenceLim){
         debugOut.println(ic);
 //        rtired.push(new PipelineEntry(Utils.opFactory.new No(), 0, false));
         int retiredInstrCount = 0;
@@ -166,18 +166,18 @@ public class Processor {
         pc.set(0);
 
         //AbstractMap<Instruction, Integer> inFlights = new HashMap<Instruction, Integer>();
-        while(isPipelineBeingUsed() || !pc.isDone()){
+        while((isPipelineBeingUsed() || !pc.isDone()) && (divergenceLim == null || tally < divergenceLim)){
 
+            debugOut.println(pipelineToString());
             wbu.clk();
             bru.clk();
 
-            if(bru.needsFlushing()) flushPipeline(bru.whereFlushAt());
+            if(bru.needsFlushing()) flushPipeline(bru.whereFlushAt(), debugOut);
             bru.doneFlushing();
             if (prefec.canPush() && !pc.isDone()) {//&& !(!voided.canPull() && fe.getIsBranch())) {
                 prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));
 //                pc.incr();
             }
-            debugOut.println(pipelineToString());
 
             lsu.clk();
             alu.clk();
@@ -190,7 +190,7 @@ public class Processor {
             bruRss.update();
 
             rob.clk(); //read off the cdb
-            if(rob.needsFlushing()) flushPipeline(ROB_INTIATES_FLUSH);
+            if(rob.needsFlushing()) flushPipeline(ROB_INTIATES_FLUSH, debugOut);
             rob.doneFlushing();
 
             tally++;
@@ -201,13 +201,14 @@ public class Processor {
             delete.flush(FLUSH_ALL); // any instructions we want to throw away can be put into delete
 
             if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");
-            System.out.println(cdb.keySet().toString() + cdb.values().toString());
+            debugOut.println(cdb.keySet().toString() + cdb.values().toString());
             cdb.clear();
             if(feu.isBruDidSetPC()){ //i think do this after the fetch unit does its thing because otherwise it has interference i guess? man i hate this
                 pc.incr();
             }
             feu.rstBruDidSetPC();
         }
+        if(tally >= divergenceLim) throw new RuntimeException("run: program considered to diverge after " + divergenceLim + " instrs");
         debugOut.println("registers (dirty): " + rf);
         debugOut.println("memory: " + mem);
         debugOut.println("run: program finished in " + tally + " cycles");

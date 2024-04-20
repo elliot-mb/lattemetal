@@ -53,7 +53,7 @@ public class Utils {
         return Math.round(n * factor) / factor;
     }
 
-    public static Memory runKern(String filePath, Memory mem, boolean quiet) throws FileNotFoundException {
+    public static Memory runKern(String filePath, Memory mem, boolean quiet, Integer divergenceLim) throws FileNotFoundException {
         System.out.println(filePath);
         PrintStream silencer = new PrintStream("/dev/null");
         Assembler assembler = new Assembler(filePath);
@@ -63,7 +63,7 @@ public class Utils {
         }
         InstructionCache ic = new InstructionCache(assembler.assemble());
         Processor p = new Processor(ic, mem); //memory can be set if you like
-        return p.run(quiet ? silencer : System.out);
+        return p.run(quiet ? silencer : System.out, divergenceLim);
     }
 
     public static boolean isNoOP(Instruction op){

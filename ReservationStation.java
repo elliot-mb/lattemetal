@@ -104,13 +104,13 @@ public class ReservationStation implements InstructionVoidVisitor {
         if(qJ == NO_DEPENDENCY) rJ = true;
         if(qK == NO_DEPENDENCY) rK = true;
         if(qJ != NO_DEPENDENCY && cdb.containsKey(qJ)){ //qJ is memory location or register
-            System.out.println("RS #" +id + " read rob entry " + qJ + " has this result off cdb");
+            //System.out.println("RS #" +id + " read rob entry " + qJ + " has this result off cdb");
             vJ = cdb.get(qJ).get(0); //broadcast this data on the first element of the list
             qJ = NO_DEPENDENCY;
             rJ = true;
         }
         if(qK != NO_DEPENDENCY && cdb.containsKey(qK)){
-            System.out.println("RS #" +id + " read rob entry " + qK + " has this result off cdb");
+            //System.out.println("RS #" +id + " read rob entry " + qK + " has this result off cdb");
             vK = cdb.get(qK).get(0);
             qK = NO_DEPENDENCY;
             rK = true;
