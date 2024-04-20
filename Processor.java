@@ -1,10 +1,7 @@
 
 
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Processor {
     private final Map<Integer, List<Integer>> cdb;
@@ -15,7 +12,7 @@ public class Processor {
     private final RegisterFile rf;
     private final Memory mem;
     private final FetchUnit fec;
-    private final DecodeUnit deu;
+    private final DecodeUnit dec;
     private final LoadStoreUnit lsu;
     private final BranchUnit bru;
     private final WriteBackUnit wbu;
@@ -41,7 +38,7 @@ public class Processor {
 
     private final PipelineRegister prefec = new PipelineRegister(8); //just to pass the pc value to the fetch unit, and increment it!
     private final PipelineRegister fecDec = new PipelineRegister(8);
-    private final PipelineRegister deuIsu = new PipelineRegister(8); //instruction queue
+    private final PipelineRegister decIsu = new PipelineRegister(8); //instruction queue
     private final PipelineRegister exeWbu = new PipelineRegister(8);
     //private final PipelineRegister aluLsu = new PipelineRegister();
     private final PipelineRegister rtired = new PipelineRegister(1); //ignored pipe register to satisfy Unit inheritence
@@ -68,15 +65,15 @@ public class Processor {
                 this.pc,
                 new PipeLike[]{prefec},
                 new PipeLike[]{fecDec});
-        this.deu = new DecodeUnit(
+        this.dec = new DecodeUnit(
                 this.rf,
                 new PipeLike[]{fecDec},
-                new PipeLike[]{deuIsu}); //loadstores go down the latter pipe
+                new PipeLike[]{decIsu}); //loadstores go down the latter pipe
         this.isu = new IssueUnit(
                 this.rf,
                 this.rob,
                 this.rat,
-                new PipeLike[]{deuIsu},
+                new PipeLike[]{decIsu},
                 new PipeLike[]{exeRss, lsuRss, bruRss});
         this.alu = new ArithmeticLogicUnit(
                 this.cdb,
@@ -117,15 +114,15 @@ public class Processor {
 
 
     private boolean isPipelineBeingUsed(){
-        return prefec.canPull() || fecDec.canPull() || deuIsu.canPull() ||
+        return prefec.canPull() || fecDec.canPull() || decIsu.canPull() ||
                 exeWbu.canPull() || rtired.canPull() || !wbu.isDone() || !lsu.isDone() ||
-                !alu.isDone() || !deu.isDone() || !fec.isDone() || !isu.isDone() || !rob.isEmpty();
+                !alu.isDone() || !dec.isDone() || !fec.isDone() || !isu.isDone() || !rob.isEmpty();
     }
 
     private void flushPipeline(int branchIdInRob, PrintStream debugOut){
         debugOut.println("flush from robEntry " + branchIdInRob);
         fec.flush(branchIdInRob);
-        deu.flush(branchIdInRob);
+        dec.flush(branchIdInRob);
         isu.flush(branchIdInRob);
         alu.flush(branchIdInRob);
         lsu.flush(branchIdInRob);
@@ -133,7 +130,7 @@ public class Processor {
         bru.flush(branchIdInRob);
         prefec.flush(branchIdInRob);
         fecDec.flush(branchIdInRob);
-        deuIsu.flush(branchIdInRob);
+        decIsu.flush(branchIdInRob);
         exeWbu.flush(branchIdInRob);
         rtired.flush(branchIdInRob);
         exeRss.flush(branchIdInRob);
@@ -146,7 +143,7 @@ public class Processor {
     private String pipelineToString(){
         return "\t[" + prefec +
                 fec + " " + fecDec + " " +
-                deu + " " + deuIsu+ " " +
+                dec + " " + decIsu + " " +
                 isu + " " + "(" + exeRss + "," + lsuRss + "," + bruRss + ") ("
                 + alu + ", " + lsu + ", " + bru + ") (" + exeWbu + ") "
                 + wbu + "]\t@"
@@ -166,19 +163,12 @@ public class Processor {
             debugOut.println(pipelineToString());
             wbu.clk();
             bru.clk();
-
-            if(bru.needsFlushing()) flushPipeline(bru.whereFlushAt(), debugOut);
-            bru.doneFlushing();
-//            if (prefec.canPush() && !pc.isDone()) {//&& !(!voided.canPull() && fe.getIsBranch())) {
-//                prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));
-////                pc.incr();
-//            }
-
             lsu.clk();
             alu.clk();
             isu.clk();
-            deu.clk();
-            //update these once the cdb has been fully utilised!
+            while(fecDec.canPull() && decIsu.canPush()){ //they all just shift a block along <=> they wont be able to do more than one pipeline buffer's worth!
+                dec.clk();
+            }
             exeRss.update(); //update reservation groups!
             lsuRss.update();
             bruRss.update();
@@ -186,14 +176,13 @@ public class Processor {
             rob.clk(); //read off the cdb
             if(rob.needsFlushing()) {
                 flushPipeline(rob.getShouldFlushWhere(), debugOut);
-                fec.yesRobDidSetPC();
             }
             rob.doneFlushing();
-            if (fec.isDone() && !pc.isDone()) {//&& !(!voided.canPull() && fe.getIsBranch())) {
+
+            while(fecDec.canPush() && !pc.isDone()){ //they all just shift a block along <=> they wont be able to do more than one pipeline buffer's worth!
                 prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));
+                fec.clk();
             }
-            fec.rstRobSetPC();
-            fec.clk();
 
             tally++;
 //            while(rtired.canPull()) { //if we retire more that one instruction per cycle
@@ -205,16 +194,13 @@ public class Processor {
             if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");
             debugOut.println(cdb.keySet().toString() + cdb.values().toString());
             cdb.clear();
-//            if(feu.isRobSetPC()){ //i think do this after the fetch unit does its thing because otherwise it has interference i guess? man i hate this
-//                pc.incr();
-//            }
-            fec.rstRobSetPC();
         }
         if(divergenceLim != null && tally >= divergenceLim) throw new RuntimeException("run: program considered to diverge after " + divergenceLim + " instrs");
         debugOut.println("registers (dirty): " + rf);
         debugOut.println("memory: " + mem);
         debugOut.println("run: program finished in " + tally + " cycles");
         debugOut.println("run: instructions per cycle " + Utils.toDecimalPlaces((float) rob.getCommitted() / tally, DP_ACC));
+        debugOut.println(Arrays.toString(mem.getData()));
         //debugOut.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
         return mem;
     }
