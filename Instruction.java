@@ -1,3 +1,4 @@
+import java.util.List;
 
 public abstract class Instruction extends Durate {
 
@@ -25,15 +26,12 @@ public abstract class Instruction extends Durate {
     }
 
     public RegisterName getRd() throws RuntimeException{
-        if(this.rd == null) throw new RuntimeException("getRd: there is no first register defined for this instruction");
         return this.rd;
     }
     public RegisterName getRs() throws RuntimeException{
-        if(this.rs == null) throw new RuntimeException("getRs: there is no second register defined for this instruction");
         return this.rs;
     }
     public RegisterName getRt() throws RuntimeException{
-        if(this.rt == null) throw new RuntimeException("getRt: there is no third register defined for this instruction");
         return this.rt;
     }
     public int getIm() throws RuntimeException{
@@ -47,12 +45,16 @@ public abstract class Instruction extends Durate {
     public void setResult(Integer result){
         this.result = result;
     }
+    public boolean hasResult(){
+        return result != null;
+    }
     public int getResult(){
         if(result == null) throw new RuntimeException("getResult: result is null and has not been set");
         return result;
     }
 
     abstract public Opcode visit(InstructionCodeVisitor v);
+    abstract public List<Integer> visit(InstructionLocVisitor v);
     abstract public void visit(InstructionVoidVisitor v);
 
     protected String regToString(RegisterName r){
@@ -65,7 +67,7 @@ public abstract class Instruction extends Durate {
 
     @Override
     public String toString(){
-        Opcode underlying = visit(new Id());
+        Opcode underlying = visit(new ConcreteCodeVisitor());
         return underlying.name() + "\t" + regToString(rd) + regToString(rs) + regToString(rt) + immToString(im);
     }
 
@@ -78,26 +80,26 @@ public abstract class Instruction extends Durate {
     // operator argument validation on the four instruction shapes
     protected void checkShape(RegisterName rd, RegisterName rs, RegisterName rt){
         if(rd == null || rs == null || rt == null)
-            throw new RuntimeException(visit(new Id()) + ": missing at least one register reference");
+            throw new RuntimeException(visit(new ConcreteCodeVisitor()) + ": missing at least one register reference");
     }
 
     protected void checkShape(RegisterName rd, RegisterName rs, Integer im){
         if(rd == null || rs == null)
-            throw new RuntimeException(visit(new Id()) +": missing at least one register reference");
+            throw new RuntimeException(visit(new ConcreteCodeVisitor()) +": missing at least one register reference");
         if(this.im == null)
-            throw new RuntimeException(visit(new Id()) +": missing immediate");
+            throw new RuntimeException(visit(new ConcreteCodeVisitor()) +": missing immediate");
     }
 
     protected void checkShape(RegisterName rd, Integer im){
         if(rd == null)
-            throw new RuntimeException(visit(new Id()) +": missing the register reference");
+            throw new RuntimeException(visit(new ConcreteCodeVisitor()) +": missing the register reference");
         if(this.im == null)
-            throw new RuntimeException(visit(new Id()) +": missing immediate");
+            throw new RuntimeException(visit(new ConcreteCodeVisitor()) +": missing immediate");
     }
 
     protected void checkShape(Integer im){
         if(this.im == null)
-            throw new RuntimeException(visit(new Id()) +": missing immediate");
+            throw new RuntimeException(visit(new ConcreteCodeVisitor()) +": missing immediate");
     }
 
     public abstract Instruction copy();

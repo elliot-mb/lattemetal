@@ -1,0 +1,39 @@
+ldc t1 #0 --output dep with ldc t1 #1
+ldc t1 #1 --^ (behaved correctly)
+
+addi t2 zero #1 --output dep with
+addi t2 zero #2 --^ (behaved correctly)
+
+ldc t5 #10 -- data dependency with addi t4 t3 #1
+addi t4 t5 #1 -- ^ (behaved correctly)
+
+-- transitive data dependency
+addi a1 zero #1
+addi a2 a1 #1
+addi a3 a2 #1 -- ^ (behaved correctly)
+
+addi a4 zero #120
+addi a5 zero #2
+-- antidependency
+st a4 a5 #1 --should store '33234' at address 2 + 1
+addi a5 a5 #1 -- ^ (behaved correctly)
+
+-- RAW (true data dependency)
+mul a7 a4 a5 --120 * 3
+addi a6 a7 #1 --361 perhaps this will try to read before the one above writes to a4
+
+-- WAW
+muli s8 a6 #2 --722
+addi s8 a6 #10 --371
+st s8 zero #4 -- this should store 371 is WAW is respected here
+
+-- WAR
+st s8 zero #5
+addi s8 zero #1000 --will be the wrong value if this finished before the one above
+
+-- load-store behaviour
+ldc s0 #0
+ldc s1 #1
+st s0 zero #12
+ld s0 s0 #0
+st s1 zero #13

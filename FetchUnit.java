@@ -3,8 +3,6 @@
 public class FetchUnit extends Unit {
 
     private static final int FETCH_LATENCY = 1;
-    
-    private Integer whatBranchID = null; //
 
     private final InstructionCache ic;
 
@@ -12,37 +10,51 @@ public class FetchUnit extends Unit {
 
     private final Durate counter = new Durate(FETCH_LATENCY);
 
-    FetchUnit(InstructionCache ic, ProgramCounter pc, PipelineRegister[] ins, PipelineRegister[] outs){
+    private boolean bruSetPC;
+
+    FetchUnit(InstructionCache ic, ProgramCounter pc, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
         this.ic = ic;
         this.pc = pc;
+        this.bruSetPC = false;
+    }
+
+    public void yesBruDidSetPC(){
+        bruSetPC = true;
+    }
+
+    public void rstBruDidSetPC(){
+        bruSetPC = false;
+    }
+
+    public boolean isBruDidSetPC(){
+        return bruSetPC;
     }
 
     @Override
     protected void procInstruction() {
+        if(pc.getCount() == ic.numInstrs()) {
+            currentOp = Utils.opFactory.new No();
+            counter.finish();
+            return;
+        }
         counter.decr();
+        currentOp = ic.getInstruction(pc.getCount());
     }
 
     @Override
     protected void readOffPipeline(){
-        getActiveIn();
-        PipelineRegister in = ins[inActive];
-        pcVal = in.getPcVal();
-        currentOp = ic.getInstruction(pcVal);
-        in.pull();
+        super.readOffPipeline();
         counter.rst();
+//        pc.set(pcVal + 1);
     }
+//
 
     @Override
     protected void writeOnPipeline() {
-        pcVal++; //incr then write the incremented value on pipeline
+        //incr then write the incremented value on pipeline
+        //if(!bruSetPC) pc.set(pcVal);
         super.writeOnPipeline();
-    }
-
-    @Override
-    public void flush(){
-        super.flush();
-        whatBranchID = null;
     }
 //
 //    // returns null if this is not a branch
@@ -63,72 +75,88 @@ public class FetchUnit extends Unit {
     //nothing happens in visitation because fetching happens in procInstruction
     @Override
     public void accept(Op.Add op) {
-        pc.set(pcVal + 1);
+        pcVal++;
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.AddI op) {
-        pc.set(pcVal + 1);
+        pcVal++;
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.Mul op) {
-        pc.set(pcVal + 1);
+        pcVal++;
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.MulI op) {
-        pc.set(pcVal + 1);
+        pcVal++;
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.Cmp op) {
-        pc.set(pcVal + 1);
+        pcVal++;
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.Ld op) {
-        pc.set(pcVal + 1);
+        pcVal++;
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.LdC op) {
-        pc.set(pcVal + 1);
+        pcVal++;
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.St op) {
-        pc.set(pcVal + 1);
+        pcVal++;
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.BrLZ op) {
-        pc.set(pcVal + 1);
+        op.setResult(pcVal + 1); //branch untaken!
         if(STATIC_PREDICT_BR_TAKEN){
             //next.setPcVal(op.getImVal());
-            pc.set(op.getImVal()); //static prediciton
+            pcVal = op.getImVal(); //pc.set(op.getImVal()); //static prediciton
+        }else{
+            pcVal++;
         }
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.JpLZ op) {
-        pc.set(pcVal + 1);
+        op.setResult(pcVal + 1); //branch untaken!
         if(STATIC_PREDICT_BR_TAKEN){
             //next.setPcVal(op.getImVal());
-            pc.set(pcVal + 1 + op.getImVal());
+            pcVal += op.getImVal();
+        }else{
+            pcVal++;
         }
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.Br op) {
-//        next.setPcVal(op.getImVal());
-        pc.set(op.getImVal());
+        op.setResult(pcVal + 1);
+        pcVal = op.getImVal();
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.Jp op) {
-//        next.setPcVal(op.getImVal());
-        pc.set(pcVal + 1 + op.getImVal());
+        op.setResult(pcVal + 1);
+        pcVal += op.getImVal();
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     protected String showUnit(){

@@ -1,66 +1,80 @@
+import java.util.*;
+
 public class ArithmeticLogicUnit extends Unit {
 
-    private final Forwarder fwd;
+    private final Map<Integer, List<Integer>> cdb;
 
-    ArithmeticLogicUnit(PipelineRegister[] ins, PipelineRegister[] outs){
+    private final RegisterFile rf;
+
+    private final ReorderBuffer rob;
+
+    private final RegisterAliasTable prf;
+
+    private int currentRobEntry;
+
+    ArithmeticLogicUnit(Map<Integer, List<Integer>> cdb, ReorderBuffer rob, RegisterFile rf, RegisterAliasTable prf, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
         this.currentOp = null;
-        this.fwd = new Forwarder();
+        this.rf = rf;
+        this.cdb = cdb;
+        this.prf = prf;
+        this.rob = rob;
     }
 
     @Override
     protected void procInstruction() {
-        currentOp.decr();
-        if(!isUnfinished()){ //this is the final procInstruction call
-            currentOp = fwd.forward(currentOp);
-//            if(fwd.didForward()){
-//                //System.out.println("forward: " + fwd);
-//            }
+
+        if(currentOp != null && !currentOp.isDone()) {
+            currentOp.decr();
         }
     }
 
     @Override
     protected boolean isUnfinished() {
-        return !isDone() && !currentOp.isDone(); //if we arent done with the inner up, and its not blank
+        return (currentOp == null || !currentOp.isDone()); //if we arent done with the inner up, and its not blank
     }
 
     @Override
-    public void flush(){
-        super.flush();
-        fwd.flush();
+    protected void readOffPipeline(){
+        PipeLike in = ins[selectionPriority()];
+        PipelineEntry e = in.pull();
+        pcVal = e.getPcVal();
+        flag = e.getFlag();
+        currentOp = e.getOp();
+        currentRobEntry = e.getEntry();
+    }
+
+    @Override
+    protected PipelineEntry makeEntryToWrite(){
+        return new PipelineEntry(currentOp, pcVal, flag, currentRobEntry); //send currentRobEntry to resi station!
     }
 
     @Override
     public void accept(Op.Add op) {
-        //modify register value = op.getRsVal() + op.getRtVal(); // i guess we can just write into the instruction
-        //and then create a writeback stage
-        op.setResult(op.getRsVal() + op.getRtVal());
-        fwd.setSlotReg(op.getRd());
-        fwd.setSlot(currentOp.getResult());
+        int res = op.getRsVal() + op.getRtVal();
+        op.setResult(res);
+        op.setRdVal(res);
     }
 
     @Override
     public void accept(Op.AddI op) {
-        // modify register value = op.getRsVal() + op.getImVal();
-        op.setResult(op.getRsVal() + op.getImVal());
-        fwd.setSlotReg(op.getRd());
-        fwd.setSlot(currentOp.getResult());
+        int res = op.getRsVal() + op.getImVal();
+        op.setResult(res);
+        op.setRdVal(res);
     }
 
     @Override
     public void accept(Op.Mul op) {
-        // modify register value = op.getRsVal() * op.getRtVal();
-        op.setResult(op.getRsVal() * op.getRtVal());
-        fwd.setSlotReg(op.getRd());
-        fwd.setSlot(currentOp.getResult());
+        int res = op.getRsVal() * op.getRtVal();
+        op.setResult(res);
+        op.setRdVal(res);
     }
 
     @Override
     public void accept(Op.MulI op) {
-        // modify register value = op.getRsVal() * op.getImVal();
-        op.setResult(op.getRsVal() * op.getImVal());
-        fwd.setSlotReg(op.getRd());
-        fwd.setSlot(currentOp.getResult());
+        int res = op.getRsVal() * op.getImVal();
+        op.setResult(res);
+        op.setRdVal(res);
     }
 
     @Override
@@ -73,57 +87,45 @@ public class ArithmeticLogicUnit extends Unit {
         else if(a == b) cmpResult = 0;
         else cmpResult = 1;
         op.setResult(cmpResult);
-        fwd.setSlotReg(op.getRd());
-        fwd.setSlot(currentOp.getResult());
+        op.setRdVal(cmpResult);
     }
 
     @Override
     public void accept(Op.Ld op) {
-        op.setResult(op.getRsVal() + op.getImVal()); //calculate offset
-        fwd.setSlotReg(null); //doesnt correspond to a register because the result comes from the LSU
-        fwd.setSlot(currentOp.getResult());
+        throw new RuntimeException("ArithmeticLogicUnit.accept: load instruction not valid");
     }
 
     @Override
     public void accept(Op.LdC op) {
-        op.setResult(op.getImVal());
-        fwd.setSlotReg(op.getRd());
-        fwd.setSlot(currentOp.getResult());
+        throw new RuntimeException("ArithmeticLogicUnit.accept: load instruction not valid");
     }
 
     @Override
     public void accept(Op.St op) {
-        //store register value at offset address
-        op.setResult(op.getRsVal() + op.getImVal()); //calculate offset
-        fwd.setSlotReg(null); //doesnt correspond to a register
+        throw new RuntimeException("ArithmeticLogicUnit.accept: store instruction not valid");
     }
 
     @Override
     public void accept(Op.BrLZ op) {
-        //pc.set(op.getImVal());
-        //pc.incr();
-        flag = op.getRdVal() <= 0;
-        op.setResult(op.getImVal()); //result is just set to imval?
-        fwd.setSlotReg(null); //doesnt correspond to a register
+        throw new RuntimeException("ArithmeticLogicUnit.accept: load instruction not valid");
     }
 
     @Override
     public void accept(Op.JpLZ op) {
-        flag = op.getRdVal() <= 0;
-        op.setResult(pcVal + op.getImVal());
-        fwd.setSlotReg(null); //doesnt correspond to a register
+        throw new RuntimeException("ArithmeticLogicUnit.accept: load instruction not valid");
+
     }
 
     @Override
     public void accept(Op.Br op) {
-        op.setResult(op.getImVal());
-        fwd.setSlotReg(null); //doesnt correspond to a register
+        throw new RuntimeException("ArithmeticLogicUnit.accept: load instruction not valid");
+
     }
 
     @Override
     public void accept(Op.Jp op) {
-        op.setResult(pcVal + op.getImVal());
-        fwd.setSlotReg(null); //doesnt correspond to a register
+        throw new RuntimeException("ArithmeticLogicUnit.accept: load instruction not valid");
+
     }
 
     protected String showUnit(){

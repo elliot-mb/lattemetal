@@ -1,7 +1,8 @@
+import java.util.List;
 
 public class Op {
 
-    Op(){}
+
 
     public class Add extends Instruction{ //all operations extend hasduration also by proxy
 
@@ -15,6 +16,10 @@ public class Op {
 
         @Override
         public Opcode visit(InstructionCodeVisitor v) {
+            return v.accept(this);
+        }
+        @Override
+        public List<Integer> visit(InstructionLocVisitor v) {
             return v.accept(this);
         }
         @Override
@@ -53,6 +58,10 @@ public class Op {
             return v.accept(this);
         }
         @Override
+        public List<Integer> visit(InstructionLocVisitor v) {
+            return v.accept(this);
+        }
+        @Override
         public void visit(InstructionVoidVisitor v) {
             v.accept(this);
         }
@@ -83,6 +92,10 @@ public class Op {
 
         @Override
         public Opcode visit(InstructionCodeVisitor v){
+            return v.accept(this);
+        }
+        @Override
+        public List<Integer> visit(InstructionLocVisitor v) {
             return v.accept(this);
         }
         @Override
@@ -121,6 +134,10 @@ public class Op {
             return v.accept(this);
         }
         @Override
+        public List<Integer> visit(InstructionLocVisitor v) {
+            return v.accept(this);
+        }
+        @Override
         public void visit(InstructionVoidVisitor v) {
             v.accept(this);
         }
@@ -152,6 +169,10 @@ public class Op {
 
         @Override
         public Opcode visit(InstructionCodeVisitor v) {
+            return v.accept(this);
+        }
+        @Override
+        public List<Integer> visit(InstructionLocVisitor v) {
             return v.accept(this);
         }
         @Override
@@ -188,6 +209,10 @@ public class Op {
         @Override
         public Opcode visit(InstructionCodeVisitor v) { return v.accept(this); }
         @Override
+        public List<Integer> visit(InstructionLocVisitor v) {
+            return v.accept(this);
+        }
+        @Override
         public void visit(InstructionVoidVisitor v) {
             v.accept(this);
         }
@@ -221,6 +246,10 @@ public class Op {
             return v.accept(this);
         }
         @Override
+        public List<Integer> visit(InstructionLocVisitor v) {
+            return v.accept(this);
+        }
+        @Override
         public void visit(InstructionVoidVisitor v) {
             v.accept(this);
         }
@@ -248,6 +277,10 @@ public class Op {
 
         @Override
         public Opcode visit(InstructionCodeVisitor v){
+            return v.accept(this);
+        }
+        @Override
+        public List<Integer> visit(InstructionLocVisitor v) {
             return v.accept(this);
         }
         @Override
@@ -283,6 +316,11 @@ public class Op {
         public Opcode visit(InstructionCodeVisitor v) {
             return v.accept(this);
         }
+
+        @Override
+        public List<Integer> visit(InstructionLocVisitor v) {
+            return v.accept(this);
+        }
         @Override
         public void visit(InstructionVoidVisitor v) {
             v.accept(this);
@@ -310,6 +348,10 @@ public class Op {
 
         @Override
         public Opcode visit(InstructionCodeVisitor v) { return v.accept(this); }
+        @Override
+        public List<Integer> visit(InstructionLocVisitor v) {
+            return v.accept(this);
+        }
         @Override
         public void visit(InstructionVoidVisitor v) {
             v.accept(this);
@@ -340,6 +382,10 @@ public class Op {
             return v.accept(this);
         }
         @Override
+        public List<Integer> visit(InstructionLocVisitor v) {
+            return v.accept(this);
+        }
+        @Override
         public void visit(InstructionVoidVisitor v) {
             v.accept(this);
         }
@@ -366,6 +412,10 @@ public class Op {
             return v.accept(this);
         }
         @Override
+        public List<Integer> visit(InstructionLocVisitor v) {
+            return v.accept(this);
+        }
+        @Override
         public void visit(InstructionVoidVisitor v) {
             v.accept(this);
         }
@@ -389,7 +439,10 @@ public class Op {
         public Opcode visit(InstructionCodeVisitor v) {
             return v.accept(this);
         }
-
+        @Override
+        public List<Integer> visit(InstructionLocVisitor v) {
+            return v.accept(this);
+        }
         @Override
         public void visit(InstructionVoidVisitor v) {
             v.accept(this);

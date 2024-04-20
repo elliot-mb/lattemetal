@@ -8,7 +8,7 @@ public class Utils {
 
     private static final char[] WHITESPACE = new char[]{' ', '\n', '\r', '\t'};
 
-    private static final Id preDecoder = new Id();
+    private static final ConcreteCodeVisitor preDecoder = new ConcreteCodeVisitor();
 
     public static final Op opFactory = new Op();
 
@@ -24,7 +24,7 @@ public class Utils {
         return xs[size - 1];
     }
 
-    public static <T> String writeList(ArrayList<T> xs){
+    public static <T> String writeList(List<T> xs){
         List<String> shows = xs.stream().map(Object::toString).toList();
         return shows.stream().reduce("", (acc, x) -> acc + "'" + x.toString() + "'" + "\r\n");
     }
@@ -53,7 +53,7 @@ public class Utils {
         return Math.round(n * factor) / factor;
     }
 
-    public static Memory runKern(String filePath, Memory mem, boolean quiet) throws FileNotFoundException {
+    public static Memory runKern(String filePath, Memory mem, boolean quiet, Integer divergenceLim) throws FileNotFoundException {
         System.out.println(filePath);
         PrintStream silencer = new PrintStream("/dev/null");
         Assembler assembler = new Assembler(filePath);
@@ -63,7 +63,18 @@ public class Utils {
         }
         InstructionCache ic = new InstructionCache(assembler.assemble());
         Processor p = new Processor(ic, mem); //memory can be set if you like
-        return p.run(quiet ? silencer : System.out);
+        return p.run(quiet ? silencer : System.out, divergenceLim);
+    }
+
+    public static boolean isNoOP(Instruction op){
+        return op.visit(new ConcreteCodeVisitor()).equals(Opcode.no);
+    }
+
+    public static String twoDigitInstrId(Instruction op){
+        if(op == null) return "__";
+        if(Utils.isNoOP(op)) return "NO";
+        String pad = op.getId() % 100 < 10 ? "0" : "";
+        return pad + (op.getId() % 100);
     }
 
     public static void assertTrue(boolean b){
