@@ -141,14 +141,14 @@ public class BranchUnit extends Unit{
 
     @Override
     public void accept(Op.Br op) {
-        pc.set(op.getImVal());
-        feu.yesBruDidSetPC();
+        //pc.set(op.getImVal()); //these are not speculative so we dont set the pc!
+        //feu.yesBruDidSetPC();
     }
 
     @Override
     public void accept(Op.Jp op) {
-        pc.set(op.getResult() + op.getImVal());
-        feu.yesBruDidSetPC();
+        //pc.set(op.getResult() + op.getImVal());  //these are not speculative so we dont set the pc!
+        //feu.yesBruDidSetPC();
     }
 
     public boolean needsFlushing(){

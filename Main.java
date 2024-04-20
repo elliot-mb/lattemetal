@@ -43,7 +43,7 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) throws FileNotFoundException {
-        String programPath = "./assembly/block_testing.latte";
+        String programPath = "./assembly/vec_add.latte";
         int printWidth = 1;
         boolean testing = false;
         if(args.length >= 1){
@@ -72,10 +72,10 @@ public class Main {
                 printWidth,
                 new int[]{
                         40, 10, 0, 0, 0, 0, 0, 0, 0, 0,
-                        78, 9, -15, 22, -4, 65, 11, 2, 10, 18,
-                        58, 11, -11, 6, -4, 51, 51, 4, 51, 17,
-                        48, 12, -8, 24, 20, 25, 31, 10, 19, 25,
-                        148, 15, -81, 31, -4, 54, 14, 23, 41, 4,
+                        2, 4, 6, 8, 10, 12, 14, 16, 18, 20,
+                        -2, -4, -6, -8, -10, -12, -14, -16, -18, -20,
+                        2, 4, 6, 8, 10, 12, 14, 16, 18, 20,
+                        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                 }
         );
         Utils.runKern(programPath, exampleMemory, false);
