@@ -21,6 +21,8 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     private final ProgramCounter pc;
 
     private boolean shouldFlush = false;
+    private static final int FLUSH_NOWHERE = -1;
+    private int shouldFlushWhere;
 
     private int committed;
     private List<Instruction> committedInstrs;
@@ -36,6 +38,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         this.pc = pc;
         this.committed = 0;
         this.committedInstrs = new ArrayList<Instruction>();
+        this.shouldFlushWhere = FLUSH_NOWHERE;
     }
 
 //    /**
@@ -67,6 +70,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     public void doneFlushing(){
         shouldFlush = false;
+        shouldFlushWhere = FLUSH_NOWHERE;
     }
 
     /**
@@ -193,7 +197,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 //            if(r.isReady()) System.out.println("entry " + r.getId() + " is ready!");
             if(cdb.containsKey(r.getId())){
                 List<Integer> payload = cdb.get(r.getId());
-                //if its a branch it has no value and no payload so i dont write any value on the cdb
+                //if its a fixed branch (non-conditional) it has no value and no payload so i dont write any value on the cdb
                 if(!payload.isEmpty()) r.setValue(payload.get(0)); //read from the map if the id matches this rese entry (value is already in the entry before we commit!)
                 r.readyUp();
             }
@@ -241,6 +245,9 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         currentCommit = null;
     }
 
+    public int getShouldFlushWhere(){
+        return shouldFlushWhere;
+    }
     public int getCommitted(){
         return committed;
     }
@@ -326,11 +333,34 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.BrLZ op) {
+        boolean flag = currentCommit.getValue() == BranchUnit.TAKEN;
+        if(flag != Unit.STATIC_PREDICT_BR_TAKEN){
+            if(flag){
+                pc.set(op.getImVal());
+            }else{
+                pc.set(op.getResult()); // untaken
+            }
+            shouldFlush = true;
+            shouldFlushWhere = currentCommit.getId() + 1;
+            flushFrom(currentCommit.getId() + 1);
+//            flushAt = currentRobEntry + 1; //after the current rob entry because we need to maintain program order
+        }
         cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.JpLZ op) {
+        boolean flag = currentCommit.getValue() == BranchUnit.TAKEN;
+        if(flag != Unit.STATIC_PREDICT_BR_TAKEN){
+            if(flag){
+                pc.set(op.getResult() + op.getImVal());
+            }else{
+                pc.set(op.getResult()); // untaken
+            }
+            shouldFlush = true;
+            shouldFlushWhere = currentCommit.getId() + 1;
+            flushFrom(currentCommit.getId() + 1);
+        }
         cdb.remove(currentCommit.getId());
     }
 

@@ -43,7 +43,7 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) throws FileNotFoundException {
-        String programPath = "./assembly/vec_add.latte";
+        String programPath = "./assembly/min.latte";
         int printWidth = 1;
         boolean testing = false;
         if(args.length >= 1){
@@ -72,9 +72,9 @@ public class Main {
                 printWidth,
                 new int[]{
                         40, 10, 0, 0, 0, 0, 0, 0, 0, 0,
-                        2, 4, 6, 8, 10, 12, 14, 16, 18, 20,
+                        92, 84, 76, 68, 50, 42, 34, 26, 18, 0,
                         -2, -4, -6, -8, -10, -12, -14, -16, -18, -20,
-                        2, 4, 6, 8, 10, 12, 14, 16, 18, 20,
+                        12, 24, 36, 48, 51, 62, 74, 86, 98, 120,
                         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                 }
         );

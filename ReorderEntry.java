@@ -7,7 +7,7 @@ public class ReorderEntry {
     private int value; //holds the instruciton result until commital
     private boolean ready; //false if still executing, true otherwise
     private final int pcVal;
-    private boolean flag; //used for branch instructions
+//    private boolean flag; //used for branch instructions
 
     ReorderEntry(Instruction op, int destination, int pcVal){
         this.op = op;
@@ -15,7 +15,7 @@ public class ReorderEntry {
         this.id = uId;
         this.ready = false;
         this.pcVal = pcVal; //used for flushing and resetting!
-        this.flag = false; //is set true when flush
+//        this.flag = false; //is set true when flush
         uId++;
     }
 
@@ -48,10 +48,10 @@ public class ReorderEntry {
         return value;
     }
 
-    public void isBranchAndFlushesPipe(){
-        if(!Utils.isBranch(op)) throw new RuntimeException("isBranchAndFlushesPipe: this instruction '" +op + "' is not a branch");
-        flag = true;
-    }
+//    public void isBranchAndFlushesPipe(){
+//        if(!Utils.isBranch(op)) throw new RuntimeException("isBranchAndFlushesPipe: this instruction '" +op + "' is not a branch");
+//        flag = true;
+//    }
 
     public Instruction getOp(){
         return op;

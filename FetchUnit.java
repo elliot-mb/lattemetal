@@ -10,25 +10,25 @@ public class FetchUnit extends Unit {
 
     private final Durate counter = new Durate(FETCH_LATENCY);
 
-    private boolean bruSetPC;
+    private boolean robSetPC;
 
     FetchUnit(InstructionCache ic, ProgramCounter pc, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
         this.ic = ic;
         this.pc = pc;
-        this.bruSetPC = false;
+        this.robSetPC = false;
     }
 
-    public void yesBruDidSetPC(){
-        bruSetPC = true;
+    public void yesRobDidSetPC(){
+        robSetPC = true;
     }
 
-    public void rstBruDidSetPC(){
-        bruSetPC = false;
+    public void rstRobSetPC(){
+        robSetPC = false;
     }
 
-    public boolean isBruDidSetPC(){
-        return bruSetPC;
+    public boolean isRobSetPC(){
+        return robSetPC;
     }
 
     @Override
@@ -76,49 +76,49 @@ public class FetchUnit extends Unit {
     @Override
     public void accept(Op.Add op) {
         pcVal++;
-        if(!bruSetPC) pc.set(pcVal);
+        if(!robSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.AddI op) {
         pcVal++;
-        if(!bruSetPC) pc.set(pcVal);
+        if(!robSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.Mul op) {
         pcVal++;
-        if(!bruSetPC) pc.set(pcVal);
+        if(!robSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.MulI op) {
         pcVal++;
-        if(!bruSetPC) pc.set(pcVal);
+        if(!robSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.Cmp op) {
         pcVal++;
-        if(!bruSetPC) pc.set(pcVal);
+        if(!robSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.Ld op) {
         pcVal++;
-        if(!bruSetPC) pc.set(pcVal);
+        if(!robSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.LdC op) {
         pcVal++;
-        if(!bruSetPC) pc.set(pcVal);
+        if(!robSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.St op) {
         pcVal++;
-        if(!bruSetPC) pc.set(pcVal);
+        if(!robSetPC) pc.set(pcVal);
     }
 
     @Override
@@ -130,7 +130,7 @@ public class FetchUnit extends Unit {
         }else{
             pcVal++;
         }
-        if(!bruSetPC) pc.set(pcVal);
+        if(!robSetPC) pc.set(pcVal);
     }
 
     @Override
@@ -142,21 +142,21 @@ public class FetchUnit extends Unit {
         }else{
             pcVal++;
         }
-        if(!bruSetPC) pc.set(pcVal);
+        if(!robSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.Br op) {
         op.setResult(pcVal + 1);
         pcVal = op.getImVal();
-        if(!bruSetPC) pc.set(pcVal);
+        if(!robSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.Jp op) {
         op.setResult(pcVal + 1);
         pcVal += op.getImVal();
-        if(!bruSetPC) pc.set(pcVal);
+        if(!robSetPC) pc.set(pcVal);
     }
 
     protected String showUnit(){

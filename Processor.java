@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BinaryOperator;
 
 public class Processor {
     private final Map<Integer, List<Integer>> cdb;
@@ -145,7 +144,7 @@ public class Processor {
         lsuRss.flush(branchIdInRob);
         bruRss.flush(branchIdInRob);
         rat.flushFrom(branchIdInRob);
-        if(branchIdInRob != ROB_INTIATES_FLUSH) rob.flushFrom(branchIdInRob);
+        //if(branchIdInRob != ROB_INTIATES_FLUSH) rob.flushFrom(branchIdInRob); always initiates flush so we dont call it here
     }
 
     private String pipelineToString(){
@@ -174,24 +173,31 @@ public class Processor {
 
             if(bru.needsFlushing()) flushPipeline(bru.whereFlushAt(), debugOut);
             bru.doneFlushing();
-            if (prefec.canPush() && !pc.isDone()) {//&& !(!voided.canPull() && fe.getIsBranch())) {
-                prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));
-//                pc.incr();
-            }
+//            if (prefec.canPush() && !pc.isDone()) {//&& !(!voided.canPull() && fe.getIsBranch())) {
+//                prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));
+////                pc.incr();
+//            }
 
             lsu.clk();
             alu.clk();
             isu.clk();
             deu.clk();
-            feu.clk();
             //update these once the cdb has been fully utilised!
             execRss.update(); //update reservation groups!
             lsuRss.update();
             bruRss.update();
 
             rob.clk(); //read off the cdb
-            if(rob.needsFlushing()) flushPipeline(ROB_INTIATES_FLUSH, debugOut);
+            if(rob.needsFlushing()) {
+                flushPipeline(rob.getShouldFlushWhere(), debugOut);
+                feu.yesRobDidSetPC();
+            }
             rob.doneFlushing();
+            if (prefec.canPush() && !pc.isDone()) {//&& !(!voided.canPull() && fe.getIsBranch())) {
+                prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));
+            }
+            feu.rstRobSetPC();
+            feu.clk();
 
             tally++;
 //            while(rtired.canPull()) { //if we retire more that one instruction per cycle
@@ -203,17 +209,17 @@ public class Processor {
             if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");
             debugOut.println(cdb.keySet().toString() + cdb.values().toString());
             cdb.clear();
-            if(feu.isBruDidSetPC()){ //i think do this after the fetch unit does its thing because otherwise it has interference i guess? man i hate this
-                pc.incr();
-            }
-            feu.rstBruDidSetPC();
+//            if(feu.isRobSetPC()){ //i think do this after the fetch unit does its thing because otherwise it has interference i guess? man i hate this
+//                pc.incr();
+//            }
+            feu.rstRobSetPC();
         }
-        if(tally >= divergenceLim) throw new RuntimeException("run: program considered to diverge after " + divergenceLim + " instrs");
+        if(divergenceLim != null && tally >= divergenceLim) throw new RuntimeException("run: program considered to diverge after " + divergenceLim + " instrs");
         debugOut.println("registers (dirty): " + rf);
         debugOut.println("memory: " + mem);
         debugOut.println("run: program finished in " + tally + " cycles");
         debugOut.println("run: instructions per cycle " + Utils.toDecimalPlaces((float) rob.getCommitted() / tally, DP_ACC));
-        debugOut.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
+        //debugOut.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
         return mem;
     }
 

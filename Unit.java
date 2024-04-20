@@ -8,7 +8,7 @@ public abstract class Unit implements InstructionVoidVisitor {
      * for any building block that reads from one pipeline register and writes to another
      */
 
-    protected static final boolean STATIC_PREDICT_BR_TAKEN = true;
+    public static final boolean STATIC_PREDICT_BR_TAKEN = true;
 
     protected final PipeLike[] ins;
     protected final PipeLike[] outs;
@@ -171,7 +171,7 @@ public abstract class Unit implements InstructionVoidVisitor {
         currentOp = null;
         pcVal = 0;
         flag = false;
-
+        visited = false;
     }
 
     protected void chooseOuts() {
