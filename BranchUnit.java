@@ -95,15 +95,6 @@ public class BranchUnit extends Unit{
     @Override
     public void accept(Op.BrLZ op) {
         flag = op.getRdVal() <= 0;
-        //if we got it wrong we flush
-//        if(flag){
-//            //we only need to reset to destination if we didnt set it correctly
-//            //(if we predicted wrong)
-//            feu.yesBruDidSetPC();
-//            pc.set(op.getImVal());
-//        }else{
-//            //pc.set(pcVal);
-//        }
         if(flag != STATIC_PREDICT_BR_TAKEN){
             if(flag){
                 pc.set(op.getImVal());
@@ -120,12 +111,6 @@ public class BranchUnit extends Unit{
     @Override
     public void accept(Op.JpLZ op) {
         flag = op.getRdVal() <= 0;
-//        if(flag){
-//            pc.set(op.getImVal());
-//            feu.yesBruDidSetPC();
-//        }else{
-//            //pc.set(pcVal);
-//        }
         if(flag != STATIC_PREDICT_BR_TAKEN){
             if(flag){
                 pc.set(op.getResult() + op.getImVal());
