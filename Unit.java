@@ -102,7 +102,7 @@ public abstract class Unit implements InstructionVoidVisitor {
 
     //if all of our chosen outputs can be pushed onto, this returns true. otherwise we should stall
     //run chooseOuts() before this; its not run here because we might decide some time before this function
-    private boolean canPushOnChosenOuts(){
+    public boolean canPushOnChosenOuts(){
         int i = 0;
         boolean ok = false;
         for(PipeLike out : outs){

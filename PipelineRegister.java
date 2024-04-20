@@ -66,6 +66,11 @@ public class PipelineRegister implements PipeLike {
         return xs.get(xs.size() - 1);
     }
 
+    @Override
+    public int getCount() {
+        return queue.getElementsIn();
+    }
+
     public String toString(){
         return queue.toString();
     }

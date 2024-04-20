@@ -10,4 +10,6 @@ public interface PipeLike {
     public PipelineEntry pull();
 
     public PipelineEntry peek();
+
+    public int getCount();
 }

@@ -18,7 +18,10 @@ public class ReservationGroup implements PipeLike, InstructionVoidVisitor{ //to 
 
     private final Map<Integer, PipelineEntry> rsToEntry; //so we can load all the other junk that comes with a pipeiregentry
 
+    private int size;
+
     ReservationGroup(int size, Map<Integer, List<Integer>> cdb, ReorderBuffer rob, RegisterFile rf, RegisterAliasTable rat){
+        this.size = size;
         this.rss = new ArrayList<ReservationStation>(size);
         for(int i = 0; i < size; i++){
             rss.add(new ReservationStation(cdb, rob));
@@ -26,6 +29,7 @@ public class ReservationGroup implements PipeLike, InstructionVoidVisitor{ //to 
         this.rf = rf;
         this.rat = rat;
         this.rsToEntry = new HashMap<Integer, PipelineEntry>();
+        this.size = size;
     }
 
     public void update(){
@@ -154,6 +158,10 @@ public class ReservationGroup implements PipeLike, InstructionVoidVisitor{ //to 
         return rsToEntry.get(rsWithOldestOpReady());
     }
 
+    @Override
+    public int getCount() {
+        return size - getFreeRss().size();
+    }
 
 
     // visitation

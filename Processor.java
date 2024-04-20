@@ -165,13 +165,16 @@ public class Processor {
             bru.clk();
             lsu.clk();
             alu.clk();
+
+            int lastCountInDecIsu = -1;
             isu.clk();
-            while(fecDec.canPull() && decIsu.canPush()){ //they all just shift a block along <=> they wont be able to do more than one pipeline buffer's worth!
-                dec.clk();
+            while(decIsu.canPull() && lastCountInDecIsu != decIsu.getCount()){
+                lastCountInDecIsu = decIsu.getCount();
+                isu.clk();
+                exeRss.update(); //update reservation groups!
+                lsuRss.update();
+                bruRss.update();
             }
-            exeRss.update(); //update reservation groups!
-            lsuRss.update();
-            bruRss.update();
 
             rob.clk(); //read off the cdb
             if(rob.needsFlushing()) {
@@ -179,6 +182,12 @@ public class Processor {
             }
             rob.doneFlushing();
 
+            dec.clk();
+            while(fecDec.canPull() && decIsu.canPush()){ //they all just shift a block along <=> they wont be able to do more than one pipeline buffer's worth!
+                dec.clk();
+            }
+
+            fec.clk();
             while(fecDec.canPush() && !pc.isDone()){ //they all just shift a block along <=> they wont be able to do more than one pipeline buffer's worth!
                 prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));
                 fec.clk();
