@@ -20,12 +20,15 @@ public abstract class Unit implements InstructionVoidVisitor {
     protected int pcVal;
     protected boolean flag;
 
+    protected boolean visited;
+
     Unit(PipeLike[] ins, PipeLike[] outs){
         if(ins.length == 0 || outs.length == 0) throw new RuntimeException("Unit: provide at least one input and at least one output pipereg");
         this.ins = ins;
         this.outs = outs;
         this.outsChoice = new boolean[this.outs.length];
         rstChosenOuts();
+        this.visited = false;
     }
 
     protected List<Integer> getActiveIn(){
@@ -144,11 +147,13 @@ public abstract class Unit implements InstructionVoidVisitor {
                                //while RSs wait for deps
         }
         if(isUnfinished()) return;
+        if(!visited) currentOp.visit(this); // /!\ main processing happens here /!\ (forced to be implementation-defined)
+        visited = true;
         chooseOuts(); //implementation defined unless has one output
         if(!canPushOnChosenOuts()) return; //stall a clock cycle if we cant push the result
-        currentOp.visit(this); // /!\ main processing happens here /!\ (forced to be implementation-defined)
         writeOnPipeline();
         currentOp = null;
+        visited = false;
     }
 
     @Override

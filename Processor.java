@@ -175,7 +175,7 @@ public class Processor {
             bru.doneFlushing();
             if (prefec.canPush() && !pc.isDone()) {//&& !(!voided.canPull() && fe.getIsBranch())) {
                 prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));
-                //pc.incr();
+//                pc.incr();
             }
             debugOut.println(pipelineToString());
 

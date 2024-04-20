@@ -53,7 +53,7 @@ public class FetchUnit extends Unit {
     @Override
     protected void writeOnPipeline() {
         //incr then write the incremented value on pipeline
-        if(!bruSetPC) pc.set(pcVal);
+        //if(!bruSetPC) pc.set(pcVal);
         super.writeOnPipeline();
     }
 //
@@ -76,40 +76,49 @@ public class FetchUnit extends Unit {
     @Override
     public void accept(Op.Add op) {
         pcVal++;
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.AddI op) {
         pcVal++;
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.Mul op) {
         pcVal++;
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.MulI op) {
         pcVal++;
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.Cmp op) {
-        pcVal++;}
+        pcVal++;
+        if(!bruSetPC) pc.set(pcVal);
+    }
 
     @Override
     public void accept(Op.Ld op) {
         pcVal++;
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.LdC op) {
         pcVal++;
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.St op) {
         pcVal++;
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     @Override
@@ -121,6 +130,7 @@ public class FetchUnit extends Unit {
         }else{
             pcVal++;
         }
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     @Override
@@ -132,18 +142,21 @@ public class FetchUnit extends Unit {
         }else{
             pcVal++;
         }
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.Br op) {
         op.setResult(pcVal + 1);
         pcVal = op.getImVal();
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.Jp op) {
         op.setResult(pcVal + 1);
         pcVal += op.getImVal();
+        if(!bruSetPC) pc.set(pcVal);
     }
 
     protected String showUnit(){
