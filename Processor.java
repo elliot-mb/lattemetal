@@ -5,6 +5,7 @@ import java.util.*;
 
 public class Processor {
     //@@@SETTINGS@@@
+    private static final double CLOCK_SPEED_MHZ = 500;
     private static final int SUPERSCALAR_WIDTH = 8;
     private static final int ALU_COUNT = 4;
     private static final int LSU_COUNT = 2;
@@ -17,6 +18,7 @@ public class Processor {
     public static final int FLUSH_ALL = -1;
     public static final int PHYSICAL_REGISTER_FACTOR = 4; //how many times more physical registers we have than architectural ones
     //@@@DEPENDANT SETTINGS@@@
+    private static final double ASSUMED_CYCLE_TIME = Math.pow(10, 3) / CLOCK_SPEED_MHZ;//ns
     public static final int PHYSICAL_REGISTER_COUNT = PHYSICAL_REGISTER_FACTOR * RegisterName.values().length;
     //@@@@@@
     private final ArrayList<ArithmeticLogicUnit> alusInUse;
@@ -312,8 +314,12 @@ public class Processor {
         debugOut.println("registers (dirty): " + rf);
         debugOut.println("memory: " + mem);
         debugOut.println("run: program finished in " + tally + " cycles");
-        debugOut.println("run: instructions per cycle " + Utils.toDecimalPlaces((float) rob.getCommitted() / tally, DP_ACC));
+        double ipc = Utils.toDecimalPlaces( (double) rob.getCommitted() / tally, DP_ACC);
+        double time = (rob.getCommitted() * (1 / ipc) * ASSUMED_CYCLE_TIME) / Math.pow(10, 3);
+        debugOut.println("run: instructions per cycle " + ipc);
+        debugOut.println("run: cpu time " + Utils.toDecimalPlaces(time, DP_ACC) + "μs @ " + CLOCK_SPEED_MHZ + "MHz");
         debugOut.println(Arrays.toString(mem.getData()));
+
         //debugOut.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
         return mem;
     }

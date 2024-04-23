@@ -48,7 +48,7 @@ public class Utils {
         return code == Opcode.ld || code == Opcode.ldc || code == Opcode.st;
     }
 
-    public static double toDecimalPlaces(float n, int dp){
+    public static double toDecimalPlaces(double n, int dp){
         double factor = Math.pow(10, dp);
         return Math.round(n * factor) / factor;
     }
