@@ -54,6 +54,8 @@ public class ReservationStation implements InstructionVoidVisitor {
     }
 //    //this must happen in program order and so needs to be moved!
     public void set(PipelineEntry e, RegisterAliasTable rat, RegisterFile rf){
+
+//        System.out.println("should be in order as we renamed : " + e.getEntry());
         op = e.getOp();
         if(Utils.isNoOP(op)) {
             qJ = NO_DEPENDENCY;
@@ -178,6 +180,7 @@ public class ReservationStation implements InstructionVoidVisitor {
     @Override
     public void accept(Op.St op) {
         op.setRdVal(vJ);
+        op.setRsVal(vK);
     }
 
     @Override
