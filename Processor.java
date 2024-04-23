@@ -13,7 +13,7 @@ public class Processor {
     private static final int ALU_RS_COUNT = 4;
     private static final int LSU_RS_COUNT = 2;
     private static final int BRU_RS_COUNT = 2;
-    private static final int DP_ACC = 2;
+    private static final int DP_ACC = 4;
     private static final int ROB_ENTRIES = 32;
     public static final int FLUSH_ALL = -1;
     public static final int PHYSICAL_REGISTER_FACTOR = 4; //how many times more physical registers we have than architectural ones
@@ -222,7 +222,7 @@ public class Processor {
                 + tally + "\tpc " + pc.getCount() + "\t" + "\t" + rob;
     }
 
-    public Memory run(PrintStream debugOut, Integer divergenceLim){
+    public Memory run(PrintStream debugOut, Integer divergenceLim, boolean quietStats){
         debugOut.println(ic);
 //        rtired.push(new PipelineEntry(Utils.opFactory.new No(), 0, false));
         int retiredInstrCount = 0;
@@ -313,12 +313,18 @@ public class Processor {
         if(divergenceLim != null && tally >= divergenceLim) throw new RuntimeException("run: program considered to diverge after " + divergenceLim + " instrs");
         debugOut.println("registers (dirty): " + rf);
         debugOut.println("memory: " + mem);
-        debugOut.println("run: program finished in " + tally + " cycles");
-        double ipc = Utils.toDecimalPlaces( (double) rob.getCommitted() / tally, DP_ACC);
-        double time = (rob.getCommitted() * (1 / ipc) * ASSUMED_CYCLE_TIME) / Math.pow(10, 3);
-        debugOut.println("run: instructions per cycle " + ipc);
-        debugOut.println("run: cpu time " + Utils.toDecimalPlaces(time, DP_ACC) + "μs @ " + CLOCK_SPEED_MHZ + "MHz");
-        debugOut.println(Arrays.toString(mem.getData()));
+
+        if(!quietStats){
+            System.out.println("run: program finished in " + tally + " cycles");
+            double ipc = Utils.toDecimalPlaces( (double) rob.getCommitted() / tally, DP_ACC);
+            double time = (rob.getCommitted() * (1 / ipc) * ASSUMED_CYCLE_TIME) / Math.pow(10, 3);
+            double percentMispredicts = (double) rob.getMispredicted() / rob.getCommitted();
+            System.out.println("run: instructions per cycle " + ipc);
+            System.out.println("run: cpu time " + Utils.toDecimalPlaces(time, DP_ACC) + "μs @ " + CLOCK_SPEED_MHZ + "MHz");
+            System.out.println("run: percentage mispredicted " + Utils.toDecimalPlaces(percentMispredicts, DP_ACC) +"%");
+            System.out.println(Arrays.toString(mem.getData()));
+        }
+
 
         //debugOut.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
         return mem;

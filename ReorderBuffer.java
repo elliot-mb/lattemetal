@@ -25,8 +25,8 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     private int shouldFlushWhere;
 
     private int committed;
+    private int mispredicted;
     private List<Instruction> committedInstrs;
-
     private final DecodeUnit dec;
 
     ReorderBuffer(int size, Map<Integer, List<Integer>> cdb, RegisterFile rf, Memory mem, ProgramCounter pc, DecodeUnit dec){
@@ -40,6 +40,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         this.lsq = new CircluarQueue<ReorderEntry>(size);
         this.pc = pc;
         this.committed = 0;
+        this.mispredicted = 0;
         this.committedInstrs = new ArrayList<Instruction>();
         this.shouldFlushWhere = FLUSH_NOWHERE;
     }
@@ -76,6 +77,10 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         shouldFlushWhere = FLUSH_NOWHERE;
     }
 
+    public int getMispredicted(){
+        return mispredicted;
+    }
+
     /**
      * the queue is like
      *   head v           v tail
@@ -87,6 +92,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         //System.out.println("rob flushes from " + id);
         CircluarQueue<ReorderEntry> newBuffer = new CircluarQueue<ReorderEntry>(size);
         CircluarQueue<ReorderEntry> newLsq = new CircluarQueue<ReorderEntry>(size);
+        int sizeBefore = buffer.getSize();
         ReorderEntry peel = buffer.pop();
         while(!buffer.isEmpty() && peel.getId() != id){
             if(!lsq.isEmpty() && peel.getId() == lsq.peek().getId()){
@@ -96,6 +102,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
             peel = buffer.pop();
         }
         buffer = newBuffer;
+        mispredicted += (sizeBefore - buffer.getElementsIn()); //adds the change on
         lsq = newLsq;
     }
 
