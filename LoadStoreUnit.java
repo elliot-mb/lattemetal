@@ -15,7 +15,6 @@ public class LoadStoreUnit extends Unit{
 
     private int currentRobEntry;
     private final RegisterAliasTable prf;
-    private Durate counter = new Durate(L1_LATENCY);
 
     LoadStoreUnit(Memory mem, RegisterFile rf, RegisterAliasTable prf, Map<Integer, List<Integer>> cdb, ReorderBuffer rob, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
@@ -28,7 +27,7 @@ public class LoadStoreUnit extends Unit{
 
     @Override
     protected boolean isUnfinished() {
-        return currentOp == null || !counter.isDone();//(!counter.isDone() && Utils.isLoadStore(currentOp)) || !counterNop.isDone(); //if its not a load/store we're finished
+        return currentOp == null || !currentOp.isDone();//(!counter.isDone() && Utils.isLoadStore(currentOp)) || !counterNop.isDone(); //if its not a load/store we're finished
     }
 
     @Override
@@ -39,7 +38,7 @@ public class LoadStoreUnit extends Unit{
         flag = e.getFlag();
         currentOp = e.getOp();
         currentRobEntry = e.getEntry(); //requires rob entry number otherwise they crash
-        counter.rst();
+        currentOp.rst();
     }
 
     @Override
@@ -49,7 +48,7 @@ public class LoadStoreUnit extends Unit{
 
     @Override
     protected void procInstruction() {
-        counter.decr();
+        if(currentOp != null && !currentOp.isDone()) currentOp.decr();
     }
 
     //visitation

@@ -100,19 +100,7 @@ public class WriteBackUnit extends Unit{
     @Override
     public void accept(Op.St op) {
         //stores' result is set to the location in memory
-        int val;
-//        if (prf.isRegValUnmapped(op.getRd())) {
-//            val = rf.getReg(op.getRd()); //this happens when nobody is busy with this register
-//            cdb.put(currentRobEntry, List.of(val));
-//        }
-        cdb.put(currentRobEntry, List.of(rf.getReg(op.getRd())));
-
-//        } else {
-//            //not entirely sure if this 'else' case is necessary because we have clk() in ROB doing this
-//            int resultEntryLoc = prf.whereRegInRob(op.getRd());
-//            val = rob.getValOfEntry(resultEntryLoc); //copy reg value from elsewhere in the rob to the result of the store
-//        }
-//        cdb.put(currentRobEntry, List.of(val)); //if this doesnt happen, it will later get broadcast in another instr
+        cdb.put(currentRobEntry, List.of(op.getRdVal())); //rdval is where we store the register value taht is what we write
     }
 
     @Override

@@ -23,7 +23,6 @@ public class ArithmeticLogicUnit extends Unit {
 
     @Override
     protected void procInstruction() {
-
         if(currentOp != null && !currentOp.isDone()) {
             currentOp.decr();
         }
@@ -42,6 +41,7 @@ public class ArithmeticLogicUnit extends Unit {
         flag = e.getFlag();
         currentOp = e.getOp();
         currentRobEntry = e.getEntry();
+        currentOp.rst();
     }
 
     @Override

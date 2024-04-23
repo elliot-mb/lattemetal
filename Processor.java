@@ -1,29 +1,28 @@
 
 
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Processor {
+    private static final int SUPERSCALAR_WIDTH = 8;
+
     private final Map<Integer, List<Integer>> cdb;
     private final ProgramCounter pc;
     private final InstructionCache ic;
     private final IssueUnit isu;
-    private final ArithmeticLogicUnit alu;
+    private final ArithmeticLogicUnit alu1, alu2, alu3;
     private final RegisterFile rf;
     private final Memory mem;
-    private final FetchUnit feu;
-    private final DecodeUnit deu;
-    private final LoadStoreUnit lsu;
+    private final FetchUnit fec;
+    private final DecodeUnit dec;
+    private final LoadStoreUnit lsu1, lsu2;
     private final BranchUnit bru;
     private final WriteBackUnit wbu;
     private final ReorderBuffer rob;
     private final RegisterAliasTable rat;
     private int tally;
 
-    private static final int ALU_RS_COUNT = 2;
+    private static final int ALU_RS_COUNT = 4;
     private static final int LSU_RS_COUNT = 2;
     private static final int BRU_RS_COUNT = 2;
     private static final int DP_ACC = 2;
@@ -35,19 +34,17 @@ public class Processor {
 //    private final List<ReservationStation> aluRs = new ArrayList<ReservationStation>();
 //    private final List<ReservationStation> lsuRs = new ArrayList<ReservationStation>();
 //    //lsu? load store buffers?
-    private final ReservationGroup execRss;
+    private final ReservationGroup exeRss;
     private final ReservationGroup lsuRss;
     private final ReservationGroup bruRss;
 
-    private final PipelineRegister prefec = new PipelineRegister(1); //just to pass the pc value to the fetch unit, and increment it!
-    private final PipelineRegister fecDec = new PipelineRegister(1);
-    private final PipelineRegister deuIsu = new PipelineRegister(1); //instruction queue!!
-    private final PipelineRegister aluWbu = new PipelineRegister(1);
-    private final PipelineRegister lsuWbu = new PipelineRegister(1);
-    private final PipelineRegister bruWbu = new PipelineRegister(1);
+    private final PipelineRegister prefec = new PipelineRegister(SUPERSCALAR_WIDTH); //just to pass the pc value to the fetch unit, and increment it!
+    private final PipelineRegister fecDec = new PipelineRegister(SUPERSCALAR_WIDTH);
+    private final PipelineRegister decIsu = new PipelineRegister(SUPERSCALAR_WIDTH); //instruction queue
+    private final PipelineRegister exeWbu = new PipelineRegister(SUPERSCALAR_WIDTH);
     //private final PipelineRegister aluLsu = new PipelineRegister();
     private final PipelineRegister rtired = new PipelineRegister(1); //ignored pipe register to satisfy Unit inheritence
-    private final PipelineRegister delete = new PipelineRegister(100);
+    private final PipelineRegister delete = new PipelineRegister(SUPERSCALAR_WIDTH);
 
     Processor(InstructionCache ic, Memory... mem) throws RuntimeException{
         if(mem.length > 1) throw new RuntimeException("Processor: this constructor cannot have more than one memories");
@@ -61,52 +58,74 @@ public class Processor {
         this.rat = new RegisterAliasTable(cdb, rob);
         this.rob.setRat(rat); //avoid circular dependency
 
-        this.execRss = new ReservationGroup(ALU_RS_COUNT, cdb, rob, rf, rat);
+        this.exeRss = new ReservationGroup(ALU_RS_COUNT, cdb, rob, rf, rat);
         this.lsuRss = new ReservationGroup(LSU_RS_COUNT, cdb, rob, rf, rat);
         this.bruRss = new ReservationGroup(BRU_RS_COUNT, cdb, rob, rf, rat);
 
-        this.feu = new FetchUnit(
+        this.fec = new FetchUnit(
                 this.ic,
                 this.pc,
                 new PipeLike[]{prefec},
                 new PipeLike[]{fecDec});
-        this.deu = new DecodeUnit(
+        this.dec = new DecodeUnit(
                 this.rf,
                 new PipeLike[]{fecDec},
-                new PipeLike[]{deuIsu}); //loadstores go down the latter pipe
+                new PipeLike[]{decIsu}); //loadstores go down the latter pipe
         this.isu = new IssueUnit(
                 this.rf,
                 this.rob,
                 this.rat,
-                new PipeLike[]{deuIsu},
-                new PipeLike[]{execRss, lsuRss, bruRss});
-        this.alu = new ArithmeticLogicUnit(
+                new PipeLike[]{decIsu},
+                new PipeLike[]{exeRss, lsuRss, bruRss});
+        this.alu1 = new ArithmeticLogicUnit(
                 this.cdb,
                 this.rob,
                 this.rf,
                 this.rat,
-                new PipeLike[]{execRss},
-                new PipeLike[]{aluWbu});
-        this.lsu = new LoadStoreUnit(
+                new PipeLike[]{exeRss},
+                new PipeLike[]{exeWbu});
+        this.alu2 = new ArithmeticLogicUnit(
+                this.cdb,
+                this.rob,
+                this.rf,
+                this.rat,
+                new PipeLike[]{exeRss},
+                new PipeLike[]{exeWbu});
+        this.alu3 = new ArithmeticLogicUnit(
+                this.cdb,
+                this.rob,
+                this.rf,
+                this.rat,
+                new PipeLike[]{exeRss},
+                new PipeLike[]{exeWbu});
+        this.lsu1 = new LoadStoreUnit(
                 this.mem,
                 this.rf,
                 this.rat,
                 this.cdb,
                 this.rob,
                 new PipeLike[]{lsuRss},
-                new PipeLike[]{lsuWbu});
+                new PipeLike[]{exeWbu});
+        this.lsu2 = new LoadStoreUnit(
+                this.mem,
+                this.rf,
+                this.rat,
+                this.cdb,
+                this.rob,
+                new PipeLike[]{lsuRss},
+                new PipeLike[]{exeWbu});
         this.bru = new BranchUnit(
                 this.pc,
-                this.feu,
+                this.fec,
                 new PipeLike[]{bruRss},
-                new PipeLike[]{bruWbu}
+                new PipeLike[]{exeWbu}
         );
         this.wbu = new WriteBackUnit(
                 this.rf,
                 this.rob,
                 this.rat,
                 this.cdb,
-                new PipeLike[]{aluWbu, lsuWbu, bruWbu},
+                new PipeLike[]{exeWbu},
                 new PipeLike[]{delete});
     }
 
@@ -119,28 +138,29 @@ public class Processor {
 
 
     private boolean isPipelineBeingUsed(){
-        return prefec.canPull() || fecDec.canPull() || deuIsu.canPull() ||
-                bruWbu.canPull() || aluWbu.canPull() || rtired.canPull() || !wbu.isDone() || !lsu.isDone() ||
-                lsuWbu.canPull() || !alu.isDone() || !deu.isDone() || !feu.isDone() || !isu.isDone() || !rob.isEmpty();
+        return prefec.canPull() || fecDec.canPull() || decIsu.canPull() ||
+                exeWbu.canPull() || rtired.canPull() || !wbu.isDone() || !lsu1.isDone() || !lsu2.isDone() ||
+                !alu1.isDone() || !alu2.isDone() || !alu3.isDone() || !dec.isDone() || !fec.isDone() || !isu.isDone() || !rob.isEmpty();
     }
 
     private void flushPipeline(int branchIdInRob, PrintStream debugOut){
         debugOut.println("flush from robEntry " + branchIdInRob);
-        feu.flush(branchIdInRob);
-        deu.flush(branchIdInRob);
+        fec.flush(branchIdInRob);
+        dec.flush(branchIdInRob);
         isu.flush(branchIdInRob);
-        alu.flush(branchIdInRob);
-        lsu.flush(branchIdInRob);
+        alu1.flush(branchIdInRob);
+        alu2.flush(branchIdInRob);
+        alu3.flush(branchIdInRob);
+        lsu1.flush(branchIdInRob);
+        lsu2.flush(branchIdInRob);
         wbu.flush(branchIdInRob);
         bru.flush(branchIdInRob);
         prefec.flush(branchIdInRob);
         fecDec.flush(branchIdInRob);
-        deuIsu.flush(branchIdInRob);
-        aluWbu.flush(branchIdInRob);
-        lsuWbu.flush(branchIdInRob);
-        bruWbu.flush(branchIdInRob);
+        decIsu.flush(branchIdInRob);
+        exeWbu.flush(branchIdInRob);
         rtired.flush(branchIdInRob);
-        execRss.flush(branchIdInRob);
+        exeRss.flush(branchIdInRob);
         lsuRss.flush(branchIdInRob);
         bruRss.flush(branchIdInRob);
         rat.flushFrom(branchIdInRob);
@@ -149,10 +169,10 @@ public class Processor {
 
     private String pipelineToString(){
         return "\t[" + prefec +
-                feu + " " + fecDec + " " +
-                deu + " " + deuIsu+ " " +
-                isu + " " + "(" + execRss + "," + lsuRss + "," + bruRss + ") ("
-                + alu + ", " + lsu + ", " + bru + ") (" + aluWbu + "," + lsuWbu + "," + bruWbu + ") "
+                fec + " " + fecDec + " " +
+                dec + " " + decIsu + " " +
+                isu + " " + "(" + exeRss + "," + lsuRss + "," + bruRss + ") ("
+                + alu1 + alu2 + alu3 + ", " + lsu1 + lsu2 + ", " + bru + ") (" + exeWbu + ") "
                 + wbu + "]\t@"
                 + tally + "\tpc " + pc.getCount() + "\t" + "\t" + rob;
     }
@@ -167,37 +187,74 @@ public class Processor {
         //AbstractMap<Instruction, Integer> inFlights = new HashMap<Instruction, Integer>();
         while((isPipelineBeingUsed() || !pc.isDone()) && (divergenceLim == null || tally < divergenceLim)){
 
-            debugOut.println(pipelineToString());
-            wbu.clk();
+            boolean flushFlag = false;
+            Durate counter = new Durate(SUPERSCALAR_WIDTH);
+            counter.rst();
+
             bru.clk();
+            lsu1.clk();
+            lsu2.clk();
+            alu1.clk();
+            alu2.clk();
+            alu3.clk();
+            debugOut.println(pipelineToString());
+            debugOut.println(cdb.keySet().toString() + cdb.values().toString());
 
-            if(bru.needsFlushing()) flushPipeline(bru.whereFlushAt(), debugOut);
-            bru.doneFlushing();
-//            if (prefec.canPush() && !pc.isDone()) {//&& !(!voided.canPull() && fe.getIsBranch())) {
-//                prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));
-////                pc.incr();
-//            }
-
-            lsu.clk();
-            alu.clk();
+            int lastCountInDecIsu = -1;
             isu.clk();
-            deu.clk();
-            //update these once the cdb has been fully utilised!
-            execRss.update(); //update reservation groups!
-            lsuRss.update();
-            bruRss.update();
+            while(decIsu.canPull() && lastCountInDecIsu != decIsu.getCount() && !counter.isDone()){
+                lastCountInDecIsu = decIsu.getCount();
+                isu.clk();
+                counter.decr();
+            }
+            counter.rst();
 
-            rob.clk(); //read off the cdb
-            if(rob.needsFlushing()) {
-                flushPipeline(rob.getShouldFlushWhere(), debugOut);
-                feu.yesRobDidSetPC();
+            while(exeWbu.canPull() && !flushFlag && !counter.isDone()){ //can only be up to eight in one cycle due to queue length
+                wbu.clk();
+                exeRss.update(); //update reservation groups! only once because the cdb doesnt change mid-cycle
+                lsuRss.update();
+                bruRss.update();
+
+                rob.clk(); //read off the cdb
+                if(rob.needsFlushing()) {
+                    flushPipeline(rob.getShouldFlushWhere(), debugOut);
+                    flushFlag = true; //exit this loop NOW
+                }
+                rob.doneFlushing();
+                counter.decr();
+                cdb.clear();
             }
-            rob.doneFlushing();
-            if (prefec.canPush() && !pc.isDone()) {//&& !(!voided.canPull() && fe.getIsBranch())) {
+
+            //though the rob is updated when we update the common data bus, it updates separately even when we cant writeback
+            // it may do this for the remaining cycles in the counter
+            // it may do this for as long as it has entries left
+            // it may do this just if it did not flush beforehand (because otherwise there are no instructions)
+            while(!counter.isDone() && !rob.isEmpty() && !flushFlag){
+                rob.clk();
+                if(rob.needsFlushing()) {
+                    flushPipeline(rob.getShouldFlushWhere(), debugOut);
+                    flushFlag = true; //exit this loop NOW
+                }
+                rob.doneFlushing();
+                counter.decr();
+            }
+
+            counter.rst();
+
+            dec.clk();
+            while(fecDec.canPull() && decIsu.canPush() && !counter.isDone()){ //they all just shift a block along <=> they wont be able to do more than one pipeline buffer's worth!
+                dec.clk();
+                counter.decr();
+            }
+            counter.rst();
+
+            fec.clk();
+            while(fecDec.canPush() && !pc.isDone() && !counter.isDone()){ //they all just shift a block along <=> they wont be able to do more than one pipeline buffer's worth!
                 prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));
+                fec.clk();
+                counter.decr();
             }
-            feu.rstRobSetPC();
-            feu.clk();
+            counter.rst();
 
             tally++;
 //            while(rtired.canPull()) { //if we retire more that one instruction per cycle
@@ -207,18 +264,14 @@ public class Processor {
             delete.flush(FLUSH_ALL); // any instructions we want to throw away can be put into delete
 
             if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");
-            debugOut.println(cdb.keySet().toString() + cdb.values().toString());
             cdb.clear();
-//            if(feu.isRobSetPC()){ //i think do this after the fetch unit does its thing because otherwise it has interference i guess? man i hate this
-//                pc.incr();
-//            }
-            feu.rstRobSetPC();
         }
         if(divergenceLim != null && tally >= divergenceLim) throw new RuntimeException("run: program considered to diverge after " + divergenceLim + " instrs");
         debugOut.println("registers (dirty): " + rf);
         debugOut.println("memory: " + mem);
         debugOut.println("run: program finished in " + tally + " cycles");
         debugOut.println("run: instructions per cycle " + Utils.toDecimalPlaces((float) rob.getCommitted() / tally, DP_ACC));
+        debugOut.println(Arrays.toString(mem.getData()));
         //debugOut.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
         return mem;
     }

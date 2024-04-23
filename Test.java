@@ -6,7 +6,7 @@ public class Test {
 
     static final int GLOBAL_DIVERGE_LIM = (int) Math.pow(10, 5);
 
-    private static final Memory getExampleMemory() {
+    private static Memory getExampleMemory() {
         return new Memory(
                 0, //dont care
                 new int[]{
@@ -15,6 +15,19 @@ public class Test {
                         58, 11, -11, 6, -4, 51, 51, 4, 51, 17,
                         48, 12, -8, 24, 20, 25, 31, 10, 19, 25,
                         148, 15, -81, 31, -4, 54, 14, 23, 41, 4,
+                }
+        );
+    }
+
+    private static Memory getExampleMemory2() {
+        return new Memory(
+                0,
+                new int[]{
+                        40, 10, 0, 0, 0, 0, 0, 0, 0, 0,
+                        92, 84, 76, 68, 50, 42, 34, 26, 18, 0,
+                        -2, -4, -6, -8, -10, -12, -14, -16, -18, -20,
+                        12, 24, 36, 48, 51, 62, 74, 86, 98, 120,
+                        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                 }
         );
     }
@@ -89,7 +102,13 @@ public class Test {
         Utils.assertTrue(result.equals(Utils.runKern("./assembly/block_testing.latte", getExampleMemory(), true, GLOBAL_DIVERGE_LIM)));
     }
 
+    private static void branchTakenTest() throws FileNotFoundException{
+        final Memory result = new Memory(0, new int[]{1, 11, 0, 0, 0, 0, 0, 0, 0, 0, 92, 84, 76, 68, 50, 42, 34, 26, 18, 0, -2, -4, -6, -8, -10, -12, -14, -16, -18, -20, 12, 24, 36, 48, 51, 62, 74, 86, 98, 120, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+        Utils.assertTrue(result.equals(Utils.runKern("./assembly/simple_branch_taken.latte", getExampleMemory2(), true, GLOBAL_DIVERGE_LIM)));
+    }
+
     static void test() throws FileNotFoundException {
+        try{branchTakenTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
         try{blockTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
         try{mat2MulMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
         try{mat3MulMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}

@@ -1,14 +1,10 @@
 public class BranchUnit extends Unit{
 
-    private boolean shouldFlush = false;
-
     private final ProgramCounter pc;
 
     private final FetchUnit feu; //to tell it we branched
 
     private int currentRobEntry;
-
-    private Integer flushAt;
 
     public static final int TAKEN = 1;
     public static final int NOT_TAKEN = 0;
@@ -16,7 +12,6 @@ public class BranchUnit extends Unit{
     BranchUnit(ProgramCounter pc, FetchUnit feu, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
         this.pc = pc;
-        this.flushAt = null;
         this.feu = feu;
     }
 
@@ -48,11 +43,6 @@ public class BranchUnit extends Unit{
     @Override
     protected PipelineEntry makeEntryToWrite(){
         return new PipelineEntry(currentOp, pcVal, flag, currentRobEntry); //send currentRobEntry to resi station!
-    }
-
-    public void doneFlushing(){
-        shouldFlush = false; //once we flush we dont want to flush again next cycle
-        flushAt = null;
     }
 
     @Override
@@ -139,13 +129,5 @@ public class BranchUnit extends Unit{
         //feu.yesBruDidSetPC();
     }
 
-    public boolean needsFlushing(){
-        return shouldFlush;
-    }
-
-    public int whereFlushAt(){
-        if(flushAt == null) throw new RuntimeException("whereFlushAt: flush was not requested so flushAt is null");
-        return flushAt;
-    }
 
 }
