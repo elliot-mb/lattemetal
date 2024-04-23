@@ -27,7 +27,10 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     private int committed;
     private List<Instruction> committedInstrs;
 
-    ReorderBuffer(int size, Map<Integer, List<Integer>> cdb, RegisterFile rf, Memory mem, ProgramCounter pc){
+    private final DecodeUnit dec;
+
+    ReorderBuffer(int size, Map<Integer, List<Integer>> cdb, RegisterFile rf, Memory mem, ProgramCounter pc, DecodeUnit dec){
+        this.dec = dec;
         this.buffer = new CircluarQueue<ReorderEntry>(size);
         this.cdb = cdb;
         this.rf = rf;
@@ -258,6 +261,9 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.Add op) {
+        dec.physicalRegisters.pop();
+        dec.physicalRegisters.pop();
+        dec.physicalRegisters.pop();
         rf.setReg(op.getRd(), currentCommit.getValue());
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
@@ -265,6 +271,8 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.AddI op) {
+        dec.physicalRegisters.pop();
+        dec.physicalRegisters.pop();
         rf.setReg(op.getRd(), currentCommit.getValue());
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
@@ -272,6 +280,9 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.Mul op) {
+        dec.physicalRegisters.pop();
+        dec.physicalRegisters.pop();
+        dec.physicalRegisters.pop();
         rf.setReg(op.getRd(), currentCommit.getValue());
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
@@ -279,6 +290,8 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.MulI op) {
+        dec.physicalRegisters.pop();
+        dec.physicalRegisters.pop();
         rf.setReg(op.getRd(), currentCommit.getValue());
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
@@ -286,6 +299,9 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.Cmp op) {
+        dec.physicalRegisters.pop();
+        dec.physicalRegisters.pop();
+        dec.physicalRegisters.pop();
         rf.setReg(op.getRd(), currentCommit.getValue());
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
@@ -293,6 +309,8 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.Ld op) {
+        dec.physicalRegisters.pop();
+        dec.physicalRegisters.pop();
         rf.setReg(op.getRd(), currentCommit.getValue());
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
@@ -300,6 +318,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.LdC op) {
+        dec.physicalRegisters.pop();
         rf.setReg(op.getRd(), currentCommit.getValue());
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
@@ -307,6 +326,8 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.St op) {
+        dec.physicalRegisters.pop();
+        dec.physicalRegisters.pop();
 //        System.out.println("STORING " + currentCommit.getValue() + " AT " + op.getResult());
         mem.set(currentCommit.getValue(), op.getResult()); //addr gets stored in result in the LSU!
 //        cdb.remove(currentCommit.getId());
@@ -334,6 +355,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.BrLZ op) {
+        dec.physicalRegisters.pop();
         boolean flag = currentCommit.getValue() == BranchUnit.TAKEN;
         if(flag != Unit.STATIC_PREDICT_BR_TAKEN){
             if(flag){
@@ -351,6 +373,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.JpLZ op) {
+        dec.physicalRegisters.pop();
         boolean flag = currentCommit.getValue() == BranchUnit.TAKEN;
         if(flag != Unit.STATIC_PREDICT_BR_TAKEN){
             if(flag){

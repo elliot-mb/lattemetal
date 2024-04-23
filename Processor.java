@@ -4,7 +4,7 @@ import java.io.PrintStream;
 import java.util.*;
 
 public class Processor {
-    //SETTINGS
+    //@@@SETTINGS@@@
     private static final int SUPERSCALAR_WIDTH = 8;
     private static final int ALU_COUNT = 4;
     private static final int LSU_COUNT = 2;
@@ -13,10 +13,12 @@ public class Processor {
     private static final int LSU_RS_COUNT = 2;
     private static final int BRU_RS_COUNT = 2;
     private static final int DP_ACC = 2;
-    private static final int ROB_ENTRIES = 64;
+    private static final int ROB_ENTRIES = 32;
     public static final int FLUSH_ALL = -1;
-    //@@@@@@@@
-
+    public static final int PHYSICAL_REGISTER_FACTOR = 4; //how many times more physical registers we have than architectural ones
+    //@@@DEPENDANT SETTINGS@@@
+    public static final int PHYSICAL_REGISTER_COUNT = PHYSICAL_REGISTER_FACTOR * RegisterName.values().length;
+    //@@@@@@
     private final ArrayList<ArithmeticLogicUnit> alusInUse;
 
     private final ArrayList<BranchUnit> brusInUse;
@@ -60,7 +62,13 @@ public class Processor {
         this.mem = mem.length > 0 ? mem[0] : new Memory();
         this.rf = new RegisterFile(cdb);
         this.pc = new ProgramCounter(ic.numInstrs());
-        this.rob = new ReorderBuffer(ROB_ENTRIES, cdb, rf, this.mem, this.pc);
+
+        this.dec = new DecodeUnit(
+                this.rf,
+                new PipeLike[]{fecDec},
+                new PipeLike[]{decIsu}); //loadstores go down the latter pipe
+
+        this.rob = new ReorderBuffer(ROB_ENTRIES, cdb, rf, this.mem, this.pc, this.dec);
         this.ic = ic;
         this.tally = 0;
         this.rat = new RegisterAliasTable(cdb, rob);
@@ -75,10 +83,6 @@ public class Processor {
                 this.pc,
                 new PipeLike[]{prefec},
                 new PipeLike[]{fecDec});
-        this.dec = new DecodeUnit(
-                this.rf,
-                new PipeLike[]{fecDec},
-                new PipeLike[]{decIsu}); //loadstores go down the latter pipe
         this.isu = new IssueUnit(
                 this.rf,
                 this.rob,
@@ -234,6 +238,7 @@ public class Processor {
             for(LoadStoreUnit lsu : lsusInUse) lsu.clk();
             for(ArithmeticLogicUnit alu : alusInUse) alu.clk();
 
+            //debugOut.println(dec.physicalRegisters);
             debugOut.println(pipelineToString());
             debugOut.println(cdb.keySet().toString() + cdb.values().toString());
 
