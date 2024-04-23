@@ -94,7 +94,6 @@ public class LoadStoreUnit extends Unit{
 //        }
         op.setResult(addr); //the offset location
         op.setRdVal(res);
-        rob.setValOfEntry(currentRobEntry, res); //value of rob is mem at the offset location
     }
 
     @Override
@@ -111,7 +110,6 @@ public class LoadStoreUnit extends Unit{
 //        }
         op.setResult(addr); //the offset location
         op.setRdVal(res);
-        rob.setValOfEntry(currentRobEntry, res);
     }
 
     @Override

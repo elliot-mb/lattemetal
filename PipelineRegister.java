@@ -58,7 +58,7 @@ public class PipelineRegister implements PipeLike {
     }
 
     public boolean canPull(){
-        return !queue.isEmpty();
+        return !queue.isEmpty() && peek() != null;
     }
 
     public PipelineEntry peek() {

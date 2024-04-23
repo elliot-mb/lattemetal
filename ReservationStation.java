@@ -39,7 +39,7 @@ public class ReservationStation implements InstructionVoidVisitor {
     }
 
     public void flush(int fromRobEntry){
-        if(fromRobEntry <= this.robEntry){
+        if(this.robEntry >= fromRobEntry){
             this.busy = false;
             this.op = null;
             this.qJ = NO_DEPENDENCY; //rob entry id

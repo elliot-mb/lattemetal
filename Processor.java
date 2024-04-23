@@ -6,7 +6,7 @@ import java.util.*;
 public class Processor {
     //@@@SETTINGS@@@
     private static final double CLOCK_SPEED_MHZ = 500;
-    private static final int SUPERSCALAR_WIDTH = 8;
+    private static final int SUPERSCALAR_WIDTH = 1;
     private static final int ALU_COUNT = 4;
     private static final int LSU_COUNT = 2;
     private static final int BRU_COUNT = 2;

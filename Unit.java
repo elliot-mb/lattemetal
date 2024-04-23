@@ -168,10 +168,12 @@ public abstract class Unit implements InstructionVoidVisitor {
     }
 
     public void flush(int fromRobEntry){
-        currentOp = null;
-        pcVal = 0;
-        flag = false;
-        visited = false;
+        if(currentRobEntry >= fromRobEntry){
+            currentOp = null;
+            pcVal = 0;
+            flag = false;
+            visited = false;
+        }
     }
 
     protected void chooseOuts() {

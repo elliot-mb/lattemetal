@@ -5,6 +5,7 @@ public class DecodeUnit extends Unit{
     private final RegisterFile rf;
 
     public final CircluarQueue<RegisterName> physicalRegisters = new CircluarQueue<RegisterName>(Processor.PHYSICAL_REGISTER_COUNT); //added to each time we make an instruction
+    public final CircluarQueue<Integer> physicalRobEntries = new CircluarQueue<Integer>(Processor.PHYSICAL_REGISTER_COUNT);
 
     DecodeUnit(RegisterFile rf, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
@@ -19,7 +20,12 @@ public class DecodeUnit extends Unit{
     @Override
     public void flush(int fromRobEntry){
         super.flush(fromRobEntry);
-        physicalRegisters.empty();
+        while(physicalRobEntries.peekHead() >= fromRobEntry) {
+            physicalRobEntries.shift();
+            physicalRegisters.shift();
+        }
+        System.out.println(physicalRegisters);
+        System.out.println(physicalRobEntries);
     }
 
     @Override
@@ -33,6 +39,9 @@ public class DecodeUnit extends Unit{
         physicalRegisters.push(op.getRd());
         physicalRegisters.push(op.getRs());
         physicalRegisters.push(op.getRt());
+        physicalRobEntries.push(ReorderEntry.uId);
+        physicalRobEntries.push(ReorderEntry.uId);
+        physicalRobEntries.push(ReorderEntry.uId);
         currentOp = op;
     }
 
@@ -40,6 +49,8 @@ public class DecodeUnit extends Unit{
     public void accept(Op.AddI op) {
         physicalRegisters.push(op.getRd());
         physicalRegisters.push(op.getRs());
+        physicalRobEntries.push(ReorderEntry.uId);
+        physicalRobEntries.push(ReorderEntry.uId);
         currentOp = op;
     }
 
@@ -48,6 +59,9 @@ public class DecodeUnit extends Unit{
         physicalRegisters.push(op.getRd());
         physicalRegisters.push(op.getRs());
         physicalRegisters.push(op.getRt());
+        physicalRobEntries.push(ReorderEntry.uId);
+        physicalRobEntries.push(ReorderEntry.uId);
+        physicalRobEntries.push(ReorderEntry.uId);
         currentOp = op;
     }
 
@@ -55,6 +69,8 @@ public class DecodeUnit extends Unit{
     public void accept(Op.MulI op) {
         physicalRegisters.push(op.getRd());
         physicalRegisters.push(op.getRs());
+        physicalRobEntries.push(ReorderEntry.uId);
+        physicalRobEntries.push(ReorderEntry.uId);
         currentOp = op;
     }
 
@@ -63,6 +79,9 @@ public class DecodeUnit extends Unit{
         physicalRegisters.push(op.getRd());
         physicalRegisters.push(op.getRs());
         physicalRegisters.push(op.getRt());
+        physicalRobEntries.push(ReorderEntry.uId);
+        physicalRobEntries.push(ReorderEntry.uId);
+        physicalRobEntries.push(ReorderEntry.uId);
         currentOp = op;
     }
 
@@ -70,12 +89,15 @@ public class DecodeUnit extends Unit{
     public void accept(Op.Ld op) {
         physicalRegisters.push(op.getRd());
         physicalRegisters.push(op.getRs());
+        physicalRobEntries.push(ReorderEntry.uId);
+        physicalRobEntries.push(ReorderEntry.uId);
         currentOp = op;
     }
 
     @Override
     public void accept(Op.LdC op) {
         physicalRegisters.push(op.getRd());
+        physicalRobEntries.push(ReorderEntry.uId);
         currentOp = op;
     }
 
@@ -83,28 +105,34 @@ public class DecodeUnit extends Unit{
     public void accept(Op.St op) {
         physicalRegisters.push(op.getRd());
         physicalRegisters.push(op.getRs());
+        physicalRobEntries.push(ReorderEntry.uId);
+        physicalRobEntries.push(ReorderEntry.uId);
         currentOp = op;
     }
 
     @Override
     public void accept(Op.BrLZ op) {
         physicalRegisters.push(op.getRd());
+        physicalRobEntries.push(ReorderEntry.uId);
         currentOp = op;
     }
 
     @Override
     public void accept(Op.JpLZ op) {
         physicalRegisters.push(op.getRd());
+        physicalRobEntries.push(ReorderEntry.uId);
         currentOp = op;
     }
 
     @Override
     public void accept(Op.Br op) {
+
         currentOp = op;
     }
 
     @Override
     public void accept(Op.Jp op) {
+
         currentOp = op;
     }
 

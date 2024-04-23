@@ -43,7 +43,7 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) throws FileNotFoundException {
-        String programPath = "./assembly/block_testing.latte";
+        String programPath = "./assembly/bubble_sort.latte";
         int printWidth = 1;
         boolean testing = false;
         boolean quiet = false;

@@ -127,7 +127,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     }
 
     public String toString(){
-        return "[" + contents() + "]\t";
+        return "[" + contents() + "]\t" + lsq;
     }
 
     private ReorderEntry precedingLoadOrNull(){
@@ -246,6 +246,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
                 Instruction poppedOp = currentCommit.getOp();
                 if(lsqWillPop != null) lsq.pop();
                 //visitation to distinguish between stores, common instructions, and branches (incorrect)
+                System.out.println("retire " + poppedOp);
                 poppedOp.visit(this);
                 committedInstrs.add(poppedOp);
                 committed++;
@@ -268,6 +269,9 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.Add op) {
+        dec.physicalRobEntries.pop();
+        dec.physicalRobEntries.pop();
+        dec.physicalRobEntries.pop();
         dec.physicalRegisters.pop();
         dec.physicalRegisters.pop();
         dec.physicalRegisters.pop();
@@ -278,6 +282,8 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.AddI op) {
+        dec.physicalRobEntries.pop();
+        dec.physicalRobEntries.pop();
         dec.physicalRegisters.pop();
         dec.physicalRegisters.pop();
         rf.setReg(op.getRd(), currentCommit.getValue());
@@ -287,6 +293,9 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.Mul op) {
+        dec.physicalRobEntries.pop();
+        dec.physicalRobEntries.pop();
+        dec.physicalRobEntries.pop();
         dec.physicalRegisters.pop();
         dec.physicalRegisters.pop();
         dec.physicalRegisters.pop();
@@ -297,6 +306,8 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.MulI op) {
+        dec.physicalRobEntries.pop();
+        dec.physicalRobEntries.pop();
         dec.physicalRegisters.pop();
         dec.physicalRegisters.pop();
         rf.setReg(op.getRd(), currentCommit.getValue());
@@ -306,6 +317,9 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.Cmp op) {
+        dec.physicalRobEntries.pop();
+        dec.physicalRobEntries.pop();
+        dec.physicalRobEntries.pop();
         dec.physicalRegisters.pop();
         dec.physicalRegisters.pop();
         dec.physicalRegisters.pop();
@@ -316,6 +330,8 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.Ld op) {
+        dec.physicalRobEntries.pop();
+        dec.physicalRobEntries.pop();
         dec.physicalRegisters.pop();
         dec.physicalRegisters.pop();
         rf.setReg(op.getRd(), currentCommit.getValue());
@@ -325,6 +341,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.LdC op) {
+        dec.physicalRobEntries.pop();
         dec.physicalRegisters.pop();
         rf.setReg(op.getRd(), currentCommit.getValue());
         rat.regValIsReady(op.getRd());
@@ -333,6 +350,8 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.St op) {
+        dec.physicalRobEntries.pop();
+        dec.physicalRobEntries.pop();
         dec.physicalRegisters.pop();
         dec.physicalRegisters.pop();
 //        System.out.println("STORING " + currentCommit.getValue() + " AT " + op.getResult());
@@ -351,9 +370,10 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         // IF THE LOAD IS READY, FLUSH THE PIPELINE FROM HERE BACK AND RESET THE PC
         if(collide && lastLoadOrNull.isReady()){
             //flushhh
-            pc.set(lastLoadOrNull.getPcVal());
             shouldFlush = true;
+            shouldFlushWhere = lastLoadOrNull.getId();
             flushFrom(lastLoadOrNull.getId());
+            pc.set(buffer.peekHead().getPcVal());
         }else if(collide){ // OTHERWISE, JUST UPDATE THE VALUE OF THE LOAD
             lastLoadOrNull.setValue(op.getResult());
             lastLoadOrNull.readyUp(); //make sure its ready
@@ -362,6 +382,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.BrLZ op) {
+        dec.physicalRobEntries.pop();
         dec.physicalRegisters.pop();
         boolean flag = currentCommit.getValue() == BranchUnit.TAKEN;
         if(flag != Unit.STATIC_PREDICT_BR_TAKEN){
@@ -380,6 +401,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.JpLZ op) {
+        dec.physicalRobEntries.pop();
         dec.physicalRegisters.pop();
         boolean flag = currentCommit.getValue() == BranchUnit.TAKEN;
         if(flag != Unit.STATIC_PREDICT_BR_TAKEN){

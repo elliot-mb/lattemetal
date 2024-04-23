@@ -60,6 +60,17 @@ public class CircluarQueue<T> {
         return ret;
     }
 
+    public T shift(){
+        if(isEmpty()){
+            System.out.println("CQueue.pop: warning: queue is empty");
+            return null;
+        }
+        elementsIn--;
+        head = ((head - 1) + size) % size;
+        T ret = xs.get(head);
+        return ret;
+    }
+
     public boolean isEmpty(){
         return elementsIn == 0;
     }

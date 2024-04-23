@@ -108,7 +108,7 @@ public class ReservationGroup implements PipeLike, InstructionVoidVisitor{ //to 
 
     @Override
     public boolean canPull() {
-        return rsToEntry.size() > 0 && getReadyAndFullRss().size() > 0;
+        return rsToEntry.size() > 0 && getReadyAndFullRss().size() > 0 && peek() != null;
     }
 
     @Override
@@ -117,10 +117,12 @@ public class ReservationGroup implements PipeLike, InstructionVoidVisitor{ //to 
     }
 
     public void flush(int fromRobEntry) {
+        int i = 0;
         for(ReservationStation rs: rss){
             rs.flush(fromRobEntry);
+            if(!rs.isBusy()) rsToEntry.remove(i);
+            i++;
         }
-        rsToEntry.clear();
     }
 
     @Override
