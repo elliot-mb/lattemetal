@@ -10,13 +10,13 @@ public class Processor {
     private final ProgramCounter pc;
     private final InstructionCache ic;
     private final IssueUnit isu;
-    private final ArithmeticLogicUnit alu1, alu2, alu3;
+    private final ArithmeticLogicUnit alu1, alu2, alu3, alu4;
     private final RegisterFile rf;
     private final Memory mem;
     private final FetchUnit fec;
     private final DecodeUnit dec;
     private final LoadStoreUnit lsu1, lsu2;
-    private final BranchUnit bru;
+    private final BranchUnit bru1, bru2;
     private final WriteBackUnit wbu;
     private final ReorderBuffer rob;
     private final RegisterAliasTable rat;
@@ -27,7 +27,7 @@ public class Processor {
     private static final int BRU_RS_COUNT = 2;
     private static final int DP_ACC = 2;
     private static final int ROB_INTIATES_FLUSH = -1;
-    private static final int ROB_ENTRIES = 8;
+    private static final int ROB_ENTRIES = 64;
 
     public static final int FLUSH_ALL = -1;
 
@@ -98,6 +98,13 @@ public class Processor {
                 this.rat,
                 new PipeLike[]{exeRss},
                 new PipeLike[]{exeWbu});
+        this.alu4 = new ArithmeticLogicUnit(
+                this.cdb,
+                this.rob,
+                this.rf,
+                this.rat,
+                new PipeLike[]{exeRss},
+                new PipeLike[]{exeWbu});
         this.lsu1 = new LoadStoreUnit(
                 this.mem,
                 this.rf,
@@ -114,7 +121,13 @@ public class Processor {
                 this.rob,
                 new PipeLike[]{lsuRss},
                 new PipeLike[]{exeWbu});
-        this.bru = new BranchUnit(
+        this.bru1 = new BranchUnit(
+                this.pc,
+                this.fec,
+                new PipeLike[]{bruRss},
+                new PipeLike[]{exeWbu}
+        );
+        this.bru2 = new BranchUnit(
                 this.pc,
                 this.fec,
                 new PipeLike[]{bruRss},
@@ -140,7 +153,8 @@ public class Processor {
     private boolean isPipelineBeingUsed(){
         return prefec.canPull() || fecDec.canPull() || decIsu.canPull() ||
                 exeWbu.canPull() || rtired.canPull() || !wbu.isDone() || !lsu1.isDone() || !lsu2.isDone() ||
-                !alu1.isDone() || !alu2.isDone() || !alu3.isDone() || !dec.isDone() || !fec.isDone() || !isu.isDone() || !rob.isEmpty();
+                !alu1.isDone() || !alu2.isDone() || !alu3.isDone() || !alu4.isDone() || !bru1.isDone() || !bru2.isDone()
+                || !dec.isDone() || !fec.isDone() || !isu.isDone() || !rob.isEmpty();
     }
 
     private void flushPipeline(int branchIdInRob, PrintStream debugOut){
@@ -151,10 +165,12 @@ public class Processor {
         alu1.flush(branchIdInRob);
         alu2.flush(branchIdInRob);
         alu3.flush(branchIdInRob);
+        alu4.flush(branchIdInRob);
         lsu1.flush(branchIdInRob);
         lsu2.flush(branchIdInRob);
         wbu.flush(branchIdInRob);
-        bru.flush(branchIdInRob);
+        bru1.flush(branchIdInRob);
+        bru2.flush(branchIdInRob);
         prefec.flush(branchIdInRob);
         fecDec.flush(branchIdInRob);
         decIsu.flush(branchIdInRob);
@@ -172,7 +188,7 @@ public class Processor {
                 fec + " " + fecDec + " " +
                 dec + " " + decIsu + " " +
                 isu + " " + "(" + exeRss + "," + lsuRss + "," + bruRss + ") ("
-                + alu1 + alu2 + alu3 + ", " + lsu1 + lsu2 + ", " + bru + ") (" + exeWbu + ") "
+                + alu1 + alu2 + alu3 + alu4 + ", " + lsu1 + lsu2 + ", " + bru1 + bru2 + ") (" + exeWbu + ") "
                 + wbu + "]\t@"
                 + tally + "\tpc " + pc.getCount() + "\t" + "\t" + rob;
     }
@@ -191,12 +207,14 @@ public class Processor {
             Durate counter = new Durate(SUPERSCALAR_WIDTH);
             counter.rst();
 
-            bru.clk();
+            bru1.clk();
+            bru2.clk();
             lsu1.clk();
             lsu2.clk();
             alu1.clk();
             alu2.clk();
             alu3.clk();
+            alu4.clk();
             debugOut.println(pipelineToString());
             debugOut.println(cdb.keySet().toString() + cdb.values().toString());
 
