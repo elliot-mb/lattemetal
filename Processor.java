@@ -241,12 +241,9 @@ public class Processor {
             for(ArithmeticLogicUnit alu : alusInUse) alu.clk();
 
             //debugOut.println(dec.physicalRegisters);
-            debugOut.println(pipelineToString());
-            debugOut.println(cdb.keySet().toString() + cdb.values().toString());
 
             int lastCountInDecIsu = -1;
             isu.clk();
-            counter.decr();
             while(decIsu.canPull() && lastCountInDecIsu != decIsu.getCount() && !counter.isDone()){
                 lastCountInDecIsu = decIsu.getCount();
                 isu.clk();
@@ -287,7 +284,6 @@ public class Processor {
             counter.rst();
 
             dec.clk();
-            counter.decr();
             while(fecDec.canPull() && decIsu.canPush() && !counter.isDone()){ //they all just shift a block along <=> they wont be able to do more than one pipeline buffer's worth!
                 dec.clk();
                 counter.decr();
@@ -295,7 +291,6 @@ public class Processor {
             counter.rst();
 
             fec.clk();
-            counter.decr();
             while(fecDec.canPush() && !pc.isDone() && !counter.isDone()){ //they all just shift a block along <=> they wont be able to do more than one pipeline buffer's worth!
                 prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));
                 fec.clk();
@@ -311,6 +306,7 @@ public class Processor {
             delete.flush(FLUSH_ALL); // any instructions we want to throw away can be put into delete
 
             if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");
+            debugOut.println(pipelineToString());
             cdb.clear();
         }
         if(divergenceLim != null && tally >= divergenceLim) throw new RuntimeException("run: program considered to diverge after " + divergenceLim + " instrs");

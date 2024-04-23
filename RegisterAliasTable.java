@@ -6,7 +6,7 @@ import java.util.Map;
 public class RegisterAliasTable {
     private final Map<Integer, CircluarQueue<Integer>> resultStatus;
 
-    private static int HISTORY_LENGTH = 10;
+    private static int HISTORY_LENGTH = 64;
 
     private static int MEM_OFFSET = RegisterName.values().length;
     private final ReorderBuffer rob;
@@ -19,6 +19,10 @@ public class RegisterAliasTable {
         }
         this.rob = rob;
     }
+
+//    public boolean canMakeNewAlias(RegisterName reg){
+//
+//    }
 
     public Integer getLatestAlias(RegisterName reg){
         return resultStatus.get(reg.ordinal()).peekHead(); // peek the item under where we're adding(latest)
@@ -61,4 +65,6 @@ public class RegisterAliasTable {
             resultStatus.put(resetKey, newQ); //queue with all values after the higher value in program order removed (perhaps this is wrong)??
         }
     }
+
+
 }

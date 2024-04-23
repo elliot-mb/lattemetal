@@ -127,7 +127,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     }
 
     public String toString(){
-        return "[" + contents() + "]\t" +  lsq;
+        return "[" + contents() + "]\t";
     }
 
     private ReorderEntry precedingLoadOrNull(){
