@@ -12,7 +12,6 @@ public class IssueUnit extends Unit{
 
     private final RegisterAliasTable prf;
 
-    private int currentRobEntry;
     //                          vv update rob      vv put mapping of rob to dest into prf
     IssueUnit(RegisterFile rf, ReorderBuffer rob, RegisterAliasTable prf, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
@@ -80,6 +79,9 @@ public class IssueUnit extends Unit{
     public void accept(Op.Add op) {
         ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
         currentRobEntry = e.id;
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
         rob.add(e);
     }
 
@@ -87,6 +89,8 @@ public class IssueUnit extends Unit{
     public void accept(Op.AddI op) {
         ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
         currentRobEntry = e.id;
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
         rob.add(e);
     }
 
@@ -94,6 +98,9 @@ public class IssueUnit extends Unit{
     public void accept(Op.Mul op) {
         ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
         currentRobEntry = e.id;
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
         rob.add(e);
     }
 
@@ -101,6 +108,8 @@ public class IssueUnit extends Unit{
     public void accept(Op.MulI op) {
         ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
         currentRobEntry = e.id;
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
         rob.add(e);
     }
 
@@ -108,6 +117,10 @@ public class IssueUnit extends Unit{
     public void accept(Op.Cmp op) {
         ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
         currentRobEntry = e.id;
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+
         rob.add(e);
     }
 
@@ -115,6 +128,9 @@ public class IssueUnit extends Unit{
     public void accept(Op.Ld op) {
         ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
         currentRobEntry = e.id;
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+
         rob.add(e);
     }
 
@@ -122,6 +138,7 @@ public class IssueUnit extends Unit{
     public void accept(Op.LdC op) {
         ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
         currentRobEntry = e.id;
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
         rob.add(e);
     }
 
@@ -129,6 +146,8 @@ public class IssueUnit extends Unit{
     public void accept(Op.St op) {
         ReorderEntry e = new ReorderEntry(op, op.getRsVal() + op.getIm(), pcVal);
         currentRobEntry = e.id;
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
         rob.add(e);
     }
 
@@ -136,6 +155,7 @@ public class IssueUnit extends Unit{
     public void accept(Op.BrLZ op) {
         ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST, op.getResult());
         currentRobEntry = e.id;
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
         rob.add(e);
     }
 
@@ -143,6 +163,7 @@ public class IssueUnit extends Unit{
     public void accept(Op.JpLZ op) {
         ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST, op.getResult());
         currentRobEntry = e.id;
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
         rob.add(e);
     }
 

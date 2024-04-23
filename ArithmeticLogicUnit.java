@@ -10,8 +10,6 @@ public class ArithmeticLogicUnit extends Unit {
 
     private final RegisterAliasTable prf;
 
-    private int currentRobEntry;
-
     ArithmeticLogicUnit(Map<Integer, List<Integer>> cdb, ReorderBuffer rob, RegisterFile rf, RegisterAliasTable prf, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
         this.currentOp = null;

@@ -4,8 +4,6 @@ public class BranchUnit extends Unit{
 
     private final FetchUnit feu; //to tell it we branched
 
-    private int currentRobEntry;
-
     public static final int TAKEN = 1;
     public static final int NOT_TAKEN = 0;
 

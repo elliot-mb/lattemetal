@@ -6,7 +6,7 @@ import java.util.*;
 public class Processor {
     //@@@SETTINGS@@@
     private static final double CLOCK_SPEED_MHZ = 500;
-    private static final int SUPERSCALAR_WIDTH = 1;
+    private static final int SUPERSCALAR_WIDTH = 8;
     private static final int ALU_COUNT = 4;
     private static final int LSU_COUNT = 2;
     private static final int BRU_COUNT = 2;
@@ -231,7 +231,7 @@ public class Processor {
 
         //AbstractMap<Instruction, Integer> inFlights = new HashMap<Instruction, Integer>();
         while((isPipelineBeingUsed() || !pc.isDone()) && (divergenceLim == null || tally < divergenceLim)){
-
+            debugOut.println(pipelineToString());
             boolean flushFlag = false;
             Durate counter = new Durate(SUPERSCALAR_WIDTH);
             counter.rst();
@@ -306,7 +306,7 @@ public class Processor {
             delete.flush(FLUSH_ALL); // any instructions we want to throw away can be put into delete
 
             if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");
-            debugOut.println(pipelineToString());
+
             cdb.clear();
         }
         if(divergenceLim != null && tally >= divergenceLim) throw new RuntimeException("run: program considered to diverge after " + divergenceLim + " instrs");

@@ -13,7 +13,6 @@ public class LoadStoreUnit extends Unit{
 
     private final Map<Integer, List<Integer>> cdb;
 
-    private int currentRobEntry;
     private final RegisterAliasTable prf;
 
     LoadStoreUnit(Memory mem, RegisterFile rf, RegisterAliasTable prf, Map<Integer, List<Integer>> cdb, ReorderBuffer rob, PipeLike[] ins, PipeLike[] outs){

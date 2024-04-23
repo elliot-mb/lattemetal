@@ -11,7 +11,6 @@ public class WriteBackUnit extends Unit{
 
     private final Map<Integer, List<Integer>> cdb;
 
-    private int currentRobEntry;
 
     WriteBackUnit(RegisterFile rf, ReorderBuffer rob, RegisterAliasTable prf, Map<Integer, List<Integer>> cdb, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
@@ -30,6 +29,7 @@ public class WriteBackUnit extends Unit{
         currentOp = e.getOp();
         currentRobEntry = e.getEntry();
         counter.rst();
+        //System.out.println("writeback reads " + currentOp);
     }
 
 //    @Override

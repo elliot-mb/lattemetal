@@ -16,7 +16,7 @@ public abstract class Unit implements InstructionVoidVisitor {
     protected final boolean[] outsChoice;
 
     protected Instruction currentOp;
-    protected int currentRobEntry;
+    protected Integer currentRobEntry;
     protected int pcVal;
     protected boolean flag;
 
@@ -154,6 +154,7 @@ public abstract class Unit implements InstructionVoidVisitor {
         writeOnPipeline();
         currentOp = null;
         visited = false;
+        currentRobEntry = null;
     }
 
     @Override
@@ -168,7 +169,7 @@ public abstract class Unit implements InstructionVoidVisitor {
     }
 
     public void flush(int fromRobEntry){
-        if(currentRobEntry >= fromRobEntry){
+        if(currentRobEntry == null || currentRobEntry >= fromRobEntry){
             currentOp = null;
             pcVal = 0;
             flag = false;
