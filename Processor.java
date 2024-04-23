@@ -171,10 +171,10 @@ public class Processor {
             while(decIsu.canPull() && lastCountInDecIsu != decIsu.getCount()){
                 lastCountInDecIsu = decIsu.getCount();
                 isu.clk();
-                exeRss.update(); //update reservation groups!
-                lsuRss.update();
-                bruRss.update();
             }
+            exeRss.update(); //update reservation groups!
+            lsuRss.update();
+            bruRss.update();
 
             rob.clk(); //read off the cdb
             if(rob.needsFlushing()) {

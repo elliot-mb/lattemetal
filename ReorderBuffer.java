@@ -307,7 +307,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.St op) {
-        System.out.println("STORING " + currentCommit.getValue() + " AT " + op.getResult());
+//        System.out.println("STORING " + currentCommit.getValue() + " AT " + op.getResult());
         mem.set(currentCommit.getValue(), op.getResult()); //addr gets stored in result in the LSU!
 //        cdb.remove(currentCommit.getId());
         ReorderEntry lastLoadOrNull = precedingLoadOrNull();
