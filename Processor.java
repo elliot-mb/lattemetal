@@ -8,12 +8,12 @@ public class Processor {
     private final ProgramCounter pc;
     private final InstructionCache ic;
     private final IssueUnit isu;
-    private final ArithmeticLogicUnit alu;
+    private final ArithmeticLogicUnit alu1, alu2, alu3;
     private final RegisterFile rf;
     private final Memory mem;
     private final FetchUnit fec;
     private final DecodeUnit dec;
-    private final LoadStoreUnit lsu;
+    private final LoadStoreUnit lsu1, lsu2;
     private final BranchUnit bru;
     private final WriteBackUnit wbu;
     private final ReorderBuffer rob;
@@ -75,14 +75,36 @@ public class Processor {
                 this.rat,
                 new PipeLike[]{decIsu},
                 new PipeLike[]{exeRss, lsuRss, bruRss});
-        this.alu = new ArithmeticLogicUnit(
+        this.alu1 = new ArithmeticLogicUnit(
                 this.cdb,
                 this.rob,
                 this.rf,
                 this.rat,
                 new PipeLike[]{exeRss},
                 new PipeLike[]{exeWbu});
-        this.lsu = new LoadStoreUnit(
+        this.alu2 = new ArithmeticLogicUnit(
+                this.cdb,
+                this.rob,
+                this.rf,
+                this.rat,
+                new PipeLike[]{exeRss},
+                new PipeLike[]{exeWbu});
+        this.alu3 = new ArithmeticLogicUnit(
+                this.cdb,
+                this.rob,
+                this.rf,
+                this.rat,
+                new PipeLike[]{exeRss},
+                new PipeLike[]{exeWbu});
+        this.lsu1 = new LoadStoreUnit(
+                this.mem,
+                this.rf,
+                this.rat,
+                this.cdb,
+                this.rob,
+                new PipeLike[]{lsuRss},
+                new PipeLike[]{exeWbu});
+        this.lsu2 = new LoadStoreUnit(
                 this.mem,
                 this.rf,
                 this.rat,
@@ -115,8 +137,8 @@ public class Processor {
 
     private boolean isPipelineBeingUsed(){
         return prefec.canPull() || fecDec.canPull() || decIsu.canPull() ||
-                exeWbu.canPull() || rtired.canPull() || !wbu.isDone() || !lsu.isDone() ||
-                !alu.isDone() || !dec.isDone() || !fec.isDone() || !isu.isDone() || !rob.isEmpty();
+                exeWbu.canPull() || rtired.canPull() || !wbu.isDone() || !lsu1.isDone() || !lsu2.isDone() ||
+                !alu1.isDone() || !alu2.isDone() || !alu3.isDone() || !dec.isDone() || !fec.isDone() || !isu.isDone() || !rob.isEmpty();
     }
 
     private void flushPipeline(int branchIdInRob, PrintStream debugOut){
@@ -124,8 +146,11 @@ public class Processor {
         fec.flush(branchIdInRob);
         dec.flush(branchIdInRob);
         isu.flush(branchIdInRob);
-        alu.flush(branchIdInRob);
-        lsu.flush(branchIdInRob);
+        alu1.flush(branchIdInRob);
+        alu2.flush(branchIdInRob);
+        alu3.flush(branchIdInRob);
+        lsu1.flush(branchIdInRob);
+        lsu2.flush(branchIdInRob);
         wbu.flush(branchIdInRob);
         bru.flush(branchIdInRob);
         prefec.flush(branchIdInRob);
@@ -145,7 +170,7 @@ public class Processor {
                 fec + " " + fecDec + " " +
                 dec + " " + decIsu + " " +
                 isu + " " + "(" + exeRss + "," + lsuRss + "," + bruRss + ") ("
-                + alu + ", " + lsu + ", " + bru + ") (" + exeWbu + ") "
+                + alu1 + alu2 + alu3 + ", " + lsu1 + lsu2 + ", " + bru + ") (" + exeWbu + ") "
                 + wbu + "]\t@"
                 + tally + "\tpc " + pc.getCount() + "\t" + "\t" + rob;
     }
@@ -160,11 +185,14 @@ public class Processor {
         //AbstractMap<Instruction, Integer> inFlights = new HashMap<Instruction, Integer>();
         while((isPipelineBeingUsed() || !pc.isDone()) && (divergenceLim == null || tally < divergenceLim)){
 
-            debugOut.println(pipelineToString());
             wbu.clk();
             bru.clk();
-            lsu.clk();
-            alu.clk();
+            lsu1.clk();
+            lsu2.clk();
+            alu1.clk();
+            alu2.clk();
+            alu3.clk();
+            debugOut.println(pipelineToString());
 
             int lastCountInDecIsu = -1;
             isu.clk();
@@ -172,7 +200,7 @@ public class Processor {
                 lastCountInDecIsu = decIsu.getCount();
                 isu.clk();
             }
-            exeRss.update(); //update reservation groups!
+            exeRss.update(); //update reservation groups! only once because the cdb doesnt change mid-cycle
             lsuRss.update();
             bruRss.update();
 

@@ -6,7 +6,7 @@ public class Op {
 
     public class Add extends Instruction{ //all operations extend hasduration also by proxy
 
-        private static final int DURATION = 1;
+        private static final int DURATION = 2;
 
         Add(RegisterName rd, RegisterName rs, RegisterName rt){
             super(DURATION, null, rd, rs, rt);
@@ -46,7 +46,7 @@ public class Op {
     }
 
     public class AddI extends Instruction{
-        private static final int DURATION = 1;
+        private static final int DURATION = 2;
 
         AddI(RegisterName rd, RegisterName rs, Integer immediate){
             super(DURATION, immediate, rd, rs);
@@ -199,7 +199,7 @@ public class Op {
     }
 
     public class Ld extends Instruction{
-        private static final int DURATION = 1;
+        private static final int DURATION = 2;
 
         Ld(RegisterName rd, RegisterName rs, Integer immediate){
             super(DURATION, immediate, rd, rs);
@@ -234,7 +234,7 @@ public class Op {
     }
 
     public class LdC extends Instruction{
-        private static final int DURATION = 1;
+        private static final int DURATION = 2;
 
         LdC(RegisterName rd, Integer immediate){
             super(DURATION, immediate, rd);
@@ -268,7 +268,7 @@ public class Op {
     }
 
     public class St extends Instruction{
-        private static final int DURATION = 1;
+        private static final int DURATION = 2;
 
         St(RegisterName rd, RegisterName rs, Integer immediate){
             super(DURATION, immediate, rd, rs);
