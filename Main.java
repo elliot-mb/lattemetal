@@ -46,6 +46,7 @@ public class Main {
         String programPath = "./assembly/block_testing.latte";
         int printWidth = 1;
         boolean testing = false;
+        boolean quiet = false;
         if(args.length >= 1){
             programPath = args[0];
         }
@@ -55,6 +56,8 @@ public class Main {
         if(args.length >= 3){
             testing = args[2].equals("testing");
             System.out.println("is testing? " + testing);
+            quiet = args[2].equals("quiet");
+            System.out.println("is quiet? " + quiet);
         }
 
         // do testing
@@ -78,7 +81,7 @@ public class Main {
                         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                 }
         );
-        Utils.runKern(programPath, exampleMemory, false, null);
+        Utils.runKern(programPath, exampleMemory, quiet, null, false);
 
     }
 
