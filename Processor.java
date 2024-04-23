@@ -4,6 +4,8 @@ import java.io.PrintStream;
 import java.util.*;
 
 public class Processor {
+    private static final int SUPERSCALAR_WIDTH = 1;
+
     private final Map<Integer, List<Integer>> cdb;
     private final ProgramCounter pc;
     private final InstructionCache ic;
@@ -36,13 +38,13 @@ public class Processor {
     private final ReservationGroup lsuRss;
     private final ReservationGroup bruRss;
 
-    private final PipelineRegister prefec = new PipelineRegister(8); //just to pass the pc value to the fetch unit, and increment it!
-    private final PipelineRegister fecDec = new PipelineRegister(8);
-    private final PipelineRegister decIsu = new PipelineRegister(8); //instruction queue
-    private final PipelineRegister exeWbu = new PipelineRegister(8);
+    private final PipelineRegister prefec = new PipelineRegister(SUPERSCALAR_WIDTH); //just to pass the pc value to the fetch unit, and increment it!
+    private final PipelineRegister fecDec = new PipelineRegister(SUPERSCALAR_WIDTH);
+    private final PipelineRegister decIsu = new PipelineRegister(SUPERSCALAR_WIDTH); //instruction queue
+    private final PipelineRegister exeWbu = new PipelineRegister(SUPERSCALAR_WIDTH);
     //private final PipelineRegister aluLsu = new PipelineRegister();
     private final PipelineRegister rtired = new PipelineRegister(1); //ignored pipe register to satisfy Unit inheritence
-    private final PipelineRegister delete = new PipelineRegister(100);
+    private final PipelineRegister delete = new PipelineRegister(SUPERSCALAR_WIDTH);
 
     Processor(InstructionCache ic, Memory... mem) throws RuntimeException{
         if(mem.length > 1) throw new RuntimeException("Processor: this constructor cannot have more than one memories");
@@ -185,7 +187,10 @@ public class Processor {
         //AbstractMap<Instruction, Integer> inFlights = new HashMap<Instruction, Integer>();
         while((isPipelineBeingUsed() || !pc.isDone()) && (divergenceLim == null || tally < divergenceLim)){
 
-            wbu.clk();
+            boolean flushFlag = false;
+            Durate counter = new Durate(SUPERSCALAR_WIDTH);
+            counter.rst();
+
             bru.clk();
             lsu1.clk();
             lsu2.clk();
@@ -193,33 +198,47 @@ public class Processor {
             alu2.clk();
             alu3.clk();
             debugOut.println(pipelineToString());
+            debugOut.println(cdb.keySet().toString() + cdb.values().toString());
 
             int lastCountInDecIsu = -1;
             isu.clk();
-            while(decIsu.canPull() && lastCountInDecIsu != decIsu.getCount()){
+            while(decIsu.canPull() && lastCountInDecIsu != decIsu.getCount() && !counter.isDone()){
                 lastCountInDecIsu = decIsu.getCount();
                 isu.clk();
+                counter.decr();
             }
-            exeRss.update(); //update reservation groups! only once because the cdb doesnt change mid-cycle
-            lsuRss.update();
-            bruRss.update();
+            counter.rst();
 
-            rob.clk(); //read off the cdb
-            if(rob.needsFlushing()) {
-                flushPipeline(rob.getShouldFlushWhere(), debugOut);
+            while(exeWbu.canPull() && !flushFlag && !counter.isDone()){ //can only be up to eight in one cycle due to queue length
+                wbu.clk();
+                exeRss.update(); //update reservation groups! only once because the cdb doesnt change mid-cycle
+                lsuRss.update();
+                bruRss.update();
+
+                rob.clk(); //read off the cdb
+                if(rob.needsFlushing()) {
+                    flushPipeline(rob.getShouldFlushWhere(), debugOut);
+                    flushFlag = true; //exit this loop NOW
+                }
+                rob.doneFlushing();
+                counter.decr();
+                cdb.clear();
             }
-            rob.doneFlushing();
 
             dec.clk();
-            while(fecDec.canPull() && decIsu.canPush()){ //they all just shift a block along <=> they wont be able to do more than one pipeline buffer's worth!
+            while(fecDec.canPull() && decIsu.canPush() && !counter.isDone()){ //they all just shift a block along <=> they wont be able to do more than one pipeline buffer's worth!
                 dec.clk();
+                counter.decr();
             }
+            counter.rst();
 
             fec.clk();
-            while(fecDec.canPush() && !pc.isDone()){ //they all just shift a block along <=> they wont be able to do more than one pipeline buffer's worth!
+            while(fecDec.canPush() && !pc.isDone() && !counter.isDone()){ //they all just shift a block along <=> they wont be able to do more than one pipeline buffer's worth!
                 prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));
                 fec.clk();
+                counter.decr();
             }
+            counter.rst();
 
             tally++;
 //            while(rtired.canPull()) { //if we retire more that one instruction per cycle
@@ -229,7 +248,6 @@ public class Processor {
             delete.flush(FLUSH_ALL); // any instructions we want to throw away can be put into delete
 
             if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");
-            debugOut.println(cdb.keySet().toString() + cdb.values().toString());
             cdb.clear();
         }
         if(divergenceLim != null && tally >= divergenceLim) throw new RuntimeException("run: program considered to diverge after " + divergenceLim + " instrs");

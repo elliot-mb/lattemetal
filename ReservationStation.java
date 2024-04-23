@@ -190,7 +190,7 @@ public class ReservationStation implements InstructionVoidVisitor {
 
     @Override
     public void accept(Op.JpLZ op) {
-
+        op.setRdVal(vJ);
     }
 
     @Override
