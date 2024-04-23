@@ -246,7 +246,6 @@ public class ReorderBuffer implements InstructionVoidVisitor{
                 Instruction poppedOp = currentCommit.getOp();
                 if(lsqWillPop != null) lsq.pop();
                 //visitation to distinguish between stores, common instructions, and branches (incorrect)
-                System.out.println("retire " + poppedOp);
                 poppedOp.visit(this);
                 committedInstrs.add(poppedOp);
                 committed++;

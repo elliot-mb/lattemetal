@@ -24,8 +24,8 @@ public class DecodeUnit extends Unit{
             physicalRobEntries.shift();
             physicalRegisters.shift();
         }
-        System.out.println(physicalRegisters);
-        System.out.println(physicalRobEntries);
+//        System.out.println(physicalRegisters);
+//        System.out.println(physicalRobEntries);
     }
 
     @Override

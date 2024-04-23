@@ -30,7 +30,6 @@ public class WriteBackUnit extends Unit{
         currentOp = e.getOp();
         currentRobEntry = e.getEntry();
         counter.rst();
-        System.out.println("writeback " + currentOp);
     }
 
 //    @Override
