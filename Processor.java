@@ -4,7 +4,24 @@ import java.io.PrintStream;
 import java.util.*;
 
 public class Processor {
+    //SETTINGS
     private static final int SUPERSCALAR_WIDTH = 8;
+    private static final int ALU_COUNT = 4;
+    private static final int LSU_COUNT = 2;
+    private static final int BRU_COUNT = 2;
+    private static final int ALU_RS_COUNT = 4;
+    private static final int LSU_RS_COUNT = 2;
+    private static final int BRU_RS_COUNT = 2;
+    private static final int DP_ACC = 2;
+    private static final int ROB_ENTRIES = 64;
+    public static final int FLUSH_ALL = -1;
+    //@@@@@@@@
+
+    private final ArrayList<ArithmeticLogicUnit> alusInUse;
+
+    private final ArrayList<BranchUnit> brusInUse;
+
+    private final ArrayList<LoadStoreUnit> lsusInUse;
 
     private final Map<Integer, List<Integer>> cdb;
     private final ProgramCounter pc;
@@ -21,15 +38,6 @@ public class Processor {
     private final ReorderBuffer rob;
     private final RegisterAliasTable rat;
     private int tally;
-
-    private static final int ALU_RS_COUNT = 4;
-    private static final int LSU_RS_COUNT = 2;
-    private static final int BRU_RS_COUNT = 2;
-    private static final int DP_ACC = 2;
-    private static final int ROB_INTIATES_FLUSH = -1;
-    private static final int ROB_ENTRIES = 64;
-
-    public static final int FLUSH_ALL = -1;
 
 //    private final List<ReservationStation> aluRs = new ArrayList<ReservationStation>();
 //    private final List<ReservationStation> lsuRs = new ArrayList<ReservationStation>();
@@ -140,6 +148,21 @@ public class Processor {
                 this.cdb,
                 new PipeLike[]{exeWbu},
                 new PipeLike[]{delete});
+
+
+        alusInUse = new ArrayList<ArithmeticLogicUnit>();
+        alusInUse.add(alu1);
+        if(ALU_COUNT >= 2) alusInUse.add(alu2);
+        if(ALU_COUNT >= 3) alusInUse.add(alu3);
+        if(ALU_COUNT >= 4) alusInUse.add(alu4);
+
+        brusInUse = new ArrayList<BranchUnit>();
+        brusInUse.add(bru1);
+        if(BRU_COUNT >= 2) brusInUse.add(bru2);
+
+        lsusInUse = new ArrayList<LoadStoreUnit>();
+        lsusInUse.add(lsu1);
+        if(LSU_COUNT >= 2) lsusInUse.add(lsu2);
     }
 
 //    private void sendSingleInstruction(){
@@ -207,14 +230,10 @@ public class Processor {
             Durate counter = new Durate(SUPERSCALAR_WIDTH);
             counter.rst();
 
-            bru1.clk();
-            bru2.clk();
-            lsu1.clk();
-            lsu2.clk();
-            alu1.clk();
-            alu2.clk();
-            alu3.clk();
-            alu4.clk();
+            for(BranchUnit bru : brusInUse) bru.clk(); //just turning them off like this should be fine because we only ever put instructions into a unit if they ask for them themselves
+            for(LoadStoreUnit lsu : lsusInUse) lsu.clk();
+            for(ArithmeticLogicUnit alu : alusInUse) alu.clk();
+
             debugOut.println(pipelineToString());
             debugOut.println(cdb.keySet().toString() + cdb.values().toString());
 
