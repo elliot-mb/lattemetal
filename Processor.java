@@ -4,7 +4,7 @@ import java.io.PrintStream;
 import java.util.*;
 
 public class Processor {
-    private static final int SUPERSCALAR_WIDTH = 1;
+    private static final int SUPERSCALAR_WIDTH = 8;
 
     private final Map<Integer, List<Integer>> cdb;
     private final ProgramCounter pc;
@@ -224,6 +224,22 @@ public class Processor {
                 counter.decr();
                 cdb.clear();
             }
+
+            //though the rob is updated when we update the common data bus, it updates separately even when we cant writeback
+            // it may do this for the remaining cycles in the counter
+            // it may do this for as long as it has entries left
+            // it may do this just if it did not flush beforehand (because otherwise there are no instructions)
+            while(!counter.isDone() && !rob.isEmpty() && !flushFlag){
+                rob.clk();
+                if(rob.needsFlushing()) {
+                    flushPipeline(rob.getShouldFlushWhere(), debugOut);
+                    flushFlag = true; //exit this loop NOW
+                }
+                rob.doneFlushing();
+                counter.decr();
+            }
+
+            counter.rst();
 
             dec.clk();
             while(fecDec.canPull() && decIsu.canPush() && !counter.isDone()){ //they all just shift a block along <=> they wont be able to do more than one pipeline buffer's worth!

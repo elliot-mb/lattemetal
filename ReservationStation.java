@@ -98,7 +98,10 @@ public class ReservationStation implements InstructionVoidVisitor {
         busy = true;
 
         if(!dest.isEmpty()) rat.pointRegAtRobEntry(RegisterName.values()[dest.get(0)], e.getEntry()); //tell the register file to point at the rob entry of the instruction in this rs, IF there is a result
+
         this.robEntry = e.getEntry();
+
+        if(isReady()) op.visit(this); //updates fields in instruction in case its ready right away
     }
 
     //checks if either dependant RSs have finished!
