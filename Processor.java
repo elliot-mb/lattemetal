@@ -6,7 +6,7 @@ import java.util.*;
 public class Processor {
     //@@@SETTINGS@@@
     private static final double CLOCK_SPEED_MHZ = 500;
-    public static final boolean BR_PREDICTOR_IS_FIXED = true;
+    public static final boolean BR_PREDICTOR_IS_FIXED = false;
     private static final int BTB_CACHE_SIZE = 32;
     public static final int SUPERSCALAR_WIDTH = 1;
     private static final int ALU_COUNT = 1;

@@ -6,13 +6,13 @@ public class BranchTargetBuffer {
     private final Map<Integer, Integer> pcToPrediction;
     private final CircluarQueue<Integer> orderAdded;
 
-    private final CircluarQueue<Boolean> branchQueue; //since theyre only acted on in program order this should be fine to discern if by the end whether a branch was taken in fetch
+//    private final CircluarQueue<Boolean> branchQueue; //since theyre only acted on in program order this should be fine to discern if by the end whether a branch was taken in fetch
 
     BranchTargetBuffer(int size){
         this.orderAdded = new CircluarQueue<Integer>(size); //models our size and replacement strategy (oldest evicted)
         //if the rob were full of branches this would be full too, and then its also everything we could put through the
         //fetch unit before it gets added to the rob (twice the superscalar width)
-        this.branchQueue = new CircluarQueue<Boolean>(Processor.ROB_ENTRIES + Processor.SUPERSCALAR_WIDTH * 2);
+        //this.branchQueue = new CircluarQueue<Boolean>(Processor.ROB_ENTRIES + Processor.SUPERSCALAR_WIDTH * 2);
         this.pcToPrediction = new HashMap<Integer, Integer>();
     }
 
@@ -22,7 +22,7 @@ public class BranchTargetBuffer {
 
     private void addTo(int pc, int target){
         if(!pcToPrediction.containsKey(pc) && orderAdded.isFull()) pcToPrediction.remove(orderAdded.pop()); //remove oldest mapping
-        orderAdded.push(pc);
+        if(!pcToPrediction.containsKey(pc)) orderAdded.push(pc);
         pcToPrediction.put(pc, target);
     }
 
@@ -52,11 +52,11 @@ public class BranchTargetBuffer {
         return pcToPrediction.get(pc);
     }
 
-    public void registerPrediction(boolean p){
-        branchQueue.push(p);
-    }
-
-    public boolean removePrediction(){
-        return branchQueue.pop();
-    }
+//    public void registerPrediction(boolean p){
+//        branchQueue.push(p);
+//    }
+//
+//    public boolean removePrediction(){
+//        return branchQueue.pop();
+//    }
 }

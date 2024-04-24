@@ -43,6 +43,11 @@ public class Utils {
         return code == Opcode.br || code == Opcode.brlz || code == Opcode.jp || code == Opcode.jplz;
     }
 
+    public static boolean isConditionalBranch(Instruction op){
+        Opcode code = op.visit(preDecoder);
+        return code == Opcode.brlz || code == Opcode.jplz;
+    }
+
     public static boolean isLoadStore(Instruction op){
         Opcode code = op.visit(preDecoder);
         return code == Opcode.ld || code == Opcode.ldc || code == Opcode.st || code == Opcode.ldi || code == Opcode.sti;

@@ -379,6 +379,8 @@ public class Op {
 
         private static final int DURATION = 1;
 
+        private boolean wasTaken;
+
         BrLZ(RegisterName rd, Integer immediate){
             super(DURATION, immediate, rd);
             checkShape(rd, immediate);
@@ -398,6 +400,14 @@ public class Op {
             v.accept(this);
         }
 
+        public void setWasTaken(boolean wasTaken){
+            this.wasTaken = wasTaken;
+        }
+
+        public boolean getWasTaken(){
+            return wasTaken;
+        }
+
         public void setRdVal(int v) { rdVal = v; }
         public int getRdVal() { return rdVal; }
         public int getImVal() { return im; }
@@ -412,6 +422,8 @@ public class Op {
 
     public class JpLZ extends Instruction{
         private static final int DURATION = 1;
+
+        private boolean wasTaken;
 
         JpLZ(RegisterName rd, Integer immediate){
             super(DURATION, immediate, rd);
@@ -438,6 +450,14 @@ public class Op {
             jplz.setResult(result);
             jplz.setId(getId());
             return jplz;
+        }
+
+        public void setWasTaken(boolean b) {
+            this.wasTaken = b;
+        }
+
+        public boolean getWasTaken() {
+            return wasTaken;
         }
     }
 

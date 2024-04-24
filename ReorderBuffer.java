@@ -287,7 +287,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         return committedInstrs;
     }
 
-    private void handleBranch(Instruction branch, boolean flag, int branchTo){
+    private void handleBranch(Instruction branch, boolean flag, int branchTo, boolean wasTakenAtFetch){
         if(Processor.BR_PREDICTOR_IS_FIXED){
             if(flag != Unit.FIXED_PREDICTOR_SET_TAKEN){
                 if(flag){
@@ -303,7 +303,6 @@ public class ReorderBuffer implements InstructionVoidVisitor{
                 predictedBranches++;
             }
         }else{
-            boolean wasTakenAtFetch = btb.removePrediction(); //do not do this more than once for a branch
             if(flag != wasTakenAtFetch){
                 if(flag){
                     pc.set(branchTo);
@@ -489,7 +488,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         dec.physicalRegisters.pop();
         boolean flag = currentCommit.getValue(ReorderEntry.FST) == BranchUnit.TAKEN;
 
-        handleBranch(op, flag, op.getImVal());
+        handleBranch(op, flag, op.getImVal(), op.getWasTaken());
 
         cdb.remove(currentCommit.getId());
     }
@@ -500,7 +499,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         dec.physicalRegisters.pop();
         boolean flag = currentCommit.getValue(ReorderEntry.FST) == BranchUnit.TAKEN;
 
-        handleBranch(op, flag, op.getResult() + op.getImVal() - 1);
+        handleBranch(op, flag, op.getResult() + op.getImVal() - 1, op.getWasTaken());
 
         cdb.remove(currentCommit.getId());
     }
