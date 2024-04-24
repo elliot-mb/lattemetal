@@ -31,7 +31,9 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     private List<Instruction> committedInstrs;
     private final DecodeUnit dec;
 
-    ReorderBuffer(int size, Map<Integer, List<Integer>> cdb, RegisterFile rf, Memory mem, ProgramCounter pc, DecodeUnit dec){
+    private final BranchTargetBuffer btb;
+
+    ReorderBuffer(int size, Map<Integer, List<Integer>> cdb, BranchTargetBuffer btb, RegisterFile rf, Memory mem, ProgramCounter pc, DecodeUnit dec){
         this.dec = dec;
         this.buffer = new CircluarQueue<ReorderEntry>(size);
         this.cdb = cdb;
@@ -43,6 +45,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         this.pc = pc;
         this.committed = 0;
         this.mispredictedInstr = 0;
+        this.btb = btb;
         this.mispredictedBranches = 0;
         this.predictedBranches = 0;
         this.committedInstrs = new ArrayList<Instruction>();
@@ -284,6 +287,41 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         return committedInstrs;
     }
 
+    private void handleBranch(Instruction branch, boolean flag, int branchTo){
+        if(Processor.BR_PREDICTOR_IS_FIXED){
+            if(flag != Unit.FIXED_PREDICTOR_SET_TAKEN){
+                if(flag){
+                    pc.set(branchTo);
+                }else{
+                    pc.set(branch.getResult()); // untaken
+                }
+                shouldFlush = true;
+                mispredictedBranches++;
+                shouldFlushWhere = currentCommit.getId() + 1;
+                flushFrom(currentCommit.getId() + 1);
+            }else{
+                predictedBranches++;
+            }
+        }else{
+            boolean wasTakenAtFetch = btb.removePrediction(); //do not do this more than once for a branch
+            if(flag != wasTakenAtFetch){
+                if(flag){
+                    pc.set(branchTo);
+                }else{
+                    pc.set(branch.getResult()); // untaken
+                }
+                btb.predictForThisBranch(currentCommit.getPcVal(), flag, pc.getCount());
+                shouldFlush = true;
+                mispredictedBranches++;
+                shouldFlushWhere = currentCommit.getId() + 1;
+                flushFrom(currentCommit.getId() + 1);
+            }else{
+                predictedBranches++;
+            }
+        }
+        cdb.remove(currentCommit.getId());
+    }
+
     @Override
     public void accept(Op.Add op) {
         DecodeUnit.physicalRobEntries.pop();
@@ -450,20 +488,9 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         DecodeUnit.physicalRobEntries.pop();
         dec.physicalRegisters.pop();
         boolean flag = currentCommit.getValue(ReorderEntry.FST) == BranchUnit.TAKEN;
-        if(flag != Unit.STATIC_PREDICT_BR_TAKEN){
-            if(flag){
-                pc.set(op.getImVal());
-            }else{
-                pc.set(op.getResult()); // untaken
-            }
-            shouldFlush = true;
-            mispredictedBranches++;
-            shouldFlushWhere = currentCommit.getId() + 1;
-            flushFrom(currentCommit.getId() + 1);
-//            flushAt = currentRobEntry + 1; //after the current rob entry because we need to maintain program order
-        }else{
-            predictedBranches++;
-        }
+
+        handleBranch(op, flag, op.getImVal());
+
         cdb.remove(currentCommit.getId());
     }
 
@@ -472,19 +499,9 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         DecodeUnit.physicalRobEntries.pop();
         dec.physicalRegisters.pop();
         boolean flag = currentCommit.getValue(ReorderEntry.FST) == BranchUnit.TAKEN;
-        if(flag != Unit.STATIC_PREDICT_BR_TAKEN){
-            if(flag){
-                pc.set(op.getResult() + op.getImVal() - 1); //"not dumb if it works"
-            }else{
-                pc.set(op.getResult()); // untaken
-            }
-            shouldFlush = true;
-            mispredictedBranches++;
-            shouldFlushWhere = currentCommit.getId() + 1;
-            flushFrom(currentCommit.getId() + 1);
-        }else{
-            predictedBranches++;
-        }
+
+        handleBranch(op, flag, op.getResult() + op.getImVal() - 1);
+
         cdb.remove(currentCommit.getId());
     }
 

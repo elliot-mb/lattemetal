@@ -6,7 +6,9 @@ import java.util.*;
 public class Processor {
     //@@@SETTINGS@@@
     private static final double CLOCK_SPEED_MHZ = 500;
-    private static final int SUPERSCALAR_WIDTH = 1;
+    public static final boolean BR_PREDICTOR_IS_FIXED = true;
+    private static final int BTB_CACHE_SIZE = 32;
+    public static final int SUPERSCALAR_WIDTH = 1;
     private static final int ALU_COUNT = 1;
     private static final int LSU_COUNT = 1;
     private static final int BRU_COUNT = 1;
@@ -14,7 +16,7 @@ public class Processor {
     private static final int LSU_RS_COUNT = 1;
     private static final int BRU_RS_COUNT = 1;
     private static final int DP_ACC = 4;
-    private static final int ROB_ENTRIES = 32;
+    public static final int ROB_ENTRIES = 32;
     public static final int FLUSH_ALL = -1;
     public static final int PHYSICAL_REGISTER_FACTOR = 4; //how many times more physical registers we have than architectural ones
     //@@@DEPENDANT SETTINGS@@@
@@ -26,7 +28,7 @@ public class Processor {
     private final ArrayList<BranchUnit> brusInUse;
 
     private final ArrayList<LoadStoreUnit> lsusInUse;
-
+    private final BranchTargetBuffer btb;
     private final Map<Integer, List<Integer>> cdb;
     private final ProgramCounter pc;
     private final InstructionCache ic;
@@ -60,6 +62,7 @@ public class Processor {
 
     Processor(InstructionCache ic, Memory... mem) throws RuntimeException{
         if(mem.length > 1) throw new RuntimeException("Processor: this constructor cannot have more than one memories");
+        this.btb = new BranchTargetBuffer(BTB_CACHE_SIZE);
         this.cdb = new HashMap<Integer, List<Integer>>();
         this.mem = mem.length > 0 ? mem[0] : new Memory();
         this.rf = new RegisterFile(cdb);
@@ -70,7 +73,7 @@ public class Processor {
                 new PipeLike[]{fecDec},
                 new PipeLike[]{decIsu}); //loadstores go down the latter pipe
 
-        this.rob = new ReorderBuffer(ROB_ENTRIES, cdb, rf, this.mem, this.pc, this.dec);
+        this.rob = new ReorderBuffer(ROB_ENTRIES, cdb, btb, rf, this.mem, this.pc, this.dec);
         this.ic = ic;
         this.tally = 0;
         this.rat = new RegisterAliasTable(cdb, rob);
@@ -83,6 +86,7 @@ public class Processor {
         this.fec = new FetchUnit(
                 this.ic,
                 this.pc,
+                this.btb,
                 new PipeLike[]{prefec},
                 new PipeLike[]{fecDec});
         this.isu = new IssueUnit(

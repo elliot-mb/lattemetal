@@ -5,15 +5,17 @@ public class FetchUnit extends Unit {
     private static final int FETCH_LATENCY = 1;
 
     private final InstructionCache ic;
+    private final BranchTargetBuffer btb;
 
     private final ProgramCounter pc;
 
     private final Durate counter = new Durate(FETCH_LATENCY);
 
-    FetchUnit(InstructionCache ic, ProgramCounter pc, PipeLike[] ins, PipeLike[] outs){
+    FetchUnit(InstructionCache ic, ProgramCounter pc, BranchTargetBuffer btb, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
         this.ic = ic;
         this.pc = pc;
+        this.btb = btb;
     }
     @Override
     protected void procInstruction() {
@@ -120,23 +122,44 @@ public class FetchUnit extends Unit {
     @Override
     public void accept(Op.BrLZ op) {
         op.setResult(pcVal + 1); //branch untaken!
-        if(STATIC_PREDICT_BR_TAKEN){
-            //next.setPcVal(op.getImVal());
-            pcVal = op.getImVal(); //pc.set(op.getImVal()); //static prediciton
-        }else{
-            pcVal++;
+        if(Processor.BR_PREDICTOR_IS_FIXED){
+            if(FIXED_PREDICTOR_SET_TAKEN){
+                //next.setPcVal(op.getImVal());
+                pcVal = op.getImVal(); //pc.set(op.getImVal()); //static prediciton
+            }else{
+                pcVal++;
+            }
+        }else{ //use btb
+            if(btb.hasEntry(pcVal)){
+                pcVal = btb.getPrediction(pcVal);
+                btb.registerPrediction(true); //for transferring the value to commit
+            }else{
+                pcVal++;
+                btb.registerPrediction(false);
+            }
         }
+
         pc.set(pcVal);
     }
 
     @Override
     public void accept(Op.JpLZ op) {
         op.setResult(pcVal + 1); //branch untaken!
-        if(STATIC_PREDICT_BR_TAKEN){
-            //next.setPcVal(op.getImVal());
-            pcVal += op.getImVal();
+        if(Processor.BR_PREDICTOR_IS_FIXED) {
+            if (FIXED_PREDICTOR_SET_TAKEN) {
+                //next.setPcVal(op.getImVal());
+                pcVal += op.getImVal();
+            } else {
+                pcVal++;
+            }
         }else{
-            pcVal++;
+            if(btb.hasEntry(pcVal)){
+                pcVal = btb.getPrediction(pcVal); //should encode the offset for us
+                btb.registerPrediction(true); //for transferring the value to commit
+            }else{
+                pcVal++;
+                btb.registerPrediction(false);
+            }
         }
         pc.set(pcVal);
     }
