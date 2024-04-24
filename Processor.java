@@ -18,7 +18,7 @@ public class Processor {
     private static final int DP_ACC = 4;
     public static final int ROB_ENTRIES = 32;
     public static final int FLUSH_ALL = -1;
-    public static final int PHYSICAL_REGISTER_FACTOR = 4; //how many times more physical registers we have than architectural ones
+    public static final int PHYSICAL_REGISTER_FACTOR = 2; //how many times more physical registers we have than architectural ones
     //@@@DEPENDANT SETTINGS@@@
     private static final double ASSUMED_CYCLE_TIME = Math.pow(10, 3) / CLOCK_SPEED_MHZ;//ns
     public static final int PHYSICAL_REGISTER_COUNT = PHYSICAL_REGISTER_FACTOR * RegisterName.values().length;
@@ -92,6 +92,7 @@ public class Processor {
         this.isu = new IssueUnit(
                 this.rf,
                 this.rob,
+                this.dec,
                 this.rat,
                 new PipeLike[]{decIsu},
                 new PipeLike[]{exeRss, lsuRss, bruRss});

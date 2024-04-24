@@ -110,10 +110,11 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         CircluarQueue<ReorderEntry> newLsq = new CircluarQueue<ReorderEntry>(size);
         int sizeBefore = buffer.getElementsIn();
         ReorderEntry peel = buffer.pop();
-        while(!buffer.isEmpty() && peel.getId() != id){
-            if(!lsq.isEmpty() && peel.getId() == lsq.peek().getId()){
+        while(!buffer.isEmpty() && peel.getId() > id){
+            if(!lsq.isEmpty() && peel.getId() == lsq.peekHead().getId()){
                 newLsq.push(lsq.pop()); //should include just the same instructions as the main rob
             }
+            //for(int i = 0; i < peel.getOp().getRegsNeeded(); i++) dec.physicalRegisters.pop();
             newBuffer.push(peel);
             peel = buffer.pop();
         }
@@ -323,12 +324,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.Add op) {
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
         rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
@@ -336,10 +332,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.AddI op) {
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
         rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
@@ -347,12 +340,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.Mul op) {
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
         rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
@@ -360,10 +348,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.MulI op) {
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
         rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
@@ -371,12 +356,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.Cmp op) {
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
         rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
@@ -384,10 +364,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.Ld op) {
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
         rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
@@ -395,8 +372,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.LdC op) {
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
         rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
@@ -404,10 +380,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.LdI op) {
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
         rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rf.setReg(op.getRs(), currentCommit.getValue(ReorderEntry.SND));
         rat.regValIsReady(op.getRd());
@@ -416,10 +389,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.St op) {
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
 //        System.out.println("STORING " + currentCommit.getValue() + " AT " + op.getResult());
         mem.set(currentCommit.getValue(ReorderEntry.FST), op.getResult()); //addr gets stored in result in the LSU!
 //        cdb.remove(currentCommit.getId());
@@ -448,10 +418,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.StI op) {
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
 //        System.out.println("STORING " + currentCommit.getValue() + " AT " + op.getResult());
         mem.set(currentCommit.getValue(ReorderEntry.FST), op.getRsVal()); //addr gets stored in result in the LSU!
 
@@ -484,8 +451,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.BrLZ op) {
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
         boolean flag = currentCommit.getValue(ReorderEntry.FST) == BranchUnit.TAKEN;
         boolean predTaken = currentCommit.getValue(ReorderEntry.SND) == BranchUnit.TAKEN;
 
@@ -496,8 +462,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.JpLZ op) {
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
         boolean flag = currentCommit.getValue(ReorderEntry.FST) == BranchUnit.TAKEN;
         boolean predTaken = currentCommit.getValue(ReorderEntry.SND) == BranchUnit.TAKEN;
 

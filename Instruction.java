@@ -1,16 +1,20 @@
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public abstract class Instruction extends Durate {
 
     public static final int INDEXED_ADDR_LOC = 0; //where we get the address location for the rs in any indexed load store cbd entry
     public static final int INDEXED_UPDT_LOC = 1; //where we get the updated value for rs in any indexed load store cbd entry
-
+    private final int physicalRegistersNeeded;
     private static int gId = 0;
     private int id;
     protected final RegisterName rd;
     protected final RegisterName rs;
     protected final RegisterName rt;
     protected final Integer im;
+
+    private final List<RegisterName> regsList;
 
     protected int rdVal;
     protected int rsVal;
@@ -24,8 +28,19 @@ public abstract class Instruction extends Durate {
         this.rd = regs.length > 0 ? regs[0] : null;
         this.rs = regs.length > 1 ? regs[1] : null;
         this.rt = regs.length > 2 ? regs[2] : null;
+        this.physicalRegistersNeeded = regs.length;
+        this.regsList = new ArrayList<RegisterName>(physicalRegistersNeeded);
+        regsList.addAll(Arrays.asList(regs));
         this.id = gId;
         gId++;
+    }
+
+    public int getRegsNeeded(){
+        return physicalRegistersNeeded;
+    }
+
+    public RegisterName getIthReg(int i){
+        return this.regsList.get(i);
     }
 
     public RegisterName getRd() throws RuntimeException{
