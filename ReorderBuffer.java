@@ -309,7 +309,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
                 }else{
                     pc.set(branch.getResult()); // untaken
                 }
-                btb.predictForThisBranch(currentCommit.getPcVal(), flag, pc.getCount());
+                btb.predictForThisBranch(currentCommit.getPcVal() - 1, flag, pc.getCount());
                 shouldFlush = true;
                 mispredictedBranches++;
                 shouldFlushWhere = currentCommit.getId() + 1;
