@@ -95,7 +95,7 @@ public class ReservationStation implements InstructionVoidVisitor {
             qK = NO_DEPENDENCY;
         }else if(regK != null){
             qK = rat.whereRegInRob(regK);
-            sJ = rat.cdbEntryOf(regK);
+            sK = rat.cdbEntryOf(regK);
             rK = false;
         }
         if(regK == null){
@@ -106,7 +106,7 @@ public class ReservationStation implements InstructionVoidVisitor {
 
         int entry = 0;
         for(Integer d : dest){
-            rat.pointRegAtRobEntry(RegisterName.values()[d], e.getEntry(), entry); //tell the register file to point at the rob entry of the instruction in this rs, IF there is a result
+            if(d != NO_DEPENDENCY) rat.pointRegAtRobEntry(RegisterName.values()[d], e.getEntry(), entry); //tell the register file to point at the rob entry of the instruction in this rs, IF there is a result
             entry++;
         }
 

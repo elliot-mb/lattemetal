@@ -54,7 +54,7 @@ public class DestLocVisitor implements InstructionLocVisitor {
 
     @Override
     public List<Integer> accept(Op.StI op) {
-        return List.of(op.getRs().ordinal());
+        return Arrays.asList(ReservationStation.NO_DEPENDENCY, op.getRs().ordinal());
     }
 
     @Override
