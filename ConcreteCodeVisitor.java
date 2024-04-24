@@ -39,9 +39,6 @@ public class ConcreteCodeVisitor implements InstructionCodeVisitor { //just retu
     }
 
     @Override
-    public Opcode accept(Op.LdPr op){ return Opcode.ldpr; }
-
-    @Override
     public Opcode accept(Op.LdI op){ return Opcode.ldi; }
 
 
@@ -49,9 +46,6 @@ public class ConcreteCodeVisitor implements InstructionCodeVisitor { //just retu
     public Opcode accept(Op.St op) {
         return Opcode.st;
     }
-
-    @Override
-    public Opcode accept(Op.StPr op){ return Opcode.stpr; }
 
     @Override
     public Opcode accept(Op.StI op){ return Opcode.sti; }
