@@ -45,7 +45,7 @@ public class Utils {
 
     public static boolean isLoadStore(Instruction op){
         Opcode code = op.visit(preDecoder);
-        return code == Opcode.ld || code == Opcode.ldc || code == Opcode.st;
+        return code == Opcode.ld || code == Opcode.ldc || code == Opcode.st || code == Opcode.ldi || code == Opcode.sti;
     }
 
     public static double toDecimalPlaces(double n, int dp){

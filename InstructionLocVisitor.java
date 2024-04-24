@@ -16,7 +16,10 @@ public interface InstructionLocVisitor {
 
     public List<Integer> accept(Op.LdC op);
 
+    public List<Integer> accept(Op.LdI op);
+
     public List<Integer> accept(Op.St op);
+    public List<Integer> accept(Op.StI op);
 
     public List<Integer> accept(Op.BrLZ op);
 

@@ -208,7 +208,10 @@ public class ReorderBuffer implements InstructionVoidVisitor{
             if(cdb.containsKey(r.getId())){
                 List<Integer> payload = cdb.get(r.getId());
                 //if its a fixed branch (non-conditional) it has no value and no payload so i dont write any value on the cdb
-                if(!payload.isEmpty()) r.setValue(payload.get(0)); //read from the map if the id matches this rese entry (value is already in the entry before we commit!)
+                if(payload.size() == 1) r.setValue(payload.get(0)); //read from the map if the id matches this rese entry (value is already in the entry before we commit!)
+                if(payload.size() == 2){ //just if its an indexed load or store
+                    if(r.getOp())
+                }
                 r.readyUp();
             }
         }

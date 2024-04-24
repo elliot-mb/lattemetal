@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 public class Assembler {
     // this class contains the basic assembler that turns our raw instructions into machine readable objects
@@ -90,8 +89,10 @@ public class Assembler {
             case muli: return Utils.opFactory.new MulI(rd, rs, immediate);
             case cmp: return Utils.opFactory.new Cmp(rd, rs, rt);
             case ld: return Utils.opFactory.new Ld(rd, rs, immediate);
+            case ldi: return Utils.opFactory.new LdI(rd, rs, immediate);
             case ldc: return Utils.opFactory.new LdC(rd, immediate);
             case st: return Utils.opFactory.new St(rd, rs, immediate);
+            case sti: return Utils.opFactory.new StI(rd, rs, immediate);
             case brlz: return Utils.opFactory.new BrLZ(rd, immediate);
             case jplz: return Utils.opFactory.new JpLZ(rd, immediate);
             case br: return Utils.opFactory.new Br(immediate);

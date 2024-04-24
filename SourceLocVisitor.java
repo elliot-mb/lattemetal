@@ -42,7 +42,27 @@ public class SourceLocVisitor implements InstructionLocVisitor {
     }
 
     @Override
+    public List<Integer> accept(Op.LdPr op) {
+        return Arrays.asList(op.getRs().ordinal());
+    }
+
+    @Override
+    public List<Integer> accept(Op.LdI op) {
+        return Arrays.asList(op.getRs().ordinal());
+    }
+
+    @Override
     public List<Integer> accept(Op.St op) {
+        return Arrays.asList(op.getRd().ordinal(), op.getRs().ordinal());
+    }
+
+    @Override
+    public List<Integer> accept(Op.StPr op) {
+        return Arrays.asList(op.getRd().ordinal(), op.getRs().ordinal());
+    }
+
+    @Override
+    public List<Integer> accept(Op.StI op) {
         return Arrays.asList(op.getRd().ordinal(), op.getRs().ordinal());
     }
 

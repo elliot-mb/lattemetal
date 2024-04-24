@@ -99,30 +99,42 @@ public class ArithmeticLogicUnit extends Unit {
     }
 
     @Override
+    public void accept(Op.LdI op) {
+        throw new RuntimeException("ArithmeticLogicUnit.accept: load instruction not valid");
+
+    }
+
+    @Override
     public void accept(Op.St op) {
         throw new RuntimeException("ArithmeticLogicUnit.accept: store instruction not valid");
     }
 
     @Override
+    public void accept(Op.StI op) {
+        throw new RuntimeException("ArithmeticLogicUnit.accept: store instruction not valid");
+
+    }
+
+    @Override
     public void accept(Op.BrLZ op) {
-        throw new RuntimeException("ArithmeticLogicUnit.accept: load instruction not valid");
+        throw new RuntimeException("ArithmeticLogicUnit.accept: br instruction not valid");
     }
 
     @Override
     public void accept(Op.JpLZ op) {
-        throw new RuntimeException("ArithmeticLogicUnit.accept: load instruction not valid");
+        throw new RuntimeException("ArithmeticLogicUnit.accept: jp instruction not valid");
 
     }
 
     @Override
     public void accept(Op.Br op) {
-        throw new RuntimeException("ArithmeticLogicUnit.accept: load instruction not valid");
+        throw new RuntimeException("ArithmeticLogicUnit.accept: br instruction not valid");
 
     }
 
     @Override
     public void accept(Op.Jp op) {
-        throw new RuntimeException("ArithmeticLogicUnit.accept: load instruction not valid");
+        throw new RuntimeException("ArithmeticLogicUnit.accept: jp instruction not valid");
 
     }
 

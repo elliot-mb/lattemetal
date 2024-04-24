@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -42,8 +43,18 @@ public class DestLocVisitor implements InstructionLocVisitor {
     }
 
     @Override
+    public List<Integer> accept(Op.LdI op) {
+        return Arrays.asList(op.getRd().ordinal(), op.getRs().ordinal()); //write to rs too
+    }
+
+    @Override
     public List<Integer> accept(Op.St op) {
         return NO_DEST;
+    }
+
+    @Override
+    public List<Integer> accept(Op.StI op) {
+        return List.of(op.getRs().ordinal());
     }
 
     @Override

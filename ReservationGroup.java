@@ -209,8 +209,28 @@ public class ReservationGroup implements PipeLike, InstructionVoidVisitor{ //to 
     }
 
     @Override
+    public void accept(Op.LdI op) {
+        op.setRsVal(currentRes.getvJ());
+    }
+
+    @Override
+    public void accept(Op.LdPr op) {
+        op.setRsVal(currentRes.getvJ());
+    }
+
+    @Override
     public void accept(Op.St op) {
         op.setRsVal(currentRes.getvK()); //second dependant is needed for address calc
+    }
+
+    @Override
+    public void accept(Op.StPr op) {
+        op.setRsVal(currentRes.getvK());
+    }
+
+    @Override
+    public void accept(Op.StI op) {
+        op.setRsVal(currentRes.getvK());
     }
 
     @Override

@@ -16,11 +16,11 @@ public interface InstructionCodeVisitor {
 
     public Opcode accept(Op.LdC op);
 
+    public Opcode accept(Op.LdI op);
+
     public Opcode accept(Op.St op);
 
-//    public Opcode accept(Op.StPr op);
-//
-//    public Opcode accept(Op.StPs op);
+    public Opcode accept(Op.StI op);
 
     public Opcode accept(Op.BrLZ op);
 

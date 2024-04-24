@@ -84,7 +84,21 @@ public class DecodeUnit extends Unit{
     }
 
     @Override
+    public void accept(Op.LdI op) {
+        physicalRegisters.push(op.getRd());
+        physicalRegisters.push(op.getRs());
+        currentOp = op;
+    }
+
+    @Override
     public void accept(Op.St op) {
+        physicalRegisters.push(op.getRd());
+        physicalRegisters.push(op.getRs());
+        currentOp = op;
+    }
+
+    @Override
+    public void accept(Op.StI op) {
         physicalRegisters.push(op.getRd());
         physicalRegisters.push(op.getRs());
         currentOp = op;

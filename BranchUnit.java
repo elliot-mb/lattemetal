@@ -45,27 +45,27 @@ public class BranchUnit extends Unit{
 
     @Override
     public void accept(Op.Add op) {
-        throw new RuntimeException("BranchUnit.accept: load instruction not valid");
+        throw new RuntimeException("BranchUnit.accept: add instruction not valid");
     }
 
     @Override
     public void accept(Op.AddI op) {
-        throw new RuntimeException("BranchUnit.accept: load instruction not valid");
+        throw new RuntimeException("BranchUnit.accept: add instruction not valid");
     }
 
     @Override
     public void accept(Op.Mul op) {
-        throw new RuntimeException("BranchUnit.accept: load instruction not valid");
+        throw new RuntimeException("BranchUnit.accept: mul instruction not valid");
     }
 
     @Override
     public void accept(Op.MulI op) {
-        throw new RuntimeException("BranchUnit.accept: load instruction not valid");
+        throw new RuntimeException("BranchUnit.accept: mul instruction not valid");
     }
 
     @Override
     public void accept(Op.Cmp op) {
-        throw new RuntimeException("BranchUnit.accept: load instruction not valid");
+        throw new RuntimeException("BranchUnit.accept: cmp instruction not valid");
     }
 
     @Override
@@ -79,8 +79,18 @@ public class BranchUnit extends Unit{
     }
 
     @Override
-    public void accept(Op.St op) {
+    public void accept(Op.LdI op) {
         throw new RuntimeException("BranchUnit.accept: load instruction not valid");
+    }
+
+    @Override
+    public void accept(Op.St op) {
+        throw new RuntimeException("BranchUnit.accept: store instruction not valid");
+    }
+
+    @Override
+    public void accept(Op.StI op) {
+        throw new RuntimeException("BranchUnit.accept: store instruction not valid");
     }
 
     @Override

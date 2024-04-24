@@ -86,11 +86,6 @@ public class LoadStoreUnit extends Unit{
     public void accept(Op.Ld op) {
         int addr = op.getRsVal() + op.getImVal(); //copied from old ALU
         int res = mem.get(addr);
-//        if(prf.isMemValUnmapped(addr)){ //from mem
-//            res = mem.get(addr);
-//        }else{// from rob
-//            res = rob.getValOfEntry(prf.whereMemInRob(addr));
-//        }
         op.setResult(addr); //the offset location
         op.setRdVal(res);
     }
@@ -99,15 +94,16 @@ public class LoadStoreUnit extends Unit{
     public void accept(Op.LdC op) {
         int addr = op.getImVal(); //either we get from mem or get from the rob
         int res = mem.get(addr); //this isnt always right, exactly when there is a store ahead to the same address
-        // we can detect conflicts and forward or elimiate everything here and behind in the rob
-
-//        int res;
-//        if(prf.isMemValUnmapped(addr)){ //from mem
-//            res = mem.get(addr);
-//        }else{// from rob
-//            res = rob.getValOfEntry(prf.whereMemInRob(addr));
-//        }
         op.setResult(addr); //the offset location
+        op.setRdVal(res);
+    }
+
+    @Override
+    public void accept(Op.LdI op) {
+        int addr = op.getRsVal();
+        int res = mem.get(addr);
+        op.setResult(addr); //the offset location
+        op.setRsVal(addr + op.getImVal()); //what we update rs to! broadcast this like [res, addr] at writeback
         op.setRdVal(res);
     }
 
@@ -115,22 +111,13 @@ public class LoadStoreUnit extends Unit{
     public void accept(Op.St op) {
         int addr = op.getRsVal() + op.getImVal();
         op.setResult(addr);
-//        rob.setValOfEntry(currentRobEntry, addr);
-        //NOT READY ^^^^^^ since we need to retire it
-        //before its ready!
+    }
 
-
-
-
-//        int res; this happens after commit
-//        if(prf.isMemValUnmapped(addr)){ //from mem
-//            res = mem.get(addr);
-//            prf.pointMemAtRobEntry(addr, currentRobEntry);
-//        }else{// from rob
-//            res = rob.getValOfEntry(prf.whereMemInRob(addr));
-//        }
-//        cdb.put(currentRobEntry, List.of(res));
-        //show the updated val in prf
+    @Override
+    public void accept(Op.StI op) {
+        int addr = op.getRsVal();
+        op.setResult(addr);
+        op.setRsVal(addr + op.getImVal());
     }
 
     @Override

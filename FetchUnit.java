@@ -100,7 +100,19 @@ public class FetchUnit extends Unit {
     }
 
     @Override
+    public void accept(Op.LdI op) {
+        pcVal++;
+        pc.set(pcVal);
+    }
+
+    @Override
     public void accept(Op.St op) {
+        pcVal++;
+        pc.set(pcVal);
+    }
+
+    @Override
+    public void accept(Op.StI op) {
         pcVal++;
         pc.set(pcVal);
     }

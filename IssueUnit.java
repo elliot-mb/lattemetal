@@ -143,7 +143,26 @@ public class IssueUnit extends Unit{
     }
 
     @Override
+    public void accept(Op.LdI op) {
+        ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
+        currentRobEntry = e.id;
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+
+        rob.add(e);
+    }
+
+    @Override
     public void accept(Op.St op) {
+        ReorderEntry e = new ReorderEntry(op, op.getRsVal() + op.getIm(), pcVal);
+        currentRobEntry = e.id;
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+        rob.add(e);
+    }
+
+    @Override
+    public void accept(Op.StI op) {
         ReorderEntry e = new ReorderEntry(op, op.getRsVal() + op.getIm(), pcVal);
         currentRobEntry = e.id;
         DecodeUnit.physicalRobEntries.push(currentRobEntry);

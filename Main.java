@@ -20,12 +20,10 @@ public class Main {
      *      * ld   rd (rs) #n    --if we have a constant zero register (or load a constant like below)
      *      *                  --we can use this for direct and indirect addressing
      *      * ldc  rd #n        --load from a constant address
-     *      * ldpr  rd (rs) #n --loads from rs + n, saves rs + n to rs (PRE_INDEXING)
-     *      * ldps  rd (rs) #n --loads from rs, saves rs + n to rs (POST_INDEXING)
+     *      * ldi  rd (rs) #n --post-indexed!! loads from rs, saves rs + n to rs
      *      *
      *      * st   rd (rs) #n   --store whats in register rd into address rs offset by n
-     *      * stpr rd (rs) #n   --stores whats in register rd into rs + n, saves rs + n to rs
-     *      * stps rd (rs) #n   --sotres whats in register rd into rs, saves rs + n to rs
+     *      * sti rd (rs) #n   --post-indexed!! whats in register rd into mem[rs], saves rs + n to rs
      *      *
      *      * brlz rd #n | label_name      --branch; if rd is less than or equal to zero move to absolute instruction # n
      *      * jplz rd #n | label_name     --jump; if rd is less than or equal to zero, relative branch by immediate operand

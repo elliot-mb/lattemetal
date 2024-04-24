@@ -15,7 +15,11 @@ public interface InstructionVoidVisitor {
 
     public void accept(Op.LdC op);
 
+    public void accept(Op.LdI op);
+
     public void accept(Op.St op);
+
+    public void accept(Op.StI op);
 
     public void accept(Op.BrLZ op);
 
