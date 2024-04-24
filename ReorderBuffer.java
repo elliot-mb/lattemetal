@@ -27,7 +27,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     private int committed;
     private int mispredictedInstr;
     private int mispredictedBranches;
-    private int commitedBranches;
+    private int predictedBranches;
     private List<Instruction> committedInstrs;
     private final DecodeUnit dec;
 
@@ -43,6 +43,8 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         this.pc = pc;
         this.committed = 0;
         this.mispredictedInstr = 0;
+        this.mispredictedBranches = 0;
+        this.predictedBranches = 0;
         this.committedInstrs = new ArrayList<Instruction>();
         this.shouldFlushWhere = FLUSH_NOWHERE;
     }
@@ -83,6 +85,14 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         return mispredictedInstr;
     }
 
+    public int getMispredictedBranches(){
+        return mispredictedBranches;
+    }
+
+    public int getPredictedBranches(){
+        return predictedBranches;
+    }
+
     /**
      * the queue is like
      *   head v           v tail
@@ -95,7 +105,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         //System.out.println("rob flushes from " + id);
         CircluarQueue<ReorderEntry> newBuffer = new CircluarQueue<ReorderEntry>(size);
         CircluarQueue<ReorderEntry> newLsq = new CircluarQueue<ReorderEntry>(size);
-        int sizeBefore = buffer.getSize();
+        int sizeBefore = buffer.getElementsIn();
         ReorderEntry peel = buffer.pop();
         while(!buffer.isEmpty() && peel.getId() != id){
             if(!lsq.isEmpty() && peel.getId() == lsq.peek().getId()){
@@ -267,7 +277,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         return shouldFlushWhere;
     }
     public int getCommitted(){
-        return committed;
+        return committedInstrs.size();
     }
 
     public List<Instruction> getCommittedInstrs(){
@@ -451,6 +461,8 @@ public class ReorderBuffer implements InstructionVoidVisitor{
             shouldFlushWhere = currentCommit.getId() + 1;
             flushFrom(currentCommit.getId() + 1);
 //            flushAt = currentRobEntry + 1; //after the current rob entry because we need to maintain program order
+        }else{
+            predictedBranches++;
         }
         cdb.remove(currentCommit.getId());
     }
@@ -467,8 +479,11 @@ public class ReorderBuffer implements InstructionVoidVisitor{
                 pc.set(op.getResult()); // untaken
             }
             shouldFlush = true;
+            mispredictedBranches++;
             shouldFlushWhere = currentCommit.getId() + 1;
             flushFrom(currentCommit.getId() + 1);
+        }else{
+            predictedBranches++;
         }
         cdb.remove(currentCommit.getId());
     }
@@ -476,11 +491,13 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     @Override
     public void accept(Op.Br op) {
         cdb.remove(currentCommit.getId());
+        //commitedBranches++;
     }
 
     @Override
     public void accept(Op.Jp op) {
         cdb.remove(currentCommit.getId());
+        //commitedBranches++;
     }
 
     @Override

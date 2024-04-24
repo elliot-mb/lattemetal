@@ -314,14 +314,18 @@ public class Processor {
         debugOut.println("memory: " + mem);
 
         if(!quietStats){
-            System.out.println("run: program finished in " + tally + " cycles");
+
             double ipc = Utils.toDecimalPlaces( (double) rob.getCommitted() / tally, DP_ACC);
             double time = (rob.getCommitted() * (1 / ipc) * ASSUMED_CYCLE_TIME) / Math.pow(10, 3);
-            double percentMispredictedInstrs = (double) rob.getMispredictedInstr() / rob.getCommitted();
+            double rateMispredictedInstrs = (double) rob.getMispredictedInstr() / rob.getCommitted();
+            double rateMispredictedBranches = (double) rob.getMispredictedBranches() / (rob.getPredictedBranches() + rob.getMispredictedBranches());
+            System.out.println("run: program finished in " + tally + " cycles");
+            System.out.println("run: program finished after committing " + rob.getCommitted() + " instructions");
+            System.out.println("run: program incorrectly speculated and thereby flushed " + rob.getMispredictedInstr() + " instructions");
             System.out.println("run: instructions per cycle " + ipc);
             System.out.println("run: cpu time " + Utils.toDecimalPlaces(time, DP_ACC) + "μs @ " + CLOCK_SPEED_MHZ + "MHz");
-            System.out.println("run: percentage mispredicted instructions " + Utils.toDecimalPlaces(percentMispredictedInstrs, DP_ACC) +"%");
-            System.out.println("run: percentage mispredicted branches " + Utils.toDecimalPlaces(0.1, DP_ACC));
+            System.out.println("run: percentage mispredicted instructions " + Utils.toDecimalPlaces(rateMispredictedInstrs * 100, DP_ACC) +"%");
+            System.out.println("run: percentage mispredicted branches " + Utils.toDecimalPlaces(rateMispredictedBranches * 100, DP_ACC) + "%");
             System.out.println(Arrays.toString(mem.getData()));
             //System.out.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
         }
