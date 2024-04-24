@@ -1,4 +1,16 @@
-address stored in register within load and store instruction is: register value - immediate, base + immediate - carry out load - at the same time take the effective address and store this value back into the register;; add these instructions to calculate the effective address. pre-indexing is base + offset -> Access element and then store back 'pre-indexing'. access the value at just the base address and then store it back is called 'post-indexing'; no addition. dependency chains need to be removed in order to increase ilp.
-leo has everything i have + bypassing. usually people leave with a first at assignment part four stage four. reservation-station bypass; skips the reservation stations when theyre empty. 
-good experiment; starts with a hypothesis which cant be concluded on without the use of your simulator; if you have some sort of hypothesis which you could confirm without running the cpu. a CLEAR hypothesis, good EVIDENCE; one which your conclusions draw on directly. The evidence is complete; you can understand where the conclusion comes from. DETAILED conclusion; its good to start with 'it supports the hypothesis because of X' and a secondary point 'why is this the case', the dive-deeper bit is context-sensitive but is something more low-level combining the evidence and the question is good. ILP scaling graph benchmark has an ILP of 2.something; platue at 3-4 way superscalar. say that, evidence being the scaling graph, conclusion would be it shows that we accept the hypothesis. and then why werent there performance gains at 3 even though the ilp was 3; reason about perhaps it was because you had too few ALUs for the duration of the program. 
+address stored in register within load and store instruction is: register value - immediate, base + immediate -
+carry out load - at the same time take the effective address and store this value back into the register;; add these
+instructions to calculate the effective address. pre-indexing is base + offset -> Access element and then store back
+'pre-indexing'. access the value at just the base address and then store it back is called 'post-indexing'; no addition.
+dependency chains need to be removed in order to increase ilp.
+leo has everything i have + bypassing. usually people leave with a first at assignment part four stage four. reservation
+-station bypass; skips the reservation stations when theyre empty.
+good experiment; starts with a hypothesis which cant be concluded on without the use of your simulator; if you have some
+ sort of hypothesis which you could confirm without running the cpu. a CLEAR hypothesis, good EVIDENCE; one which your
+ conclusions draw on directly. The evidence is complete; you can understand where the conclusion comes from. DETAILED
+ conclusion; its good to start with 'it supports the hypothesis because of X' and a secondary point 'why is this the
+ case', the dive-deeper bit is context-sensitive but is something more low-level combining the evidence and the question
+  is good. ILP scaling graph benchmark has an ILP of 2.something; platue at 3-4 way superscalar. say that, evidence being
+   the scaling graph, conclusion would be it shows that we accept the hypothesis. and then why werent there performance
+   gains at 3 even though the ilp was 3; reason about perhaps it was because you had too few ALUs for the duration of the program.
 papi; likqid; turn performance counters on and off during the runtime of the program (in real hardware).
