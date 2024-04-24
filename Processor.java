@@ -7,9 +7,9 @@ public class Processor {
     //@@@SETTINGS@@@
     private static final double CLOCK_SPEED_MHZ = 500;
     private static final int SUPERSCALAR_WIDTH = 1;
-    private static final int ALU_COUNT = 4;
-    private static final int LSU_COUNT = 2;
-    private static final int BRU_COUNT = 2;
+    private static final int ALU_COUNT = 1;
+    private static final int LSU_COUNT = 1;
+    private static final int BRU_COUNT = 1;
     private static final int ALU_RS_COUNT = 4;
     private static final int LSU_RS_COUNT = 2;
     private static final int BRU_RS_COUNT = 2;
