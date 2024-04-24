@@ -107,6 +107,11 @@ public class Test {
         Utils.assertTrue(result.equals(Utils.runKern("./assembly/simple_branch_taken.latte", getExampleMemory2(), true, GLOBAL_DIVERGE_LIM, true)));
     }
 
+    private static void movTest() throws FileNotFoundException{
+        final Memory result = new Memory(0, new int[]{40, 10, 0, 0, 0, 0, 0, 0, 0, 0, 92, 84, 76, 68, 50, 42, 34, 26, 18, 0, 92, 84, 76, 68, 50, 42, 34, 26, 18, 0, 12, 24, 36, 48, 51, 62, 74, 86, 98, 120, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+        Utils.assertTrue(result.equals(Utils.runKern("./assembly/move_ten_elements.latte", getExampleMemory2(), true, GLOBAL_DIVERGE_LIM, true)));
+    }
+
     static void test() throws FileNotFoundException {
         try{branchTakenTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
         try{blockTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
@@ -117,5 +122,6 @@ public class Test {
         try{vecAddMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
         try{vecDotMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
         try{bubbleSortMemTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
+        try{movTest();}catch(RuntimeException err){System.out.println(err.getMessage());}
     }
 }
