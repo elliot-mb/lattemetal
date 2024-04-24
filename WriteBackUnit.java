@@ -99,7 +99,7 @@ public class WriteBackUnit extends Unit{
 
     @Override
     public void accept(Op.LdI op) {
-        cdb.put(currentRobEntry, List.of(op.getRdVal()));
+        cdb.put(currentRobEntry, List.of(op.getRdVal(), op.getRsVal()));
     }
 
     @Override
@@ -110,7 +110,7 @@ public class WriteBackUnit extends Unit{
 
     @Override
     public void accept(Op.StI op) {
-
+        cdb.put(currentRobEntry, Arrays.asList(op.getRdVal(), op.getResult()));
     }
 
     @Override

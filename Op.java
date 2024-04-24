@@ -293,12 +293,12 @@ public class Op {
         public int getRsVal() { return rsVal; }
         public int getImVal() { return im; }
         public Instruction copy(){
-            Ld ld = new Ld(getRd(), getRs(), getImVal());
-            ld.setRdVal(getRdVal());
-            ld.setRsVal(getRsVal());
-            ld.setResult(result);
-            ld.setId(getId());
-            return ld;
+            LdI ldi = new LdI(getRd(), getRs(), getImVal());
+            ldi.setRdVal(getRdVal());
+            ldi.setRsVal(getRsVal());
+            ldi.setResult(result);
+            ldi.setId(getId());
+            return ldi;
         }
     }
 
@@ -366,12 +366,12 @@ public class Op {
         public int getRsVal() { return rsVal; }
         public int getImVal() { return im; }
         public Instruction copy(){
-            St st = new St(getRd(), getRs(), getImVal());
-            st.setRdVal(getRdVal());
-            st.setRsVal(getRsVal());
-            st.setResult(result);
-            st.setId(getId());
-            return st;
+            StI sti = new StI(getRd(), getRs(), getImVal());
+            sti.setRdVal(getRdVal());
+            sti.setRsVal(getRsVal());
+            sti.setResult(result);
+            sti.setId(getId());
+            return sti;
         }
     }
 

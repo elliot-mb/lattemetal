@@ -1,0 +1,5 @@
+        addi s0 zero #0
+write:  sti zero s0 #1
+        addi s1 s0 #-64
+        brlz s1 write
+        addi s2 zero #0
