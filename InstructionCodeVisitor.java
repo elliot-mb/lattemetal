@@ -18,6 +18,10 @@ public interface InstructionCodeVisitor {
 
     public Opcode accept(Op.St op);
 
+//    public Opcode accept(Op.StPr op);
+//
+//    public Opcode accept(Op.StPs op);
+
     public Opcode accept(Op.BrLZ op);
 
     public Opcode accept(Op.JpLZ op);

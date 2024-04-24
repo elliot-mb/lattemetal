@@ -267,6 +267,76 @@ public class Op {
 
     }
 
+//    //load pre indexing
+//    public class LdPr extends Instruction{
+//        private static final int DURATION = 2;
+//
+//        LdPr(RegisterName rd, RegisterName rs, Integer immediate){
+//            super(DURATION, immediate, rd, rs);
+//            checkShape(rd, rs, immediate);
+//        }
+//
+//        @Override
+//        public Opcode visit(InstructionCodeVisitor v) { return v.accept(this); }
+//        @Override
+//        public List<Integer> visit(InstructionLocVisitor v) {
+//            return v.accept(this);
+//        }
+//        @Override
+//        public void visit(InstructionVoidVisitor v) {
+//            v.accept(this);
+//        }
+//
+//        public void setRdVal(int v) { rdVal = v; }
+//        public int getRdVal() { return rdVal; }
+//        public void setRsVal(int v) { rsVal = v; }
+//        public int getRsVal() { return rsVal; }
+//        public int getImVal() { return im; }
+//        public Instruction copy(){
+//            Ld ld = new Ld(getRd(), getRs(), getImVal());
+//            ld.setRdVal(getRdVal());
+//            ld.setRsVal(getRsVal());
+//            ld.setResult(result);
+//            ld.setId(getId());
+//            return ld;
+//        }
+//    }
+//
+//    //load post indexing
+//    public class LdPs extends Instruction{
+//        private static final int DURATION = 2;
+//
+//        LdPs(RegisterName rd, RegisterName rs, Integer immediate){
+//            super(DURATION, immediate, rd, rs);
+//            checkShape(rd, rs, immediate);
+//        }
+//
+//        @Override
+//        public Opcode visit(InstructionCodeVisitor v) { return v.accept(this); }
+//        @Override
+//        public List<Integer> visit(InstructionLocVisitor v) {
+//            return v.accept(this);
+//        }
+//        @Override
+//        public void visit(InstructionVoidVisitor v) {
+//            v.accept(this);
+//        }
+//
+//        public void setRdVal(int v) { rdVal = v; }
+//        public int getRdVal() { return rdVal; }
+//        public void setRsVal(int v) { rsVal = v; }
+//        public int getRsVal() { return rsVal; }
+//        public int getImVal() { return im; }
+//        public Instruction copy(){
+//            Ld ld = new Ld(getRd(), getRs(), getImVal());
+//            ld.setRdVal(getRdVal());
+//            ld.setRsVal(getRsVal());
+//            ld.setResult(result);
+//            ld.setId(getId());
+//            return ld;
+//        }
+//    }
+
     public class St extends Instruction{
         private static final int DURATION = 2;
 
@@ -302,6 +372,80 @@ public class Op {
             return st;
         }
     }
+
+//    //store pre-indexed
+//    public class StPr extends Instruction{
+//        private static final int DURATION = 2;
+//
+//        StPr(RegisterName rd, RegisterName rs, Integer immediate){
+//            super(DURATION, immediate, rd, rs);
+//            checkShape(rd, rs, immediate);
+//        }
+//
+//        @Override
+//        public Opcode visit(InstructionCodeVisitor v){
+//            return v.accept(this);
+//        }
+//        @Override
+//        public List<Integer> visit(InstructionLocVisitor v) {
+//            return v.accept(this);
+//        }
+//        @Override
+//        public void visit(InstructionVoidVisitor v) {
+//            v.accept(this);
+//        }
+//
+//        public void setRdVal(int v) { rdVal = v; }
+//        public int getRdVal() { return rdVal; }
+//        public void setRsVal(int v) { rsVal = v; }
+//        public int getRsVal() { return rsVal; }
+//        public int getImVal() { return im; }
+//        public Instruction copy(){
+//            St st = new St(getRd(), getRs(), getImVal());
+//            st.setRdVal(getRdVal());
+//            st.setRsVal(getRsVal());
+//            st.setResult(result);
+//            st.setId(getId());
+//            return st;
+//        }
+//    }
+//
+//    //store post indexing
+//    public class StPs extends Instruction{
+//        private static final int DURATION = 2;
+//
+//        StPs(RegisterName rd, RegisterName rs, Integer immediate){
+//            super(DURATION, immediate, rd, rs);
+//            checkShape(rd, rs, immediate);
+//        }
+//
+//        @Override
+//        public Opcode visit(InstructionCodeVisitor v){
+//            return v.accept(this);
+//        }
+//        @Override
+//        public List<Integer> visit(InstructionLocVisitor v) {
+//            return v.accept(this);
+//        }
+//        @Override
+//        public void visit(InstructionVoidVisitor v) {
+//            v.accept(this);
+//        }
+//
+//        public void setRdVal(int v) { rdVal = v; }
+//        public int getRdVal() { return rdVal; }
+//        public void setRsVal(int v) { rsVal = v; }
+//        public int getRsVal() { return rsVal; }
+//        public int getImVal() { return im; }
+//        public Instruction copy(){
+//            St st = new St(getRd(), getRs(), getImVal());
+//            st.setRdVal(getRdVal());
+//            st.setRsVal(getRsVal());
+//            st.setResult(result);
+//            st.setId(getId());
+//            return st;
+//        }
+//    }
 
     public class BrLZ extends Instruction{
 
