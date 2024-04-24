@@ -156,20 +156,20 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         return index;
     }
 
-    private void setValOfQueueEntry(int id, int val, CircluarQueue<ReorderEntry> buff){
-        List<ReorderEntry> re = buff.peekXs();
-        int index = locationOfEntryId(id, buff);
-        if(index == -1) throw new RuntimeException("setValOfEntry: there is no such entry with id '" + id + "' in buffer");
-        ReorderEntry rChange = re.get(index);
-        rChange.setValue(val);
-        rChange.readyUp();
-        buff.setElement(index, rChange);
-    }
-
-    public void setValOfEntry(int id, int val){
-        setValOfQueueEntry(id, val, buffer);
-        setValOfQueueEntry(id, val, lsq);
-    }
+//    private void setValOfQueueEntry(int id, int val, CircluarQueue<ReorderEntry> buff, int which){
+//        List<ReorderEntry> re = buff.peekXs();
+//        int index = locationOfEntryId(id, buff);
+//        if(index == -1) throw new RuntimeException("setValOfEntry: there is no such entry with id '" + id + "' in buffer");
+//        ReorderEntry rChange = re.get(index);
+//        rChange.setValue(val, which);
+//        rChange.readyUp();
+//        buff.setElement(index, rChange);
+//    }
+//
+//    public void setValOfEntry(int id, int val, int which){
+//        setValOfQueueEntry(id, val, buffer, which);
+//        setValOfQueueEntry(id, val, lsq, which);
+//    }
 
     public void setEntryReady(int id){
         getEntry(id).readyUp();
@@ -179,11 +179,11 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 //        setValOfQueueEntry(id, val, lsq);
 //    }
 
-    public int getValOfEntry(int id){
+    public int getValOfEntry(int id, int which){
         List<ReorderEntry> re = buffer.peekXs();
         int index = locationOfEntryId(id, buffer);
         if(index == -1) throw new RuntimeException("getValOfEntry: there is no such entry with id '" + id + "' in reorder buffer");;
-        return re.get(index).getValue();
+        return re.get(index).getValue(which);
     }
 
     public ReorderEntry getLSQEntry(int id){
@@ -209,7 +209,11 @@ public class ReorderBuffer implements InstructionVoidVisitor{
                 Opcode codeCheck = r.getOp().visit(new ConcreteCodeVisitor());
                 List<Integer> payload = cdb.get(r.getId());
                 //if its a fixed branch (non-conditional) it has no value and no payload so i dont write any value on the cdb
-                if(!payload.isEmpty()) r.setValue(payload.get(0)); //read from the map if the id matches this rese entry (value is already in the entry before we commit!)
+                int i = 0;
+                for(Integer val : payload){
+                    r.setValue(val, i); //read from the map if the id matches this rese entry (value is already in the entry before we commit!)
+                    i++;
+                }
                 r.readyUp();
             }
         }
@@ -275,7 +279,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         dec.physicalRegisters.pop();
         dec.physicalRegisters.pop();
         dec.physicalRegisters.pop();
-        rf.setReg(op.getRd(), currentCommit.getValue());
+        rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
     }
@@ -286,7 +290,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         DecodeUnit.physicalRobEntries.pop();
         dec.physicalRegisters.pop();
         dec.physicalRegisters.pop();
-        rf.setReg(op.getRd(), currentCommit.getValue());
+        rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
     }
@@ -299,7 +303,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         dec.physicalRegisters.pop();
         dec.physicalRegisters.pop();
         dec.physicalRegisters.pop();
-        rf.setReg(op.getRd(), currentCommit.getValue());
+        rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
     }
@@ -310,7 +314,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         DecodeUnit.physicalRobEntries.pop();
         dec.physicalRegisters.pop();
         dec.physicalRegisters.pop();
-        rf.setReg(op.getRd(), currentCommit.getValue());
+        rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
     }
@@ -323,7 +327,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         dec.physicalRegisters.pop();
         dec.physicalRegisters.pop();
         dec.physicalRegisters.pop();
-        rf.setReg(op.getRd(), currentCommit.getValue());
+        rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
     }
@@ -334,7 +338,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         DecodeUnit.physicalRobEntries.pop();
         dec.physicalRegisters.pop();
         dec.physicalRegisters.pop();
-        rf.setReg(op.getRd(), currentCommit.getValue());
+        rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
     }
@@ -343,7 +347,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     public void accept(Op.LdC op) {
         DecodeUnit.physicalRobEntries.pop();
         dec.physicalRegisters.pop();
-        rf.setReg(op.getRd(), currentCommit.getValue());
+        rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
     }
@@ -354,8 +358,8 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         DecodeUnit.physicalRobEntries.pop();
         dec.physicalRegisters.pop();
         dec.physicalRegisters.pop();
-        rf.setReg(op.getRd(), currentCommit.getValue());
-        rf.setReg(op.getRs(), op.getRsVal());
+        rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
+        rf.setReg(op.getRs(), currentCommit.getValue(ReorderEntry.SND));
         rat.regValIsReady(op.getRd());
         rat.regValIsReady(op.getRs());
     }
@@ -367,7 +371,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         dec.physicalRegisters.pop();
         dec.physicalRegisters.pop();
 //        System.out.println("STORING " + currentCommit.getValue() + " AT " + op.getResult());
-        mem.set(currentCommit.getValue(), op.getResult()); //addr gets stored in result in the LSU!
+        mem.set(currentCommit.getValue(ReorderEntry.FST), op.getResult()); //addr gets stored in result in the LSU!
 //        cdb.remove(currentCommit.getId());
         ReorderEntry lastLoadOrNull = precedingLoadOrNull();
         if(lastLoadOrNull == null) return; //no load precedes
@@ -387,7 +391,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
             flushFrom(lastLoadOrNull.getId());
             pc.set(buffer.peekHead().getPcVal());
         }else if(collide){ // OTHERWISE, JUST UPDATE THE VALUE OF THE LOAD
-            lastLoadOrNull.setValue(op.getResult());
+            lastLoadOrNull.setValue(op.getResult(), ReorderEntry.FST);
             lastLoadOrNull.readyUp(); //make sure its ready
         }
     }
@@ -399,9 +403,9 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         dec.physicalRegisters.pop();
         dec.physicalRegisters.pop();
 //        System.out.println("STORING " + currentCommit.getValue() + " AT " + op.getResult());
-        mem.set(currentCommit.getValue(), op.getRsVal()); //addr gets stored in result in the LSU!
+        mem.set(currentCommit.getValue(ReorderEntry.FST), op.getRsVal()); //addr gets stored in result in the LSU!
 
-        rf.setReg(op.getRs(), op.getResult());
+        rf.setReg(op.getRs(), currentCommit.getValue(ReorderEntry.SND));
         rat.regValIsReady(op.getRs());
 
 //        cdb.remove(currentCommit.getId());
@@ -423,7 +427,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
             flushFrom(lastLoadOrNull.getId());
             pc.set(buffer.peekHead().getPcVal());
         }else if(collide){ // OTHERWISE, JUST UPDATE THE VALUE OF THE LOAD
-            lastLoadOrNull.setValue(op.getResult());
+            lastLoadOrNull.setValue(op.getResult(), ReorderEntry.FST);
             lastLoadOrNull.readyUp(); //make sure its ready
         }
     }
@@ -432,7 +436,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     public void accept(Op.BrLZ op) {
         DecodeUnit.physicalRobEntries.pop();
         dec.physicalRegisters.pop();
-        boolean flag = currentCommit.getValue() == BranchUnit.TAKEN;
+        boolean flag = currentCommit.getValue(ReorderEntry.FST) == BranchUnit.TAKEN;
         if(flag != Unit.STATIC_PREDICT_BR_TAKEN){
             if(flag){
                 pc.set(op.getImVal());
@@ -451,7 +455,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     public void accept(Op.JpLZ op) {
         DecodeUnit.physicalRobEntries.pop();
         dec.physicalRegisters.pop();
-        boolean flag = currentCommit.getValue() == BranchUnit.TAKEN;
+        boolean flag = currentCommit.getValue(ReorderEntry.FST) == BranchUnit.TAKEN;
         if(flag != Unit.STATIC_PREDICT_BR_TAKEN){
             if(flag){
                 pc.set(op.getResult() + op.getImVal());

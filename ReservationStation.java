@@ -78,7 +78,7 @@ public class ReservationStation implements InstructionVoidVisitor {
         RegisterName regK = sources.size() <= 1 ? null : RegisterName.values()[sources.get(1)];
 
         if(regJ != null && rat.isRegValReady(regJ)){
-            vJ = rat.isRegValUnmapped(regJ) ? rf.getReg(regJ) : rob.getValOfEntry(rat.whereRegInRob(regJ));
+            vJ = rat.isRegValUnmapped(regJ) ? rf.getReg(regJ) : rob.getValOfEntry(rat.whereRegInRob(regJ), rat.cdbEntryOf(regJ));
             rJ = true; //ready up
             qJ = NO_DEPENDENCY;
         }else if(regJ != null){
@@ -90,7 +90,7 @@ public class ReservationStation implements InstructionVoidVisitor {
             rJ = true;
         }
         if(regK != null && rat.isRegValReady(regK)){
-            vK =  rat.isRegValUnmapped(regK) ? rf.getReg(regK) : rob.getValOfEntry(rat.whereRegInRob(regK));
+            vK =  rat.isRegValUnmapped(regK) ? rf.getReg(regK) : rob.getValOfEntry(rat.whereRegInRob(regK), rat.cdbEntryOf(regK));
             rK = true; //ready up
             qK = NO_DEPENDENCY;
         }else if(regK != null){
