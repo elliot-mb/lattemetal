@@ -8,7 +8,7 @@ public class Processor {
     private static final double CLOCK_SPEED_MHZ = 500;
     public static final boolean BR_PREDICTOR_IS_FIXED = true;
     private static final int BTB_CACHE_SIZE = 32;
-    public static final int SUPERSCALAR_WIDTH = 8;
+    public static final int SUPERSCALAR_WIDTH = 2;
     private static final int ALU_COUNT = 4;
     private static final int LSU_COUNT = 2;
     private static final int BRU_COUNT = 2;
