@@ -45,7 +45,7 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) throws FileNotFoundException {
-        String programPath = "./assembly/write_64_zeros.latte";
+        String programPath = "./assembly/vec_add.latte";
         int printWidth = 1;
         boolean testing = false;
         boolean quiet = false;

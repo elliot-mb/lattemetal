@@ -6,10 +6,10 @@ import java.util.*;
 public class Processor {
     //@@@SETTINGS@@@
     private static final double CLOCK_SPEED_MHZ = 500;
-    private static final int SUPERSCALAR_WIDTH = 2;
-    private static final int ALU_COUNT = 4;
-    private static final int LSU_COUNT = 2;
-    private static final int BRU_COUNT = 2;
+    private static final int SUPERSCALAR_WIDTH = 1;
+    private static final int ALU_COUNT = 1;
+    private static final int LSU_COUNT = 1;
+    private static final int BRU_COUNT = 1;
     private static final int ALU_RS_COUNT = 2;
     private static final int LSU_RS_COUNT = 1;
     private static final int BRU_RS_COUNT = 1;
@@ -305,7 +305,7 @@ public class Processor {
 //            } //delete whats inside (voided is used to detect when writebacks are finished)
             delete.flush(FLUSH_ALL); // any instructions we want to throw away can be put into delete
 
-            if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");
+            //if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");
 
             cdb.clear();
         }
@@ -317,15 +317,15 @@ public class Processor {
             System.out.println("run: program finished in " + tally + " cycles");
             double ipc = Utils.toDecimalPlaces( (double) rob.getCommitted() / tally, DP_ACC);
             double time = (rob.getCommitted() * (1 / ipc) * ASSUMED_CYCLE_TIME) / Math.pow(10, 3);
-            double percentMispredicts = (double) rob.getMispredicted() / rob.getCommitted();
+            double percentMispredictedInstrs = (double) rob.getMispredictedInstr() / rob.getCommitted();
             System.out.println("run: instructions per cycle " + ipc);
             System.out.println("run: cpu time " + Utils.toDecimalPlaces(time, DP_ACC) + "μs @ " + CLOCK_SPEED_MHZ + "MHz");
-            System.out.println("run: percentage mispredicted " + Utils.toDecimalPlaces(percentMispredicts, DP_ACC) +"%");
+            System.out.println("run: percentage mispredicted instructions " + Utils.toDecimalPlaces(percentMispredictedInstrs, DP_ACC) +"%");
+            System.out.println("run: percentage mispredicted branches " + Utils.toDecimalPlaces(0.1, DP_ACC));
             System.out.println(Arrays.toString(mem.getData()));
+            //System.out.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
         }
 
-
-        //debugOut.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
         return mem;
     }
 
