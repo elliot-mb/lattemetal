@@ -173,6 +173,7 @@ public class IssueUnit extends Unit{
     @Override
     public void accept(Op.BrLZ op) {
         ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST, op.getResult());
+        e.setValue(flag ? BranchUnit.TAKEN : BranchUnit.NOT_TAKEN, ReorderEntry.SND); //use the unused reorder entry to store whether the branch was taken
         currentRobEntry = e.id;
         DecodeUnit.physicalRobEntries.push(currentRobEntry);
         rob.add(e);
@@ -181,6 +182,7 @@ public class IssueUnit extends Unit{
     @Override
     public void accept(Op.JpLZ op) {
         ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST, op.getResult());
+        e.setValue(flag ? BranchUnit.TAKEN : BranchUnit.NOT_TAKEN, ReorderEntry.SND); //use the unused reorder entry to store whether the branch was taken
         currentRobEntry = e.id;
         DecodeUnit.physicalRobEntries.push(currentRobEntry);
         rob.add(e);

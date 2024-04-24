@@ -132,10 +132,10 @@ public class FetchUnit extends Unit {
         }else{ //use btb
             if(btb.hasEntry(pcVal)){
                 pcVal = btb.getPrediction(pcVal);
-                op.setWasTaken(true);
+                flag = true;
             }else{
                 pcVal++;
-                op.setWasTaken(false);
+                flag = false;
             }
         }
 
@@ -155,10 +155,10 @@ public class FetchUnit extends Unit {
         }else{
             if(btb.hasEntry(pcVal)){
                 pcVal = btb.getPrediction(pcVal); //should encode the offset for us
-                op.setWasTaken(true); //for transferring the value to commit
+                flag = true;
             }else{
                 pcVal++;
-                op.setWasTaken(false);
+                flag = false;
             }
         }
         pc.set(pcVal);

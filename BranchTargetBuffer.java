@@ -3,11 +3,9 @@ import java.util.Map;
 
 public class BranchTargetBuffer {
 
+
     private final Map<Integer, Integer> pcToPrediction;
     private final CircluarQueue<Integer> orderAdded;
-
-//    private final CircluarQueue<Boolean> branchQueue; //since theyre only acted on in program order this should be fine to discern if by the end whether a branch was taken in fetch
-
     BranchTargetBuffer(int size){
         this.orderAdded = new CircluarQueue<Integer>(size); //models our size and replacement strategy (oldest evicted)
         //if the rob were full of branches this would be full too, and then its also everything we could put through the

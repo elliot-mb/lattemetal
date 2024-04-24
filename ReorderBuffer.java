@@ -487,8 +487,9 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         DecodeUnit.physicalRobEntries.pop();
         dec.physicalRegisters.pop();
         boolean flag = currentCommit.getValue(ReorderEntry.FST) == BranchUnit.TAKEN;
+        boolean predTaken = currentCommit.getValue(ReorderEntry.SND) == BranchUnit.TAKEN;
 
-        handleBranch(op, flag, op.getImVal(), op.getWasTaken());
+        handleBranch(op, flag, op.getImVal(), predTaken);
 
         cdb.remove(currentCommit.getId());
     }
@@ -498,8 +499,9 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         DecodeUnit.physicalRobEntries.pop();
         dec.physicalRegisters.pop();
         boolean flag = currentCommit.getValue(ReorderEntry.FST) == BranchUnit.TAKEN;
+        boolean predTaken = currentCommit.getValue(ReorderEntry.SND) == BranchUnit.TAKEN;
 
-        handleBranch(op, flag, op.getResult() + op.getImVal() - 1, op.getWasTaken());
+        handleBranch(op, flag, op.getResult() + op.getImVal() - 1, predTaken);
 
         cdb.remove(currentCommit.getId());
     }
