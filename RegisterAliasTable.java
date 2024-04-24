@@ -54,8 +54,7 @@ public class RegisterAliasTable {
     // things before wont, but they will still be waiting for their prince charming to broadcast on the ROB and save them
 
     public void pointRegAtRobEntry(RegisterName reg, int robEntry, int entry) {
-        if(regAlias.size() >= NUM_PHYS_REGS) throw new RuntimeException("pointAtRobEntry: no more physical registers left!");
-        if(regAlias.get(reg.ordinal()).isFull()) throw new RuntimeException("pointAtRobEntry: no more aliases left for this register '" + reg.name() +"'");
+        if(regAlias.get(reg.ordinal()).isFull()) throw new RuntimeException("pointAtRobEntry: no more history left for register '" + reg.name() +"'");
         regAlias.get(reg.ordinal()).push(robEntry);
         whichCDBEntry.get(reg.ordinal()).push(entry);
     }
@@ -65,20 +64,15 @@ public class RegisterAliasTable {
         for(Map.Entry<Integer, CircluarQueue<Integer>> e : regAlias.entrySet()){
             int resetKey = e.getKey();
             CircluarQueue<Integer> oldAliasQ = e.getValue();
+            CircluarQueue<Integer> oldEntryQ = e.getValue();
             CircluarQueue<Integer> newAliasQ = new CircluarQueue<Integer>(HISTORY_LENGTH);
+            CircluarQueue<Integer> newEntryQ = new CircluarQueue<Integer>(HISTORY_LENGTH);
             while(!oldAliasQ.isEmpty() && oldAliasQ.peek() < fromRobEntry){ //as soon as we meet or exceed fromRobEntry we stop transferring *(after the flush in program order)
                 newAliasQ.push(oldAliasQ.pop()); //transfer those who're
+                newEntryQ.push(oldEntryQ.pop());
             }
             regAlias.put(resetKey, newAliasQ); //queue with all values after the higher value in program order removed (perhaps this is wrong)??
-        }
-        for(Map.Entry<Integer, CircluarQueue<Integer>> e : whichCDBEntry.entrySet()){
-            int resetKey = e.getKey();
-            CircluarQueue<Integer> oldEntryQ = e.getValue();
-            CircluarQueue<Integer> newEntryQ = new CircluarQueue<Integer>(HISTORY_LENGTH);
-            while(!oldEntryQ.isEmpty() && oldEntryQ.peek() < fromRobEntry){ //as soon as we meet or exceed fromRobEntry we stop transferring *(after the flush in program order)
-                newEntryQ.push(oldEntryQ.pop()); //transfer those who're
-            }
-            whichCDBEntry.put(resetKey, newEntryQ); //queue with all values after the higher value in program order removed (perhaps this is wrong)??
+            whichCDBEntry.put(resetKey, newEntryQ);
         }
     }
 

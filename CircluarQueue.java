@@ -41,7 +41,7 @@ public class CircluarQueue<T> {
 
     public void push(T x){
         if(isFull()) {
-            //System.out.println("CQueue.push: warning: queue is full");
+            System.out.println("CQueue.push: warning: queue is full");
             return;
         }
         xs.set(head, x);
