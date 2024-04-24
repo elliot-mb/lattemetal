@@ -86,7 +86,7 @@ public class LoadStoreUnit extends Unit{
     public void accept(Op.Ld op) {
         int addr = op.getRsVal() + op.getImVal(); //copied from old ALU
         int res = mem.get(addr);
-        op.setResult(addr); //the offset location
+        op.setRsVal(addr); //the offset location
         op.setRdVal(res);
     }
 
@@ -94,30 +94,24 @@ public class LoadStoreUnit extends Unit{
     public void accept(Op.LdC op) {
         int addr = op.getImVal(); //either we get from mem or get from the rob
         int res = mem.get(addr); //this isnt always right, exactly when there is a store ahead to the same address
-        op.setResult(addr); //the offset location
         op.setRdVal(res);
     }
 
     @Override
     public void accept(Op.LdI op) {
-        int addr = op.getRsVal();
-        int res = mem.get(addr);
-        op.setResult(addr); //the offset location
-        op.setRsVal(addr + op.getImVal()); //what we update rs to! broadcast this like [res, addr] at writeback
+        int res = mem.get(op.getRsVal());
+        op.setRsVal(op.getRsVal() + op.getImVal()); //what we update rs to! broadcast this like [res, addr] at writeback
         op.setRdVal(res);
     }
 
     @Override
     public void accept(Op.St op) {
-        int addr = op.getRsVal() + op.getImVal();
-        op.setResult(addr);
+        op.setResult(op.getRsVal() + op.getImVal());
     }
 
     @Override
     public void accept(Op.StI op) {
-        int addr = op.getRsVal();
-        op.setResult(addr);
-        op.setRsVal(addr + op.getImVal());
+        op.setResult(op.getRsVal() + op.getImVal()); //where we set to
     }
 
     @Override

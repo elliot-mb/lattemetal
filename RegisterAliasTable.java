@@ -1,10 +1,11 @@
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class RegisterAliasTable {
-    private final Map<Integer, CircluarQueue<Integer>> resultStatus;
+    private final Map<Integer, CircluarQueue<Integer>> regAlias;
+    private final Map<Integer, CircluarQueue<Integer>> whichCDBEntry; //if we produce two results from an instruction, this tells us which cdb entry to look in
+
 
     private static int HISTORY_LENGTH = 64;
 
@@ -13,9 +14,13 @@ public class RegisterAliasTable {
     private final int NUM_PHYS_REGS = 128; //four times that of the register file
 
     RegisterAliasTable(Map<Integer, List<Integer>> cdb, ReorderBuffer rob){
-        this.resultStatus = new HashMap<Integer, CircluarQueue<Integer>>();
+        this.regAlias = new HashMap<Integer, CircluarQueue<Integer>>();
         for(int i = 0; i < RegisterName.values().length; i++){
-            this.resultStatus.put(i, new CircluarQueue<Integer>(HISTORY_LENGTH));
+            this.regAlias.put(i, new CircluarQueue<Integer>(HISTORY_LENGTH));
+        }
+        this.whichCDBEntry = new HashMap<Integer, CircluarQueue<Integer>>();
+        for(int i = 0; i < RegisterName.values().length; i++){
+            this.whichCDBEntry.put(i, new CircluarQueue<Integer>(HISTORY_LENGTH));
         }
         this.rob = rob;
     }
@@ -25,21 +30,22 @@ public class RegisterAliasTable {
 //    }
 
     public Integer getLatestAlias(RegisterName reg){
-        return resultStatus.get(reg.ordinal()).peekHead(); // peek the item under where we're adding(latest)
+        return regAlias.get(reg.ordinal()).peekHead(); // peek the item under where we're adding(latest)
     }
     public boolean isRegValAtRobAndReady(RegisterName reg){
-        return resultStatus.containsKey(reg.ordinal()) && getLatestAlias(reg) != null && rob.getEntry(getLatestAlias(reg)).isReady(); //if the register does not point anywhere it is ready, or if it
+        return regAlias.containsKey(reg.ordinal()) && getLatestAlias(reg) != null && rob.getEntry(getLatestAlias(reg)).isReady(); //if the register does not point anywhere it is ready, or if it
     }
     public boolean isRegValUnmapped(RegisterName reg){
-        return resultStatus.get(reg.ordinal()).isEmpty();
+        return regAlias.get(reg.ordinal()).isEmpty();
     }
     public boolean isRegValReady(RegisterName reg){
         return isRegValUnmapped(reg) || isRegValAtRobAndReady(reg);
     }
     public void regValIsReady(RegisterName reg) {
-        if(!resultStatus.containsKey(reg.ordinal())) throw new RuntimeException("regValIsReady: there is no key '" + reg.ordinal() + "' for register '" + reg.name() + "'");
-        if(resultStatus.get(reg.ordinal()).isEmpty()) throw new RuntimeException("regValIsReady: there is no alias for '" + reg.name() +"' in the RAT");
-        resultStatus.get(reg.ordinal()).pop();
+        if(!regAlias.containsKey(reg.ordinal())) throw new RuntimeException("regValIsReady: there is no key '" + reg.ordinal() + "' for register '" + reg.name() + "'");
+        if(regAlias.get(reg.ordinal()).isEmpty()) throw new RuntimeException("regValIsReady: there is no alias for '" + reg.name() +"' in the RAT");
+        regAlias.get(reg.ordinal()).pop();
+        whichCDBEntry.get(reg.ordinal()).pop();
     } // there is no res station it corresponds to
 
     public int whereRegInRob(RegisterName reg){
@@ -47,24 +53,38 @@ public class RegisterAliasTable {
     } // as we are in program order everything after an alias was added should reference this latest location in the rob
     // things before wont, but they will still be waiting for their prince charming to broadcast on the ROB and save them
 
-    public void pointRegAtRobEntry(RegisterName reg, int robEntry) {
-        if(resultStatus.size() >= NUM_PHYS_REGS) throw new RuntimeException("pointAtRobEntry: no more physical registers left!");
-        if(resultStatus.get(reg.ordinal()).isFull()) throw new RuntimeException("pointAtRobEntry: no more aliases left for this register '" + reg.name() +"'");
-        resultStatus.get(reg.ordinal()).push(robEntry);
+    public void pointRegAtRobEntry(RegisterName reg, int robEntry, int entry) {
+        if(regAlias.size() >= NUM_PHYS_REGS) throw new RuntimeException("pointAtRobEntry: no more physical registers left!");
+        if(regAlias.get(reg.ordinal()).isFull()) throw new RuntimeException("pointAtRobEntry: no more aliases left for this register '" + reg.name() +"'");
+        regAlias.get(reg.ordinal()).push(robEntry);
+        whichCDBEntry.get(reg.ordinal()).push(entry);
     }
 
     //remove all references to rob entries after and including the passed in value!
     public void flushFrom(int fromRobEntry){
-        for(Map.Entry<Integer, CircluarQueue<Integer>> e : resultStatus.entrySet()){
+        for(Map.Entry<Integer, CircluarQueue<Integer>> e : regAlias.entrySet()){
             int resetKey = e.getKey();
-            CircluarQueue<Integer> oldQ = e.getValue();
-            CircluarQueue<Integer> newQ = new CircluarQueue<Integer>(HISTORY_LENGTH);
-            while(!oldQ.isEmpty() && oldQ.peek() < fromRobEntry){ //as soon as we meet or exceed fromRobEntry we stop transferring *(after the flush in program order)
-                newQ.push(oldQ.pop()); //transfer those who're
+            CircluarQueue<Integer> oldAliasQ = e.getValue();
+            CircluarQueue<Integer> newAliasQ = new CircluarQueue<Integer>(HISTORY_LENGTH);
+            while(!oldAliasQ.isEmpty() && oldAliasQ.peek() < fromRobEntry){ //as soon as we meet or exceed fromRobEntry we stop transferring *(after the flush in program order)
+                newAliasQ.push(oldAliasQ.pop()); //transfer those who're
             }
-            resultStatus.put(resetKey, newQ); //queue with all values after the higher value in program order removed (perhaps this is wrong)??
+            regAlias.put(resetKey, newAliasQ); //queue with all values after the higher value in program order removed (perhaps this is wrong)??
+        }
+        for(Map.Entry<Integer, CircluarQueue<Integer>> e : whichCDBEntry.entrySet()){
+            int resetKey = e.getKey();
+            CircluarQueue<Integer> oldEntryQ = e.getValue();
+            CircluarQueue<Integer> newEntryQ = new CircluarQueue<Integer>(HISTORY_LENGTH);
+            while(!oldEntryQ.isEmpty() && oldEntryQ.peek() < fromRobEntry){ //as soon as we meet or exceed fromRobEntry we stop transferring *(after the flush in program order)
+                newEntryQ.push(oldEntryQ.pop()); //transfer those who're
+            }
+            whichCDBEntry.put(resetKey, newEntryQ); //queue with all values after the higher value in program order removed (perhaps this is wrong)??
         }
     }
 
+    public int cdbEntryOf(RegisterName reg){
+        if(regAlias.get(reg.ordinal()).isEmpty()) throw new RuntimeException("cdbOfEntry: there is alias for this register");
+        return whichCDBEntry.get(reg.ordinal()).peekHead();
+    }
 
 }

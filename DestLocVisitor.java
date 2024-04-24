@@ -44,7 +44,7 @@ public class DestLocVisitor implements InstructionLocVisitor {
 
     @Override
     public List<Integer> accept(Op.LdI op) {
-        return Arrays.asList(op.getRd().ordinal(), op.getRs().ordinal()); //write to rs too
+        return Arrays.asList(op.getRd().ordinal(), op.getRs().ordinal()); //the only instruction with two dests!!
     }
 
     @Override

@@ -98,9 +98,19 @@ public class WriteBackUnit extends Unit{
     }
 
     @Override
+    public void accept(Op.LdI op) {
+        cdb.put(currentRobEntry, List.of(op.getRdVal()));
+    }
+
+    @Override
     public void accept(Op.St op) {
         //stores' result is set to the location in memory
         cdb.put(currentRobEntry, List.of(op.getRdVal())); //rdval is where we store the register value taht is what we write
+    }
+
+    @Override
+    public void accept(Op.StI op) {
+
     }
 
     @Override

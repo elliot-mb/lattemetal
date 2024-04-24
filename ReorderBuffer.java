@@ -206,12 +206,10 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         for(ReorderEntry r: re){
 //            if(r.isReady()) System.out.println("entry " + r.getId() + " is ready!");
             if(cdb.containsKey(r.getId())){
+                Opcode codeCheck = r.getOp().visit(new ConcreteCodeVisitor());
                 List<Integer> payload = cdb.get(r.getId());
                 //if its a fixed branch (non-conditional) it has no value and no payload so i dont write any value on the cdb
-                if(payload.size() == 1) r.setValue(payload.get(0)); //read from the map if the id matches this rese entry (value is already in the entry before we commit!)
-                if(payload.size() == 2){ //just if its an indexed load or store
-                    if(r.getOp())
-                }
+                if(!payload.isEmpty()) r.setValue(payload.get(0)); //read from the map if the id matches this rese entry (value is already in the entry before we commit!)
                 r.readyUp();
             }
         }
@@ -351,6 +349,18 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     }
 
     @Override
+    public void accept(Op.LdI op) {
+        DecodeUnit.physicalRobEntries.pop();
+        DecodeUnit.physicalRobEntries.pop();
+        dec.physicalRegisters.pop();
+        dec.physicalRegisters.pop();
+        rf.setReg(op.getRd(), currentCommit.getValue());
+        rf.setReg(op.getRs(), op.getRsVal());
+        rat.regValIsReady(op.getRd());
+        rat.regValIsReady(op.getRs());
+    }
+
+    @Override
     public void accept(Op.St op) {
         DecodeUnit.physicalRobEntries.pop();
         DecodeUnit.physicalRobEntries.pop();
@@ -358,6 +368,42 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         dec.physicalRegisters.pop();
 //        System.out.println("STORING " + currentCommit.getValue() + " AT " + op.getResult());
         mem.set(currentCommit.getValue(), op.getResult()); //addr gets stored in result in the LSU!
+//        cdb.remove(currentCommit.getId());
+        ReorderEntry lastLoadOrNull = precedingLoadOrNull();
+        if(lastLoadOrNull == null) return; //no load precedes
+
+        //IF THE LOAD IS NOT COLLIDING AND NOT READY (NOT EVEN PROCESSED, so is not colliding by virtue of not having
+        // worked out the effective address) we dont do anything and the
+        if(!lastLoadOrNull.getOp().hasResult()) return;
+
+        //CHECK IF THERE IS A COLLISION IN ADDRESSES
+        boolean collide = lastLoadOrNull.getOp().getResult() == op.getResult();
+        //CHECK IF THE LOAD IS READY
+        // IF THE LOAD IS READY, FLUSH THE PIPELINE FROM HERE BACK AND RESET THE PC
+        if(collide && lastLoadOrNull.isReady()){
+            //flushhh
+            shouldFlush = true;
+            shouldFlushWhere = lastLoadOrNull.getId();
+            flushFrom(lastLoadOrNull.getId());
+            pc.set(buffer.peekHead().getPcVal());
+        }else if(collide){ // OTHERWISE, JUST UPDATE THE VALUE OF THE LOAD
+            lastLoadOrNull.setValue(op.getResult());
+            lastLoadOrNull.readyUp(); //make sure its ready
+        }
+    }
+
+    @Override
+    public void accept(Op.StI op) {
+        DecodeUnit.physicalRobEntries.pop();
+        DecodeUnit.physicalRobEntries.pop();
+        dec.physicalRegisters.pop();
+        dec.physicalRegisters.pop();
+//        System.out.println("STORING " + currentCommit.getValue() + " AT " + op.getResult());
+        mem.set(currentCommit.getValue(), op.getRsVal()); //addr gets stored in result in the LSU!
+
+        rf.setReg(op.getRs(), op.getResult());
+        rat.regValIsReady(op.getRs());
+
 //        cdb.remove(currentCommit.getId());
         ReorderEntry lastLoadOrNull = precedingLoadOrNull();
         if(lastLoadOrNull == null) return; //no load precedes

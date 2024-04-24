@@ -2,6 +2,9 @@ import java.util.List;
 
 public abstract class Instruction extends Durate {
 
+    public static final int INDEXED_ADDR_LOC = 0; //where we get the address location for the rs in any indexed load store cbd entry
+    public static final int INDEXED_UPDT_LOC = 1; //where we get the updated value for rs in any indexed load store cbd entry
+
     private static int gId = 0;
     private int id;
     protected final RegisterName rd;

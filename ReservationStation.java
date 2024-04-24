@@ -3,15 +3,18 @@ import java.util.Map;
 
 public class ReservationStation implements InstructionVoidVisitor {
     public static final int NO_DEPENDENCY = -1;
+    public static final int DEFAULT_ENTRY = 0;
     public static int uId = 0;
     public final int id;
     private Instruction op;
     private int qJ, qK;
+    private int sJ, sK; //decides the entries we use for reading from the cdb
     private int vJ, vK;
     private boolean rJ, rK, busy;
     private final ReorderBuffer rob;
     public int robEntry;
     private final Map<Integer, List<Integer>> cdb;
+
 
 
     ReservationStation(Map<Integer, List<Integer>> cdb, ReorderBuffer rob){
@@ -43,7 +46,9 @@ public class ReservationStation implements InstructionVoidVisitor {
             this.busy = false;
             this.op = null;
             this.qJ = NO_DEPENDENCY; //rob entry id
+            this.sJ = DEFAULT_ENTRY;
             this.qK = NO_DEPENDENCY; //rob entry id
+            this.sK = DEFAULT_ENTRY;
             this.vJ = 0;
             this.vK = 0;
             this.rJ = false;
@@ -78,6 +83,7 @@ public class ReservationStation implements InstructionVoidVisitor {
             qJ = NO_DEPENDENCY;
         }else if(regJ != null){
             qJ = rat.whereRegInRob(regJ);
+            sJ = rat.cdbEntryOf(regJ);
             rJ = false;
         }
         if(regJ == null){
@@ -89,6 +95,7 @@ public class ReservationStation implements InstructionVoidVisitor {
             qK = NO_DEPENDENCY;
         }else if(regK != null){
             qK = rat.whereRegInRob(regK);
+            sJ = rat.cdbEntryOf(regK);
             rK = false;
         }
         if(regK == null){
@@ -97,7 +104,11 @@ public class ReservationStation implements InstructionVoidVisitor {
 
         busy = true;
 
-        if(!dest.isEmpty()) rat.pointRegAtRobEntry(RegisterName.values()[dest.get(0)], e.getEntry()); //tell the register file to point at the rob entry of the instruction in this rs, IF there is a result
+        int entry = 0;
+        for(Integer d : dest){
+            rat.pointRegAtRobEntry(RegisterName.values()[d], e.getEntry(), entry); //tell the register file to point at the rob entry of the instruction in this rs, IF there is a result
+            entry++;
+        }
 
         this.robEntry = e.getEntry();
 
@@ -110,13 +121,13 @@ public class ReservationStation implements InstructionVoidVisitor {
         if(qK == NO_DEPENDENCY) rK = true;
         if(qJ != NO_DEPENDENCY && cdb.containsKey(qJ)){ //qJ is memory location or register
             //System.out.println("RS #" +id + " read rob entry " + qJ + " has this result off cdb");
-            vJ = cdb.get(qJ).get(0); //broadcast this data on the first element of the list
+            vJ = cdb.get(qJ).get(sJ); //broadcast this data on the first element of the list
             qJ = NO_DEPENDENCY;
             rJ = true;
         }
         if(qK != NO_DEPENDENCY && cdb.containsKey(qK)){
             //System.out.println("RS #" +id + " read rob entry " + qK + " has this result off cdb");
-            vK = cdb.get(qK).get(0);
+            vK = cdb.get(qK).get(sK);
             qK = NO_DEPENDENCY;
             rK = true;
         }
@@ -181,7 +192,18 @@ public class ReservationStation implements InstructionVoidVisitor {
     }
 
     @Override
+    public void accept(Op.LdI op) {
+        op.setRsVal(vJ);
+    }
+
+    @Override
     public void accept(Op.St op) {
+        op.setRdVal(vJ);
+        op.setRsVal(vK);
+    }
+
+    @Override
+    public void accept(Op.StI op) {
         op.setRdVal(vJ);
         op.setRsVal(vK);
     }
