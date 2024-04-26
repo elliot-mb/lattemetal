@@ -326,6 +326,21 @@ public class Processor {
 
         if(!quietStats){
 
+            System.out.println("settings: CLOCK_SPEED_MHZ=" + CLOCK_SPEED_MHZ);
+            System.out.println("settings: PREDICTOR=" +PREDICTOR);
+            System.out.println("settings: BTB_CACHE_SIZE="+ BTB_CACHE_SIZE);
+            System.out.println("settings: SUPERSCALAR_WIDTH=" +SUPERSCALAR_WIDTH);
+            System.out.println("settings: ALU_COUNT=" +ALU_COUNT);
+            System.out.println("settings: LSU_COUNT="+LSU_COUNT);
+            System.out.println("settings: BRU_COUNT="+BRU_COUNT);
+            System.out.println("settings: ALU_RS_COUNT="+ALU_RS_COUNT);
+            System.out.println("settings: LSU_RS_COUNT="+LSU_RS_COUNT);
+            System.out.println("settings: BRU_RS_COUNT="+BRU_RS_COUNT);
+            System.out.println("settings: DP_ACC="+DP_ACC);
+            System.out.println("settings: ROB_ENTRIES="+ROB_ENTRIES);
+            System.out.println("settings: FLUSH_ALL="+FLUSH_ALL);
+            System.out.println("settings: PHYSICAL_REGISTER_FACTOR="+PHYSICAL_REGISTER_FACTOR);
+
             double ipc = Utils.toDecimalPlaces( (double) rob.getCommitted() / tally, DP_ACC);
             double time = (rob.getCommitted() * (1 / ipc) * ASSUMED_CYCLE_TIME) / Math.pow(10, 3);
             double rateMispredictedInstrs = (double) rob.getMispredictedInstr() / (rob.getCommitted() + rob.getMispredictedInstr());
