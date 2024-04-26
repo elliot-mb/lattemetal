@@ -123,7 +123,7 @@ public class FetchUnit extends Unit {
     public void accept(Op.BrLZ op) {
         op.setResult(pcVal + 1); //branch untaken!
         if(Processor.BR_PREDICTOR_IS_FIXED){
-            if(FIXED_PREDICTOR_SET_TAKEN){
+            if(Processor.FIXED_PREDICTOR_SET_TAKEN){
                 //next.setPcVal(op.getImVal());
                 pcVal = op.getImVal(); //pc.set(op.getImVal()); //static prediciton
             }else{
@@ -146,7 +146,7 @@ public class FetchUnit extends Unit {
     public void accept(Op.JpLZ op) {
         op.setResult(pcVal + 1); //branch untaken!
         if(Processor.BR_PREDICTOR_IS_FIXED) {
-            if (FIXED_PREDICTOR_SET_TAKEN) {
+            if (Processor.FIXED_PREDICTOR_SET_TAKEN) {
                 //next.setPcVal(op.getImVal());
                 pcVal += op.getImVal();
             } else {

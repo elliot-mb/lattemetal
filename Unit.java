@@ -7,9 +7,7 @@ public abstract class Unit implements InstructionVoidVisitor {
     /**
      * for any building block that reads from one pipeline register and writes to another
      */
-
-    public static final boolean FIXED_PREDICTOR_SET_TAKEN = true;
-
+    
     protected final PipeLike[] ins;
     protected final PipeLike[] outs;
 

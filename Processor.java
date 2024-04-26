@@ -4,9 +4,13 @@ import java.io.PrintStream;
 import java.util.*;
 
 public class Processor {
+    //@@@SETTING CHOICES@@@
+    public enum predictor {
+        fixedTaken, fixedNotTaken, oneBit, twoBit
+    }
     //@@@SETTINGS@@@
     private static final double CLOCK_SPEED_MHZ = 500;
-    public static final boolean BR_PREDICTOR_IS_FIXED = true;
+    public static final predictor PREDICTOR = predictor.fixedTaken;
     private static final int BTB_CACHE_SIZE = 32;
     public static final int SUPERSCALAR_WIDTH = 2;
     private static final int ALU_COUNT = 4;
@@ -20,6 +24,8 @@ public class Processor {
     public static final int FLUSH_ALL = -1;
     public static final int PHYSICAL_REGISTER_FACTOR = 2; //how many times more physical registers we have than architectural ones
     //@@@DEPENDANT SETTINGS@@@
+    public static final boolean BR_PREDICTOR_IS_FIXED = PREDICTOR.equals(predictor.fixedTaken) || PREDICTOR.equals(predictor.fixedNotTaken);
+    public static final boolean FIXED_PREDICTOR_SET_TAKEN = PREDICTOR.equals(predictor.fixedTaken);
     private static final double ASSUMED_CYCLE_TIME = Math.pow(10, 3) / CLOCK_SPEED_MHZ;//ns
     public static final int PHYSICAL_REGISTER_COUNT = PHYSICAL_REGISTER_FACTOR * RegisterName.values().length;
     //@@@@@@

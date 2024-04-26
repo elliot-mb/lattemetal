@@ -290,7 +290,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     private void handleBranch(Instruction branch, boolean flag, int branchTo, boolean wasTakenAtFetch){
         if(Processor.BR_PREDICTOR_IS_FIXED){
-            if(flag != Unit.FIXED_PREDICTOR_SET_TAKEN){
+            if(flag != Processor.FIXED_PREDICTOR_SET_TAKEN){
                 if(flag){
                     pc.set(branchTo);
                 }else{
