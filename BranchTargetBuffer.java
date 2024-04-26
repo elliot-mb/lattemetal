@@ -23,7 +23,7 @@ public class BranchTargetBuffer {
 
     public boolean shouldBranch(int pc){
         return Processor.PREDICTOR.equals(Processor.predictor.twoBit)
-                ? pcToPredState.containsKey(pc) && (pcToPredState.get(pc).equals(twoBitPred.weakTaken) || pcToPredState.get(pc).equals(twoBitPred.strongTaken))
+                ? pcToPredictionTarget.containsKey(pc) && (pcToPredState.get(pc).equals(twoBitPred.weakTaken) || pcToPredState.get(pc).equals(twoBitPred.strongTaken))
                 : pcToPredictionTarget.containsKey(pc);
     }
 
