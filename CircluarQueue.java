@@ -95,6 +95,16 @@ public class CircluarQueue<T> {
         return ret;
     }
 
+    public List<T> peekXsReverse(){
+        List<T> ret = new ArrayList<T>();
+
+        for(int i = elementsIn - 1; i >= 0; i--){
+            ret.add(xs.get(itemIFromHead(i)));
+        }
+
+        return ret;
+    }
+
     public T peek(){
         return xs.get(itemIFromHead(elementsIn - 1));
     }

@@ -1,4 +1,5 @@
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BranchTargetBuffer {
@@ -6,7 +7,9 @@ public class BranchTargetBuffer {
 
     private final Map<Integer, Integer> pcToPredictionTarget;
     private final Map<Integer, twoBitPred> pcToPredState;
-    private final CircluarQueue<Integer> orderAdded;
+    private CircluarQueue<Integer> orderAdded;
+
+    private final int size;
 
     private enum twoBitPred {
         strongNotTaken, weakNotTaken, weakTaken, strongTaken
@@ -19,6 +22,7 @@ public class BranchTargetBuffer {
         //this.branchQueue = new CircluarQueue<Boolean>(Processor.ROB_ENTRIES + Processor.SUPERSCALAR_WIDTH * 2);
         this.pcToPredictionTarget = new HashMap<Integer, Integer>();
         this.pcToPredState = new HashMap<Integer, twoBitPred>();
+        this.size = size;
     }
 
     public boolean shouldBranch(int pc){
@@ -34,6 +38,15 @@ public class BranchTargetBuffer {
 
     }
 
+    private void removeInsideOrderAdded(int pc){
+        List<Integer> xs = orderAdded.peekXsReverse();
+        CircluarQueue<Integer> newOrder = new CircluarQueue<Integer>(size);
+        for(Integer x : xs){
+            if(!x.equals(pc)) newOrder.push(x);
+        }
+        orderAdded = newOrder;
+    }
+
     //should be interacted with in program order
     public void predictForThisBranch(int pc, boolean taken, int target){
         if(taken){
@@ -41,8 +54,8 @@ public class BranchTargetBuffer {
             if(Processor.PREDICTOR.equals(Processor.predictor.twoBit)){
                 //strong taken does not get modified
                 if(pcToPredState.containsKey(pc) && pcToPredState.get(pc).equals(twoBitPred.weakTaken)) pcToPredState.put(pc, twoBitPred.strongTaken); //upgrade
-                if(pcToPredState.containsKey(pc) && pcToPredState.get(pc).equals(twoBitPred.weakNotTaken)) pcToPredState.put(pc, twoBitPred.weakTaken); //upgrade
-                if(!pcToPredState.containsKey(pc)) {
+                else if(pcToPredState.containsKey(pc) && pcToPredState.get(pc).equals(twoBitPred.weakNotTaken)) pcToPredState.put(pc, twoBitPred.weakTaken); //upgrade
+                else if(!pcToPredState.containsKey(pc)) {
                     pcToPredState.put(pc, twoBitPred.weakTaken);
                     addTo(pc, target);
                 }
@@ -55,13 +68,15 @@ public class BranchTargetBuffer {
             //do some other prediction
             if(Processor.PREDICTOR.equals(Processor.predictor.twoBit)){
                 if(pcToPredState.containsKey(pc) && pcToPredState.get(pc).equals(twoBitPred.strongTaken)) pcToPredState.put(pc, twoBitPred.weakTaken); //downgrade
-                if(pcToPredState.containsKey(pc) && pcToPredState.get(pc).equals(twoBitPred.weakTaken)) pcToPredState.put(pc, twoBitPred.weakNotTaken); //downgrade
-                if(pcToPredState.containsKey(pc) && pcToPredState.get(pc).equals(twoBitPred.weakNotTaken)) {
+                else if(pcToPredState.containsKey(pc) && pcToPredState.get(pc).equals(twoBitPred.weakTaken)) pcToPredState.put(pc, twoBitPred.weakNotTaken); //downgrade
+                else if(pcToPredState.containsKey(pc) && pcToPredState.get(pc).equals(twoBitPred.weakNotTaken)) {
                     pcToPredState.remove(pc); //annihilate this predictor
                     pcToPredictionTarget.remove(pc);
+                    removeInsideOrderAdded(pc);
                 }
             }else{
                 pcToPredictionTarget.remove(pc);
+                removeInsideOrderAdded(pc);
             }
         }
     }
