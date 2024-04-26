@@ -13,7 +13,7 @@ public class Processor {
     public static final predictor PREDICTOR = predictor.twoBit;
     private static final int BTB_CACHE_SIZE = 32;
     public static final int SUPERSCALAR_WIDTH = 8;
-    private static final int ALU_COUNT = 8;
+    private static final int ALU_COUNT = 4;
     private static final int LSU_COUNT = 4;
     private static final int BRU_COUNT = 4;
     private static final int ALU_RS_COUNT = 8;
@@ -21,7 +21,6 @@ public class Processor {
     private static final int BRU_RS_COUNT = 4;
     private static final int DP_ACC = 4;
     public static final int ROB_ENTRIES = 64;
-    public static final int FLUSH_ALL = -1;
     public static final int PHYSICAL_REGISTER_FACTOR = 4; //how many times more physical registers we have than architectural ones
     //@@@DEPENDANT SETTINGS@@@
     public static final boolean BR_PREDICTOR_IS_FIXED = PREDICTOR.equals(predictor.fixedTaken) || PREDICTOR.equals(predictor.fixedNotTaken);
@@ -29,6 +28,8 @@ public class Processor {
     private static final double ASSUMED_CYCLE_TIME = Math.pow(10, 3) / CLOCK_SPEED_MHZ;//ns
     public static final int PHYSICAL_REGISTER_COUNT = PHYSICAL_REGISTER_FACTOR * RegisterName.values().length;
     //@@@@@@
+
+    public static final int FLUSH_ALL = -1;
     private final ArrayList<ArithmeticLogicUnit> alusInUse;
 
     private final ArrayList<BranchUnit> brusInUse;
@@ -338,7 +339,6 @@ public class Processor {
             System.out.println("settings: BRU_RS_COUNT="+BRU_RS_COUNT);
             System.out.println("settings: DP_ACC="+DP_ACC);
             System.out.println("settings: ROB_ENTRIES="+ROB_ENTRIES);
-            System.out.println("settings: FLUSH_ALL="+FLUSH_ALL);
             System.out.println("settings: PHYSICAL_REGISTER_FACTOR="+PHYSICAL_REGISTER_FACTOR);
 
             double ipc = Utils.toDecimalPlaces( (double) rob.getCommitted() / tally, DP_ACC);
