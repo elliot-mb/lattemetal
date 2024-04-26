@@ -2,7 +2,7 @@
 -- this will give us 10000 points so we will hopefully get that 3142 ish are within range
 
 -- constants
-            addi t0 zero #1000   --grid resolution
+            addi t0 zero #200   --grid resolution
 -- dependants
             mul t1 t0 t0        --distance constant
             addi t2 zero #0     --points within distance (tally)
@@ -27,5 +27,5 @@ retrstx:    mul s3 s0 s0        --x^2
             cmp s6 s5 t1        --s5 <= t1 -> s6 <= 0
             brlz s6 incr        --increment tally
             br countnext
-done:       muli t2 t2 #4
+done:       muli t2 t2 #1
             st t2 zero #0       --store at address zero

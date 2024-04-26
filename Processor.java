@@ -13,16 +13,16 @@ public class Processor {
     public static final predictor PREDICTOR = predictor.twoBit;
     private static final int BTB_CACHE_SIZE = 32;
     public static final int SUPERSCALAR_WIDTH = 8;
-    private static final int ALU_COUNT = 4;
-    private static final int LSU_COUNT = 2;
-    private static final int BRU_COUNT = 2;
-    private static final int ALU_RS_COUNT = 4;
+    private static final int ALU_COUNT = 8;
+    private static final int LSU_COUNT = 4;
+    private static final int BRU_COUNT = 4;
+    private static final int ALU_RS_COUNT = 8;
     private static final int LSU_RS_COUNT = 4;
-    private static final int BRU_RS_COUNT = 2;
+    private static final int BRU_RS_COUNT = 4;
     private static final int DP_ACC = 4;
-    public static final int ROB_ENTRIES = 32;
+    public static final int ROB_ENTRIES = 64;
     public static final int FLUSH_ALL = -1;
-    public static final int PHYSICAL_REGISTER_FACTOR = 2; //how many times more physical registers we have than architectural ones
+    public static final int PHYSICAL_REGISTER_FACTOR = 4; //how many times more physical registers we have than architectural ones
     //@@@DEPENDANT SETTINGS@@@
     public static final boolean BR_PREDICTOR_IS_FIXED = PREDICTOR.equals(predictor.fixedTaken) || PREDICTOR.equals(predictor.fixedNotTaken);
     public static final boolean FIXED_PREDICTOR_SET_TAKEN = PREDICTOR.equals(predictor.fixedTaken);
@@ -316,7 +316,7 @@ public class Processor {
 //            } //delete whats inside (voided is used to detect when writebacks are finished)
             delete.flush(FLUSH_ALL); // any instructions we want to throw away can be put into delete
 
-            if(!quietStats) if(tally % 1000 == 0) System.out.print("\r" + tally / 1000 + "K cycles");
+            if(!quietStats) if(tally % 100000 == 0) System.out.print("\r" + tally / 100000 + "00K cycles");
 
             cdb.clear();
         }

@@ -32,7 +32,9 @@ public class BranchTargetBuffer {
     }
 
     private void addTo(int pc, int target){
-        if(!pcToPredictionTarget.containsKey(pc) && orderAdded.isFull()) pcToPredictionTarget.remove(orderAdded.pop()); //remove oldest mapping
+        if(!pcToPredictionTarget.containsKey(pc) && orderAdded.isFull()){
+            pcToPredictionTarget.remove(orderAdded.pop()); //remove oldest mapping
+        }
         if(!pcToPredictionTarget.containsKey(pc)) orderAdded.push(pc);
         pcToPredictionTarget.put(pc, target);
 
