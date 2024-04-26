@@ -12,11 +12,11 @@ public class Processor {
     private static final double CLOCK_SPEED_MHZ = 500;
     public static final predictor PREDICTOR = predictor.fixedTaken;
     private static final int BTB_CACHE_SIZE = 32;
-    public static final int SUPERSCALAR_WIDTH = 2;
+    public static final int SUPERSCALAR_WIDTH = 4;
     private static final int ALU_COUNT = 4;
     private static final int LSU_COUNT = 2;
     private static final int BRU_COUNT = 2;
-    private static final int ALU_RS_COUNT = 8;
+    private static final int ALU_RS_COUNT = 4;
     private static final int LSU_RS_COUNT = 4;
     private static final int BRU_RS_COUNT = 2;
     private static final int DP_ACC = 4;
@@ -338,7 +338,7 @@ public class Processor {
             System.out.println("run: percentage mispredicted instructions " + Utils.toDecimalPlaces(rateMispredictedInstrs * 100, DP_ACC) +"%");
             System.out.println("run: percentage mispredicted branches " + Utils.toDecimalPlaces(rateMispredictedBranches * 100, DP_ACC) + "%");
             System.out.println(Arrays.toString(mem.getData()));
-            //System.out.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
+            System.out.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
         }
 
         return mem;

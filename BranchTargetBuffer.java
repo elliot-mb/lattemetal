@@ -21,8 +21,10 @@ public class BranchTargetBuffer {
         this.pcToPredState = new HashMap<Integer, twoBitPred>();
     }
 
-    public boolean hasEntry(int pc){
-        return pcToPredictionTarget.containsKey(pc);
+    public boolean shouldBranch(int pc){
+        return Processor.PREDICTOR.equals(Processor.predictor.twoBit)
+                ? pcToPredState.containsKey(pc) && (pcToPredState.get(pc).equals(twoBitPred.weakTaken) || pcToPredState.get(pc).equals(twoBitPred.strongTaken))
+                : pcToPredictionTarget.containsKey(pc);
     }
 
     private void addTo(int pc, int target){
@@ -34,8 +36,6 @@ public class BranchTargetBuffer {
 
     //should be interacted with in program order
     public void predictForThisBranch(int pc, boolean taken, int target){
-        boolean predictedTaken = false; //set it just to satisfy the compiler
-        boolean addOrRemove = false;
         if(taken){
             //do some prediction
             if(Processor.PREDICTOR.equals(Processor.predictor.twoBit)){
@@ -44,12 +44,10 @@ public class BranchTargetBuffer {
                 if(pcToPredState.containsKey(pc) && pcToPredState.get(pc).equals(twoBitPred.weakNotTaken)) pcToPredState.put(pc, twoBitPred.weakTaken); //upgrade
                 if(!pcToPredState.containsKey(pc)) {
                     pcToPredState.put(pc, twoBitPred.weakTaken);
-                    addOrRemove = true;
-                    predictedTaken = true;
+                    addTo(pc, target);
                 }
             }else{
-                addOrRemove = true;
-                predictedTaken = true; //this works like a 1-bit predictor!
+                addTo(pc, target);
             }
             //to do a static predictor we can compare pc and target to discern direction
             //to do a dynamic predictor we can store some state for each branch to delay the decisions we make
@@ -60,25 +58,16 @@ public class BranchTargetBuffer {
                 if(pcToPredState.containsKey(pc) && pcToPredState.get(pc).equals(twoBitPred.weakTaken)) pcToPredState.put(pc, twoBitPred.weakNotTaken); //downgrade
                 if(pcToPredState.containsKey(pc) && pcToPredState.get(pc).equals(twoBitPred.weakNotTaken)) {
                     pcToPredState.remove(pc); //annihilate this predictor
-                    addOrRemove = true;
+                    pcToPredictionTarget.remove(pc);
                 }
             }else{
-                addOrRemove = true;
-            }
-        }
-        if(addOrRemove) { //the two-bit predictor doesnt always add or remove btb entries
-            if (predictedTaken) {
-                //make an entry assigned to this pc with the new prediction, if it is predicted taken (or do nothing if it existed before)
-                addTo(pc, target);
-            } else {
-                //if we find it is not taken after our prediction, remove it from the btb (or do nothing if it did not exist.)
                 pcToPredictionTarget.remove(pc);
             }
         }
     }
 
-    public int getPrediction(int pc){
-        if(!hasEntry(pc)) throw new RuntimeException("getPrediction: no entry for pc!");
+    public int getPredictionTarget(int pc){
+        if(!pcToPredictionTarget.containsKey(pc)) throw new RuntimeException("getPredictionTarget: no entry for pc '" + pc + "'");
         return pcToPredictionTarget.get(pc);
     }
 

@@ -130,8 +130,8 @@ public class FetchUnit extends Unit {
                 pcVal++;
             }
         }else{ //use btb
-            if(btb.hasEntry(pcVal)){
-                pcVal = btb.getPrediction(pcVal);
+            if(btb.shouldBranch(pcVal)){
+                pcVal = btb.getPredictionTarget(pcVal);
                 flag = true;
             }else{
                 pcVal++;
@@ -153,8 +153,8 @@ public class FetchUnit extends Unit {
                 pcVal++;
             }
         }else{
-            if(btb.hasEntry(pcVal)){
-                pcVal = btb.getPrediction(pcVal); //should encode the offset for us
+            if(btb.shouldBranch(pcVal)){
+                pcVal = btb.getPredictionTarget(pcVal); //should encode the offset for us
                 flag = true;
             }else{
                 pcVal++;
