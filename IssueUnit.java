@@ -12,12 +12,15 @@ public class IssueUnit extends Unit{
 
     private final RegisterAliasTable prf;
 
+    private final DecodeUnit dec;
+
     //                          vv update rob      vv put mapping of rob to dest into prf
-    IssueUnit(RegisterFile rf, ReorderBuffer rob, RegisterAliasTable prf, PipeLike[] ins, PipeLike[] outs){
+    IssueUnit(RegisterFile rf, ReorderBuffer rob, DecodeUnit dec, RegisterAliasTable prf, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
         this.rf = rf;
         this.rob = rob;
         this.prf = prf;
+        this.dec = dec;
     }
 
     private boolean isAnRsFree(List<ReservationStation> rss){
@@ -44,7 +47,7 @@ public class IssueUnit extends Unit{
 
     @Override
     protected boolean isUnfinished() { //is when we stall basically
-        return rob.isFull() || !outs[chooseUnit().ordinal()].canPush(); //if we cant push to the right unit! block otherwise...
+        return rob.isFull() || !outs[chooseUnit().ordinal()].canPush() || dec.noPrfsFree(); //if we cant push to the right unit! block otherwise...
     }
 
     private unitType chooseUnit(){
@@ -79,9 +82,7 @@ public class IssueUnit extends Unit{
     public void accept(Op.Add op) {
         ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
         currentRobEntry = e.id;
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+        dec.usePrfs(op, e.id);
         rob.add(e);
     }
 
@@ -89,8 +90,7 @@ public class IssueUnit extends Unit{
     public void accept(Op.AddI op) {
         ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
         currentRobEntry = e.id;
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+        dec.usePrfs(op, e.id);
         rob.add(e);
     }
 
@@ -98,9 +98,7 @@ public class IssueUnit extends Unit{
     public void accept(Op.Mul op) {
         ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
         currentRobEntry = e.id;
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+        dec.usePrfs(op, e.id);
         rob.add(e);
     }
 
@@ -108,8 +106,7 @@ public class IssueUnit extends Unit{
     public void accept(Op.MulI op) {
         ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
         currentRobEntry = e.id;
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+        dec.usePrfs(op, e.id);
         rob.add(e);
     }
 
@@ -117,10 +114,7 @@ public class IssueUnit extends Unit{
     public void accept(Op.Cmp op) {
         ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
         currentRobEntry = e.id;
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
-
+        dec.usePrfs(op, e.id);
         rob.add(e);
     }
 
@@ -128,9 +122,7 @@ public class IssueUnit extends Unit{
     public void accept(Op.Ld op) {
         ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
         currentRobEntry = e.id;
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
-
+        dec.usePrfs(op, e.id);
         rob.add(e);
     }
 
@@ -138,7 +130,7 @@ public class IssueUnit extends Unit{
     public void accept(Op.LdC op) {
         ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
         currentRobEntry = e.id;
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+        dec.usePrfs(op, e.id);
         rob.add(e);
     }
 
@@ -146,9 +138,7 @@ public class IssueUnit extends Unit{
     public void accept(Op.LdI op) {
         ReorderEntry e = new ReorderEntry(op, op.getRd().ordinal(), pcVal);
         currentRobEntry = e.id;
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
-
+        dec.usePrfs(op, e.id);
         rob.add(e);
     }
 
@@ -156,8 +146,7 @@ public class IssueUnit extends Unit{
     public void accept(Op.St op) {
         ReorderEntry e = new ReorderEntry(op, op.getRsVal() + op.getIm(), pcVal);
         currentRobEntry = e.id;
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+        dec.usePrfs(op, e.id);
         rob.add(e);
     }
 
@@ -165,24 +154,25 @@ public class IssueUnit extends Unit{
     public void accept(Op.StI op) {
         ReorderEntry e = new ReorderEntry(op, op.getRsVal() + op.getIm(), pcVal);
         currentRobEntry = e.id;
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+        dec.usePrfs(op, e.id);
         rob.add(e);
     }
 
     @Override
     public void accept(Op.BrLZ op) {
         ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST, op.getResult());
+        e.setValue(flag ? BranchUnit.TAKEN : BranchUnit.NOT_TAKEN, ReorderEntry.SND); //use the unused reorder entry to store whether the branch was taken
         currentRobEntry = e.id;
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+        dec.usePrfs(op, e.id);
         rob.add(e);
     }
 
     @Override
     public void accept(Op.JpLZ op) {
         ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST, op.getResult());
+        e.setValue(flag ? BranchUnit.TAKEN : BranchUnit.NOT_TAKEN, ReorderEntry.SND); //use the unused reorder entry to store whether the branch was taken
         currentRobEntry = e.id;
-        DecodeUnit.physicalRobEntries.push(currentRobEntry);
+        dec.usePrfs(op, e.id);
         rob.add(e);
     }
 
@@ -190,6 +180,7 @@ public class IssueUnit extends Unit{
     public void accept(Op.Br op) {
         ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST, op.getResult());
         currentRobEntry = e.id;
+        dec.usePrfs(op, e.id);
         rob.add(e);
     }
 
@@ -197,6 +188,7 @@ public class IssueUnit extends Unit{
     public void accept(Op.Jp op) {
         ReorderEntry e = new ReorderEntry(op, ReorderBuffer.NO_DEST, op.getResult());
         currentRobEntry = e.id;
+        dec.usePrfs(op, e.id);
         rob.add(e);
     }
 

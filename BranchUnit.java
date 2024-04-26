@@ -96,33 +96,11 @@ public class BranchUnit extends Unit{
     @Override
     public void accept(Op.BrLZ op) {
         flag = op.getRdVal() <= 0;
-//        if(flag != STATIC_PREDICT_BR_TAKEN){
-//            if(flag){
-//                pc.set(op.getImVal());
-//                feu.yesBruDidSetPC();
-//            }else{
-//                pc.set(op.getResult()); // untaken
-//                feu.yesBruDidSetPC();
-//            }
-//            shouldFlush = true;
-//            flushAt = currentRobEntry + 1; //after the current rob entry because we need to maintain program order
-//        }
     }
 
     @Override
     public void accept(Op.JpLZ op) {
         flag = op.getRdVal() <= 0;
-//        if(flag != STATIC_PREDICT_BR_TAKEN){
-//            if(flag){
-//                pc.set(op.getResult() + op.getImVal());
-//                feu.yesBruDidSetPC();
-//            }else{
-//                pc.set(op.getResult()); // untaken
-//                feu.yesBruDidSetPC();
-//            }
-//            shouldFlush = true;
-//            flushAt = currentRobEntry + 1; //after the current rob entry because we need to maintain program order
-//        }
     }
 
     @Override

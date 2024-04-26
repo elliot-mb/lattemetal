@@ -25,11 +25,15 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     private int shouldFlushWhere;
 
     private int committed;
-    private int mispredicted;
+    private int mispredictedInstr;
+    private int mispredictedBranches;
+    private int predictedBranches;
     private List<Instruction> committedInstrs;
     private final DecodeUnit dec;
 
-    ReorderBuffer(int size, Map<Integer, List<Integer>> cdb, RegisterFile rf, Memory mem, ProgramCounter pc, DecodeUnit dec){
+    private final BranchTargetBuffer btb;
+
+    ReorderBuffer(int size, Map<Integer, List<Integer>> cdb, BranchTargetBuffer btb, RegisterFile rf, Memory mem, ProgramCounter pc, DecodeUnit dec){
         this.dec = dec;
         this.buffer = new CircluarQueue<ReorderEntry>(size);
         this.cdb = cdb;
@@ -40,7 +44,10 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         this.lsq = new CircluarQueue<ReorderEntry>(size);
         this.pc = pc;
         this.committed = 0;
-        this.mispredicted = 0;
+        this.mispredictedInstr = 0;
+        this.btb = btb;
+        this.mispredictedBranches = 0;
+        this.predictedBranches = 0;
         this.committedInstrs = new ArrayList<Instruction>();
         this.shouldFlushWhere = FLUSH_NOWHERE;
     }
@@ -77,8 +84,16 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         shouldFlushWhere = FLUSH_NOWHERE;
     }
 
-    public int getMispredicted(){
-        return mispredicted;
+    public int getMispredictedInstr(){
+        return mispredictedInstr;
+    }
+
+    public int getMispredictedBranches(){
+        return mispredictedBranches;
+    }
+
+    public int getPredictedBranches(){
+        return predictedBranches;
     }
 
     /**
@@ -89,20 +104,22 @@ public class ReorderBuffer implements InstructionVoidVisitor{
      * @param id the item to start flushing at, flushes this item too
      */
     public void flushFrom(int id){
+        if(buffer.isEmpty()) return;
         //System.out.println("rob flushes from " + id);
         CircluarQueue<ReorderEntry> newBuffer = new CircluarQueue<ReorderEntry>(size);
         CircluarQueue<ReorderEntry> newLsq = new CircluarQueue<ReorderEntry>(size);
-        int sizeBefore = buffer.getSize();
+        int sizeBefore = buffer.getElementsIn();
         ReorderEntry peel = buffer.pop();
-        while(!buffer.isEmpty() && peel.getId() != id){
-            if(!lsq.isEmpty() && peel.getId() == lsq.peek().getId()){
+        while(!buffer.isEmpty() && peel.getId() > id){
+            if(!lsq.isEmpty() && peel.getId() == lsq.peekHead().getId()){
                 newLsq.push(lsq.pop()); //should include just the same instructions as the main rob
             }
+            //for(int i = 0; i < peel.getOp().getRegsNeeded(); i++) dec.physicalRegisters.pop();
             newBuffer.push(peel);
             peel = buffer.pop();
         }
         buffer = newBuffer;
-        mispredicted += (sizeBefore - buffer.getElementsIn()); //adds the change on
+        mispredictedInstr += (sizeBefore - buffer.getElementsIn()); //adds the change on
         lsq = newLsq;
     }
 
@@ -264,21 +281,50 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         return shouldFlushWhere;
     }
     public int getCommitted(){
-        return committed;
+        return committedInstrs.size();
     }
 
     public List<Instruction> getCommittedInstrs(){
         return committedInstrs;
     }
 
+    private void handleBranch(Instruction branch, boolean flag, int branchTo, boolean wasTakenAtFetch){
+        if(Processor.BR_PREDICTOR_IS_FIXED){
+            if(flag != Unit.FIXED_PREDICTOR_SET_TAKEN){
+                if(flag){
+                    pc.set(branchTo);
+                }else{
+                    pc.set(branch.getResult()); // untaken
+                }
+                shouldFlush = true;
+                mispredictedBranches++;
+                shouldFlushWhere = currentCommit.getId() + 1;
+                flushFrom(currentCommit.getId() + 1);
+            }else{
+                predictedBranches++;
+            }
+        }else{
+            if(flag != wasTakenAtFetch){
+                if(flag){
+                    pc.set(branchTo);
+                }else{
+                    pc.set(branch.getResult()); // untaken
+                }
+                btb.predictForThisBranch(currentCommit.getPcVal() - 1, flag, pc.getCount());
+                shouldFlush = true;
+                mispredictedBranches++;
+                shouldFlushWhere = currentCommit.getId() + 1;
+                flushFrom(currentCommit.getId() + 1);
+            }else{
+                predictedBranches++;
+            }
+        }
+        cdb.remove(currentCommit.getId());
+    }
+
     @Override
     public void accept(Op.Add op) {
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
         rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
@@ -286,10 +332,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.AddI op) {
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
         rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
@@ -297,12 +340,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.Mul op) {
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
         rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
@@ -310,10 +348,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.MulI op) {
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
         rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
@@ -321,12 +356,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.Cmp op) {
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
         rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
@@ -334,10 +364,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.Ld op) {
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
         rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
@@ -345,8 +372,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.LdC op) {
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
         rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rat.regValIsReady(op.getRd());
 //        cdb.remove(currentCommit.getId());
@@ -354,10 +380,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.LdI op) {
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
         rf.setReg(op.getRd(), currentCommit.getValue(ReorderEntry.FST));
         rf.setReg(op.getRs(), currentCommit.getValue(ReorderEntry.SND));
         rat.regValIsReady(op.getRd());
@@ -366,10 +389,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.St op) {
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
 //        System.out.println("STORING " + currentCommit.getValue() + " AT " + op.getResult());
         mem.set(currentCommit.getValue(ReorderEntry.FST), op.getResult()); //addr gets stored in result in the LSU!
 //        cdb.remove(currentCommit.getId());
@@ -398,10 +418,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.StI op) {
-        DecodeUnit.physicalRobEntries.pop();
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
 //        System.out.println("STORING " + currentCommit.getValue() + " AT " + op.getResult());
         mem.set(currentCommit.getValue(ReorderEntry.FST), op.getRsVal()); //addr gets stored in result in the LSU!
 
@@ -434,49 +451,36 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     @Override
     public void accept(Op.BrLZ op) {
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
         boolean flag = currentCommit.getValue(ReorderEntry.FST) == BranchUnit.TAKEN;
-        if(flag != Unit.STATIC_PREDICT_BR_TAKEN){
-            if(flag){
-                pc.set(op.getImVal());
-            }else{
-                pc.set(op.getResult()); // untaken
-            }
-            shouldFlush = true;
-            shouldFlushWhere = currentCommit.getId() + 1;
-            flushFrom(currentCommit.getId() + 1);
-//            flushAt = currentRobEntry + 1; //after the current rob entry because we need to maintain program order
-        }
+        boolean predTaken = currentCommit.getValue(ReorderEntry.SND) == BranchUnit.TAKEN;
+
+        handleBranch(op, flag, op.getImVal(), predTaken);
+
         cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.JpLZ op) {
-        DecodeUnit.physicalRobEntries.pop();
-        dec.physicalRegisters.pop();
+        dec.freePrfs(op);
         boolean flag = currentCommit.getValue(ReorderEntry.FST) == BranchUnit.TAKEN;
-        if(flag != Unit.STATIC_PREDICT_BR_TAKEN){
-            if(flag){
-                pc.set(op.getResult() + op.getImVal());
-            }else{
-                pc.set(op.getResult()); // untaken
-            }
-            shouldFlush = true;
-            shouldFlushWhere = currentCommit.getId() + 1;
-            flushFrom(currentCommit.getId() + 1);
-        }
+        boolean predTaken = currentCommit.getValue(ReorderEntry.SND) == BranchUnit.TAKEN;
+
+        handleBranch(op, flag, op.getResult() + op.getImVal() - 1, predTaken);
+
         cdb.remove(currentCommit.getId());
     }
 
     @Override
     public void accept(Op.Br op) {
         cdb.remove(currentCommit.getId());
+        //commitedBranches++;
     }
 
     @Override
     public void accept(Op.Jp op) {
         cdb.remove(currentCommit.getId());
+        //commitedBranches++;
     }
 
     @Override

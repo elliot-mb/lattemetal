@@ -6,17 +6,19 @@ import java.util.*;
 public class Processor {
     //@@@SETTINGS@@@
     private static final double CLOCK_SPEED_MHZ = 500;
-    private static final int SUPERSCALAR_WIDTH = 2;
+    public static final boolean BR_PREDICTOR_IS_FIXED = true;
+    private static final int BTB_CACHE_SIZE = 32;
+    public static final int SUPERSCALAR_WIDTH = 2;
     private static final int ALU_COUNT = 4;
     private static final int LSU_COUNT = 2;
     private static final int BRU_COUNT = 2;
-    private static final int ALU_RS_COUNT = 2;
-    private static final int LSU_RS_COUNT = 1;
-    private static final int BRU_RS_COUNT = 1;
+    private static final int ALU_RS_COUNT = 8;
+    private static final int LSU_RS_COUNT = 4;
+    private static final int BRU_RS_COUNT = 2;
     private static final int DP_ACC = 4;
-    private static final int ROB_ENTRIES = 32;
+    public static final int ROB_ENTRIES = 32;
     public static final int FLUSH_ALL = -1;
-    public static final int PHYSICAL_REGISTER_FACTOR = 4; //how many times more physical registers we have than architectural ones
+    public static final int PHYSICAL_REGISTER_FACTOR = 2; //how many times more physical registers we have than architectural ones
     //@@@DEPENDANT SETTINGS@@@
     private static final double ASSUMED_CYCLE_TIME = Math.pow(10, 3) / CLOCK_SPEED_MHZ;//ns
     public static final int PHYSICAL_REGISTER_COUNT = PHYSICAL_REGISTER_FACTOR * RegisterName.values().length;
@@ -26,7 +28,7 @@ public class Processor {
     private final ArrayList<BranchUnit> brusInUse;
 
     private final ArrayList<LoadStoreUnit> lsusInUse;
-
+    private final BranchTargetBuffer btb;
     private final Map<Integer, List<Integer>> cdb;
     private final ProgramCounter pc;
     private final InstructionCache ic;
@@ -60,6 +62,7 @@ public class Processor {
 
     Processor(InstructionCache ic, Memory... mem) throws RuntimeException{
         if(mem.length > 1) throw new RuntimeException("Processor: this constructor cannot have more than one memories");
+        this.btb = new BranchTargetBuffer(BTB_CACHE_SIZE);
         this.cdb = new HashMap<Integer, List<Integer>>();
         this.mem = mem.length > 0 ? mem[0] : new Memory();
         this.rf = new RegisterFile(cdb);
@@ -70,7 +73,7 @@ public class Processor {
                 new PipeLike[]{fecDec},
                 new PipeLike[]{decIsu}); //loadstores go down the latter pipe
 
-        this.rob = new ReorderBuffer(ROB_ENTRIES, cdb, rf, this.mem, this.pc, this.dec);
+        this.rob = new ReorderBuffer(ROB_ENTRIES, cdb, btb, rf, this.mem, this.pc, this.dec);
         this.ic = ic;
         this.tally = 0;
         this.rat = new RegisterAliasTable(cdb, rob);
@@ -83,11 +86,13 @@ public class Processor {
         this.fec = new FetchUnit(
                 this.ic,
                 this.pc,
+                this.btb,
                 new PipeLike[]{prefec},
                 new PipeLike[]{fecDec});
         this.isu = new IssueUnit(
                 this.rf,
                 this.rob,
+                this.dec,
                 this.rat,
                 new PipeLike[]{decIsu},
                 new PipeLike[]{exeRss, lsuRss, bruRss});
@@ -305,7 +310,7 @@ public class Processor {
 //            } //delete whats inside (voided is used to detect when writebacks are finished)
             delete.flush(FLUSH_ALL); // any instructions we want to throw away can be put into delete
 
-            if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");
+            //if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");
 
             cdb.clear();
         }
@@ -314,18 +319,22 @@ public class Processor {
         debugOut.println("memory: " + mem);
 
         if(!quietStats){
-            System.out.println("run: program finished in " + tally + " cycles");
+
             double ipc = Utils.toDecimalPlaces( (double) rob.getCommitted() / tally, DP_ACC);
             double time = (rob.getCommitted() * (1 / ipc) * ASSUMED_CYCLE_TIME) / Math.pow(10, 3);
-            double percentMispredicts = (double) rob.getMispredicted() / rob.getCommitted();
+            double rateMispredictedInstrs = (double) rob.getMispredictedInstr() / rob.getCommitted();
+            double rateMispredictedBranches = (double) rob.getMispredictedBranches() / (rob.getPredictedBranches() + rob.getMispredictedBranches());
+            System.out.println("run: program finished in " + tally + " cycles");
+            System.out.println("run: program finished after committing " + rob.getCommitted() + " instructions");
+            System.out.println("run: program incorrectly speculated and thereby flushed " + rob.getMispredictedInstr() + " instructions");
             System.out.println("run: instructions per cycle " + ipc);
             System.out.println("run: cpu time " + Utils.toDecimalPlaces(time, DP_ACC) + "μs @ " + CLOCK_SPEED_MHZ + "MHz");
-            System.out.println("run: percentage mispredicted " + Utils.toDecimalPlaces(percentMispredicts, DP_ACC) +"%");
+            System.out.println("run: percentage mispredicted instructions " + Utils.toDecimalPlaces(rateMispredictedInstrs * 100, DP_ACC) +"%");
+            System.out.println("run: percentage mispredicted branches " + Utils.toDecimalPlaces(rateMispredictedBranches * 100, DP_ACC) + "%");
             System.out.println(Arrays.toString(mem.getData()));
+            //System.out.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
         }
 
-
-        //debugOut.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
         return mem;
     }
 
