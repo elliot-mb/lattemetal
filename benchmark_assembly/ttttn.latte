@@ -1,0 +1,7 @@
+        addi t0 zero #-643
+        addi t1 zero #-640
+taken:  addi t0 t0 #1
+        cmp t2 t0 t1
+        brlz t2 taken
+        addi t1 t1 #4
+        brlz t0 taken

@@ -1,0 +1,10 @@
+            addi s2 zero #14        --n
+            addi s1 zero #1         --total
+            addi s0 s0 #1
+next:       addi s0 s0 #1           --counter
+            mul s1 s1 s0
+            cmp s3 s0 s2
+            addi s3 s3 #1
+            brlz s3 next
+            st s1 zero #0           --n!
+

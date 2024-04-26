@@ -10,7 +10,7 @@ public class Processor {
     }
     //@@@SETTINGS@@@
     private static final double CLOCK_SPEED_MHZ = 500;
-    public static final predictor PREDICTOR = predictor.fixedNotTaken;
+    public static final predictor PREDICTOR = predictor.twoBit;
     private static final int BTB_CACHE_SIZE = 32;
     public static final int SUPERSCALAR_WIDTH = 8;
     private static final int ALU_COUNT = 4;
