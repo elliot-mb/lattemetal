@@ -184,16 +184,18 @@ public class ReservationStation implements InstructionVoidVisitor {
     @Override
     public void accept(Op.Ld op) {
         op.setRsVal(vJ);
+        op.setResult(vJ); //set so we can tell if we have calculated the address, from the rob
     }
 
     @Override
     public void accept(Op.LdC op) {
-
+        op.setResult(op.getImVal());
     }
 
     @Override
     public void accept(Op.LdI op) {
         op.setRsVal(vJ);
+        op.setResult(vJ);
     }
 
     @Override

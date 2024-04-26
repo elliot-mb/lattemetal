@@ -59,6 +59,7 @@ public class WriteBackUnit extends Unit{
     public void accept(Op.Add op) {
         //setRdToRes(op.getRd(), op.getResult());
         cdb.put(currentRobEntry, Collections.singletonList(currentOp.getResult()));
+
     }
 
     @Override
@@ -88,18 +89,33 @@ public class WriteBackUnit extends Unit{
     @Override
     public void accept(Op.Ld op) {
         //setRdToRes(op.getRd(), op.getResult());
-        cdb.put(currentRobEntry, Collections.singletonList(op.getRdVal()));
+        ReorderEntry robertEntry = rob.hasEntry(currentRobEntry) ? rob.getEntry(currentRobEntry) : null; //incase it was readied by a store before it wroteback
+        if(robertEntry != null && robertEntry.isReady()) {
+            cdb.put(currentRobEntry, robertEntry.getValues()); //tell the reservation stations about it anyway!
+        }else {
+            cdb.put(currentRobEntry, Collections.singletonList(op.getRdVal()));
+        }
     }
 
     @Override
     public void accept(Op.LdC op) {
         //setRdToRes(op.getRd(), op.getResult());
-        cdb.put(currentRobEntry, Collections.singletonList(op.getRdVal()));
+        ReorderEntry robertEntry = rob.hasEntry(currentRobEntry) ? rob.getEntry(currentRobEntry) : null; //incase it was readied by a store before it wroteback
+        if(robertEntry != null && robertEntry.isReady()) {
+            cdb.put(currentRobEntry, robertEntry.getValues());
+        }else {
+            cdb.put(currentRobEntry, Collections.singletonList(op.getRdVal()));
+        }
     }
 
     @Override
     public void accept(Op.LdI op) {
-        cdb.put(currentRobEntry, List.of(op.getRdVal(), op.getRsVal()));
+        ReorderEntry robertEntry = rob.hasEntry(currentRobEntry) ? rob.getEntry(currentRobEntry) : null; //incase it was readied by a store before it wroteback
+        if(robertEntry != null && robertEntry.isReady()) {
+            cdb.put(currentRobEntry, robertEntry.getValues());
+        }else {
+            cdb.put(currentRobEntry, List.of(op.getRdVal(), op.getRsVal()));
+        }
     }
 
     @Override

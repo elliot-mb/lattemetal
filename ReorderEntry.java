@@ -1,3 +1,6 @@
+import java.util.Arrays;
+import java.util.List;
+
 public class ReorderEntry {
 
     public static final int FST = 0;
@@ -33,8 +36,12 @@ public class ReorderEntry {
     }
 //
     public void setValue(int value, int which){
-        if(which == 0) this.value1 = value;
-        else this.value2 = value;
+        if(which == 0) value1 = value;
+        else value2 = value;
+    }
+
+    public List<Integer> getValues(){
+        return Arrays.asList(value1, value2);
     }
 
     public void readyUp(){

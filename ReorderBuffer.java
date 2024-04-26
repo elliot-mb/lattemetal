@@ -110,7 +110,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         CircluarQueue<ReorderEntry> newLsq = new CircluarQueue<ReorderEntry>(size);
         int sizeBefore = buffer.getElementsIn();
         ReorderEntry peel = buffer.pop();
-        while(!buffer.isEmpty() && peel.getId() > id){
+        while(!buffer.isEmpty() && peel.getId() < id){
             if(!lsq.isEmpty() && peel.getId() == lsq.peekHead().getId()){
                 newLsq.push(lsq.pop()); //should include just the same instructions as the main rob
             }
@@ -210,6 +210,11 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         return re.get(index);
     }
 
+    public boolean hasEntry(int id){
+        int index = locationOfEntryId(id, buffer);
+        return index != -1;
+    }
+
     public ReorderEntry getEntry(int id){
         List<ReorderEntry> re = buffer.peekXs();
         int index = locationOfEntryId(id, buffer);
@@ -228,7 +233,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
                 //if its a fixed branch (non-conditional) it has no value and no payload so i dont write any value on the cdb
                 int i = 0;
                 for(Integer val : payload){
-                    r.setValue(val, i); //read from the map if the id matches this rese entry (value is already in the entry before we commit!)
+                    if(val != null) r.setValue(val, i); //read from the map if the id matches this rese entry (value is already in the entry before we commit!)
                     i++;
                 }
                 r.readyUp();
@@ -290,7 +295,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     private void handleBranch(Instruction branch, boolean flag, int branchTo, boolean wasTakenAtFetch){
         if(Processor.BR_PREDICTOR_IS_FIXED){
-            if(flag != Unit.FIXED_PREDICTOR_SET_TAKEN){
+            if(flag != Processor.FIXED_PREDICTOR_SET_TAKEN){
                 if(flag){
                     pc.set(branchTo);
                 }else{
@@ -411,7 +416,8 @@ public class ReorderBuffer implements InstructionVoidVisitor{
             flushFrom(lastLoadOrNull.getId());
             pc.set(buffer.peekHead().getPcVal());
         }else if(collide){ // OTHERWISE, JUST UPDATE THE VALUE OF THE LOAD
-            lastLoadOrNull.setValue(op.getResult(), ReorderEntry.FST);
+            lastLoadOrNull.setValue(currentCommit.getValue(ReorderEntry.FST), ReorderEntry.FST);
+
             lastLoadOrNull.readyUp(); //make sure its ready
         }
     }

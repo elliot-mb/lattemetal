@@ -64,7 +64,7 @@ public class RegisterAliasTable {
         for(Map.Entry<Integer, CircluarQueue<Integer>> e : regAlias.entrySet()){
             int resetKey = e.getKey();
             CircluarQueue<Integer> oldAliasQ = e.getValue();
-            CircluarQueue<Integer> oldEntryQ = e.getValue();
+            CircluarQueue<Integer> oldEntryQ = whichCDBEntry.get(resetKey);
             CircluarQueue<Integer> newAliasQ = new CircluarQueue<Integer>(HISTORY_LENGTH);
             CircluarQueue<Integer> newEntryQ = new CircluarQueue<Integer>(HISTORY_LENGTH);
             while(!oldAliasQ.isEmpty() && oldAliasQ.peek() < fromRobEntry){ //as soon as we meet or exceed fromRobEntry we stop transferring *(after the flush in program order)
