@@ -56,7 +56,7 @@ public class BranchTargetBuffer {
                 if(pcToPredState.containsKey(pc) && pcToPredState.get(pc).equals(twoBitPred.weakTaken)) pcToPredState.put(pc, twoBitPred.strongTaken); //upgrade
                 else if(pcToPredState.containsKey(pc) && pcToPredState.get(pc).equals(twoBitPred.weakNotTaken)) pcToPredState.put(pc, twoBitPred.weakTaken); //upgrade
                 else if(!pcToPredState.containsKey(pc)) {
-                    pcToPredState.put(pc, twoBitPred.weakTaken);
+                    pcToPredState.put(pc, twoBitPred.weakNotTaken);
                     addTo(pc, target);
                 }
             }else{

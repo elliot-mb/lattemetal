@@ -45,7 +45,7 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) throws FileNotFoundException {
-        String programPath = "./assembly/mat3_mul.latte";
+        String programPath = "./assembly/one_to_sixty_four.latte";
         int printWidth = 1;
         boolean testing = false;
         boolean quiet = false;
