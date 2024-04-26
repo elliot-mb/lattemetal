@@ -10,7 +10,7 @@ public class Processor {
     }
     //@@@SETTINGS@@@
     private static final double CLOCK_SPEED_MHZ = 500;
-    public static final predictor PREDICTOR = predictor.twoBit;
+    public static final predictor PREDICTOR = predictor.fixedNotTaken;
     private static final int BTB_CACHE_SIZE = 32;
     public static final int SUPERSCALAR_WIDTH = 8;
     private static final int ALU_COUNT = 4;
@@ -316,7 +316,7 @@ public class Processor {
 //            } //delete whats inside (voided is used to detect when writebacks are finished)
             delete.flush(FLUSH_ALL); // any instructions we want to throw away can be put into delete
 
-            //if(tally % 1000 == 0) debugOut.print("\r" + tally / 1000 + "K cycles");
+            if(!quietStats) if(tally % 1000 == 0) System.out.print("\r" + tally / 1000 + "K cycles");
 
             cdb.clear();
         }
@@ -337,7 +337,8 @@ public class Processor {
             System.out.println("run: cpu time " + Utils.toDecimalPlaces(time, DP_ACC) + "μs @ " + CLOCK_SPEED_MHZ + "MHz");
             System.out.println("run: percentage mispredicted instructions added to rob " + Utils.toDecimalPlaces(rateMispredictedInstrs * 100, DP_ACC) +"%");
             System.out.println("run: percentage mispredicted branches " + Utils.toDecimalPlaces(rateMispredictedBranches * 100, DP_ACC) + "%");
-            System.out.println(Arrays.toString(mem.getData()));
+            System.out.println("mem: " + Arrays.toString(mem.getData()));
+            System.out.println("registers (dirty): " + rf);
             //System.out.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
         }
 

@@ -1,0 +1,8 @@
+-- taken taken not taken loop
+        addi t0 zero #-65
+        addi t1 zero #-64
+taken:  addi t0 t0 #1
+        cmp t2 t0 t1
+        brlz t2 taken
+        addi t1 t1 #2
+        brlz t0 taken

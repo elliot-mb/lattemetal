@@ -1,0 +1,30 @@
+-- start with 100 by 100 pt grid to find pi
+-- this will give us 10000 points so we will hopefully get that 3142 ish are within range
+
+-- constants
+            addi t0 zero #100   --grid resolution
+-- dependants
+            mul t1 t0 t0        --distance constant
+            addi t2 zero #0     --points within distance (tally)
+            addi s0 zero #0
+            addi s1 zero #0
+            br countnext
+-- loop
+rstx:       addi s0 zero #0     --x = 0
+            addi s1 s1 #1       --y++
+            br retrstx
+incr:       addi t2 t2 #1       --tally++
+            br countnext
+
+countnext:  addi s0 s0 #1       --x++
+            cmp s2 t0 s0        --grid resolution <= s0
+            brlz s2 rstx        --s0 >= grid resolution, we branch
+            cmp s2 s1 t1
+            brlz s2 done
+retrstx:    mul s3 s0 s0        --x^2
+            mul s4 s1 s1        --y^2
+            add s5 s3 s4        --x^2 + y^2
+            cmp s6 s5 t1        --s5 <= t1 -> s6 <= 0
+            brlz s6 incr        --increment tally
+            br countnext
+done:       st t2 zero #0       --store at address zero
