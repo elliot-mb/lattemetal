@@ -16,9 +16,9 @@ public class Processor {
     private static final int ALU_COUNT = 4;
     private static final int LSU_COUNT = 2;
     private static final int BRU_COUNT = 2;
-    private static final int ALU_RS_COUNT = 4;
-    private static final int LSU_RS_COUNT = 2;
-    private static final int BRU_RS_COUNT = 2;
+    private static final int ALU_RS_COUNT = 2;
+    private static final int LSU_RS_COUNT = 1;
+    private static final int BRU_RS_COUNT = 1;
     private static final int DP_ACC = 4;
     public static final int ROB_ENTRIES = 32;
     public static final int FLUSH_ALL = -1;
