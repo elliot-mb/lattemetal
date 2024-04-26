@@ -1,0 +1,43 @@
+-- integer modulo 2
+            br start
+        -- t3 % 2
+mod2:       addi t4 zero #2
+            addi t5 zero #0     -- zero our quotient counter (our result)
+            muli t6 t4 #-1      --so we can subtract t4 by adding it
+            addi t3 a3 #0
+loop1:      add t3 t3 t6
+            cmp t0 t4 t3        -- if t3 (what we're subtacting from) is less than what we're subtracting we stop
+            jplz t0 loop1       -- loop tail
+            br modret           -- use t3
+
+        -- t3 div 2
+quot2:      addi t4 zero #2
+            addi t5 zero #0     -- zero our quotient counter (our result)
+            muli t6 t4 #-1      --so we can subtract t4 by adding it
+            addi t5 zero #0
+            addi t3 a3 #0
+loop2:      addi t5 t5 #1       -- increment quotient loop starts here
+            add t3 t3 t6        -- ln 08
+            cmp t0 t4 t3        -- if t3 (what we're subtacting from) is less than what we're subtracting we stop
+            jplz t0 loop2       -- loop tail
+            br quotret          -- use t5
+
+-- collatz sequence
+
+start:      addi s1 zero #3144 --seed
+            addi s2 zero #2 --if its less than this we stop
+            addi a1 zero #0 --debug store counter
+            addi a2 zero #1 --debug counter
+
+next:       addi a3 s1 #0
+            br mod2
+modret:     addi a3 s1 #0
+            brlz t3 quot2
+            br noquot
+quotret:    addi s1 t5 #0   -- n / 2
+            br didquot
+noquot:     muli s1 s1 #3
+            addi s1 s1 #1   -- 3n + 1
+didquot:    sti s1 a1 #1
+            cmp t6 s2 s1    -- 2 < n
+            brlz t6 next
