@@ -122,12 +122,31 @@ public class FetchUnit extends Unit {
     @Override
     public void accept(Op.BrLZ op) {
         op.setResult(pcVal + 1); //branch untaken!
-        if(Processor.BR_PREDICTOR_IS_FIXED){
-            if(Processor.FIXED_PREDICTOR_SET_TAKEN){
+        if(Processor.BR_PREDICTOR_IS_FIXED) {
+            if (Processor.FIXED_PREDICTOR_SET_TAKEN) {
                 //next.setPcVal(op.getImVal());
                 pcVal = op.getImVal(); //pc.set(op.getImVal()); //static prediciton
-            }else{
+            } else {
                 pcVal++;
+            }
+        }else if (Processor.PREDICTOR.equals(Processor.predictor.bckTknFwdNTkn) ||
+                  Processor.PREDICTOR.equals(Processor.predictor.bckNTknFwdTkn)){
+            if(Processor.STATIC_PREDICTOR_BCK_TKN){
+                if(op.getImVal() <= pcVal){ //backwards
+                    pcVal = op.getImVal();  //taken
+                    flag = true;
+                }else{
+                    pcVal++;
+                    flag = false;
+                }
+            }else{
+                if(op.getImVal() > pcVal){  //forwards
+                    pcVal = op.getImVal();  //taken
+                    flag = true;
+                }else{
+                    pcVal++;
+                    flag = false;
+                }
             }
         }else{ //use btb
             if(btb.shouldBranch(pcVal)){
@@ -152,13 +171,32 @@ public class FetchUnit extends Unit {
             } else {
                 pcVal++;
             }
+        }else if (Processor.PREDICTOR.equals(Processor.predictor.bckTknFwdNTkn) ||
+                    Processor.PREDICTOR.equals(Processor.predictor.bckNTknFwdTkn)){
+                if(Processor.STATIC_PREDICTOR_BCK_TKN){
+                    if(op.getImVal() <= 0){ //backwards
+                        pcVal += op.getImVal();  //taken
+                        flag = true;//gets put into entry.second
+                    }else{
+                        pcVal++;
+                        flag = false;//gets put into entry.second
+                    }
+                }else{
+                    if(op.getImVal() > 0){  //forwards
+                        pcVal += op.getImVal();  //taken
+                        flag = true; //gets put into entry.second
+                    }else{
+                        pcVal++;
+                        flag = false;//gets put into entry.second
+                    }
+                }
         }else{
             if(btb.shouldBranch(pcVal)){
                 pcVal = btb.getPredictionTarget(pcVal); //should encode the offset for us
-                flag = true;
+                flag = true; //gets put into entry.second
             }else{
                 pcVal++;
-                flag = false;
+                flag = false;//gets put into entry.second
             }
         }
         pc.set(pcVal);

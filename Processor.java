@@ -10,9 +10,9 @@ public class Processor {
     }
     //@@@SETTINGS@@@
     private static final double CLOCK_SPEED_MHZ = 500;
-    public static final predictor PREDICTOR = predictor.fixedTaken;
+    public static final predictor PREDICTOR = predictor.bckTknFwdNTkn;
     private static final int BTB_CACHE_SIZE = 32;
-    public static final int SUPERSCALAR_WIDTH = 8;
+    public static final int SUPERSCALAR_WIDTH = 4;
     private static final int ALU_COUNT = 4;
     private static final int LSU_COUNT = 4;
     private static final int BRU_COUNT = 2;
@@ -23,6 +23,7 @@ public class Processor {
     public static final int ROB_ENTRIES = 64;
     public static final int PHYSICAL_REGISTER_FACTOR = 4; //how many times more physical registers we have than architectural ones
     //@@@DEPENDANT SETTINGS@@@
+    public static final boolean STATIC_PREDICTOR_BCK_TKN = PREDICTOR.equals(predictor.bckTknFwdNTkn);
     public static final boolean BR_PREDICTOR_IS_FIXED = PREDICTOR.equals(predictor.fixedTaken) || PREDICTOR.equals(predictor.fixedNotTaken);
     public static final boolean FIXED_PREDICTOR_SET_TAKEN = PREDICTOR.equals(predictor.fixedTaken);
     private static final double ASSUMED_CYCLE_TIME = Math.pow(10, 3) / CLOCK_SPEED_MHZ;//ns
@@ -354,7 +355,7 @@ public class Processor {
             System.out.println("run: percentage mispredicted branches " + Utils.toDecimalPlaces(rateMispredictedBranches * 100, DP_ACC) + "%");
             System.out.println("mem: " + Arrays.toString(mem.getData()));
             System.out.println("registers (dirty): " + rf);
-            //System.out.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
+            System.out.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
         }
 
         return mem;

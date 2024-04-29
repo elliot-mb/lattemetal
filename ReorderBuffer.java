@@ -294,18 +294,33 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     }
 
     private void handleBranch(Instruction branch, boolean flag, int branchTo, boolean wasTakenAtFetch){
-        if(Processor.BR_PREDICTOR_IS_FIXED){
-            if(flag != Processor.FIXED_PREDICTOR_SET_TAKEN){
-                if(flag){
+        if(Processor.BR_PREDICTOR_IS_FIXED) {
+            if (flag != Processor.FIXED_PREDICTOR_SET_TAKEN) {
+                if (flag) {
                     pc.set(branchTo);
-                }else{
+                } else {
                     pc.set(branch.getResult()); // untaken
                 }
                 shouldFlush = true;
                 mispredictedBranches++;
                 shouldFlushWhere = currentCommit.getId() + 1;
                 flushFrom(currentCommit.getId() + 1);
-            }else{
+            } else {
+                predictedBranches++;
+            }
+        }else if(Processor.PREDICTOR.equals(Processor.predictor.bckTknFwdNTkn) ||
+                Processor.PREDICTOR.equals(Processor.predictor.bckNTknFwdTkn)){
+            if (flag != wasTakenAtFetch) {
+                if (flag) {
+                    pc.set(branchTo);
+                } else {
+                    pc.set(branch.getResult()); // untaken
+                }
+                shouldFlush = true;
+                mispredictedBranches++;
+                shouldFlushWhere = currentCommit.getId() + 1;
+                flushFrom(currentCommit.getId() + 1);
+            } else {
                 predictedBranches++;
             }
         }else{
