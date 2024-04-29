@@ -26,7 +26,7 @@ public class Utils {
 
     public static <T> String writeList(List<T> xs){
         List<String> shows = xs.stream().map(Object::toString).toList();
-        return shows.stream().reduce("", (acc, x) -> acc + "'" + x.toString() + "'" + "\r\n");
+        return shows.stream().reduce("", (acc, x) -> acc + "" + x.toString() + "" + "\r\n");
     }
 
     public static boolean isSpace(String maybeSpace){

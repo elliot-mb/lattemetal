@@ -6,19 +6,19 @@ import java.util.*;
 public class Processor {
     //@@@SETTING CHOICES@@@
     public enum predictor {
-        fixedTaken, fixedNotTaken, oneBit, twoBit
+        fixedTaken, fixedNotTaken, bckTknFwdNTkn, bckNTknFwdTkn, oneBit, twoBit
     }
     //@@@SETTINGS@@@
     private static final double CLOCK_SPEED_MHZ = 500;
-    public static final predictor PREDICTOR = predictor.twoBit;
+    public static final predictor PREDICTOR = predictor.fixedTaken;
     private static final int BTB_CACHE_SIZE = 32;
     public static final int SUPERSCALAR_WIDTH = 8;
     private static final int ALU_COUNT = 4;
     private static final int LSU_COUNT = 4;
-    private static final int BRU_COUNT = 4;
-    private static final int ALU_RS_COUNT = 8;
+    private static final int BRU_COUNT = 2;
+    private static final int ALU_RS_COUNT = 6;
     private static final int LSU_RS_COUNT = 4;
-    private static final int BRU_RS_COUNT = 4;
+    private static final int BRU_RS_COUNT = 2;
     private static final int DP_ACC = 4;
     public static final int ROB_ENTRIES = 64;
     public static final int PHYSICAL_REGISTER_FACTOR = 4; //how many times more physical registers we have than architectural ones
