@@ -42,6 +42,7 @@ public class Main {
     static final String TESTING = "testing";
     static final String WIDTH = "width";
     static final String QUIET = "quiet";
+    static final String PREDICTOR = "predictor";
     static final String BTB_SIZE = "btb_size";
     static final String SS_WIDTH = "ss_width";
     static final String ALUS = "alus";
@@ -83,9 +84,10 @@ public class Main {
         int dpAcc = 4;                  // dp_acc
         int robEntries = 64;            // rob_size
         boolean alignedFetch = false;   // aligned_fetch
+        Processor.predictor pred = Processor.predictor.twoBit;
 
         List<String> recogArgs = Arrays.asList(
-                PROG, TESTING, WIDTH, QUIET, BTB_SIZE, SS_WIDTH, ALUS, LSUS, BRUS, ALU_RSS, LSU_RSS, BRU_RSS, DP_ACC, ROB_SIZE, ALIGN_FETCH
+                PROG, TESTING, WIDTH, QUIET, PREDICTOR, BTB_SIZE, SS_WIDTH, ALUS, LSUS, BRUS, ALU_RSS, LSU_RSS, BRU_RSS, DP_ACC, ROB_SIZE, ALIGN_FETCH
         );
 
         Map<String, String> argMap = new HashMap<String, String>();
@@ -94,7 +96,7 @@ public class Main {
             //if(!arg.contains("=")) throw new RuntimeException("main: argument '" + arg + "' is not recognised and does not include an equals sign (must be of the form <property_name>=<value>)");
             String[] kv = arg.split("=");
             String key = kv[0];
-            String val = kv[1];
+            String val = kv.length < 2 ? null : kv[1];
             if(!recogArgs.contains(key)) throw new RuntimeException("main: argument name '" + key + "' does not correspond to an input for the program");
             argMap.put(key, val);
         }
@@ -103,6 +105,29 @@ public class Main {
         if(argMap.containsKey(TESTING)) testing = true;
         if(argMap.containsKey(WIDTH)) printWidth = stoi(argMap.get(WIDTH));
         if(argMap.containsKey(QUIET)) quiet = true;
+        if(argMap.containsKey(PREDICTOR)) {
+            String predArg = argMap.get(PREDICTOR);
+            boolean set = false;
+            if(predArg.equals(Processor.predictor.fixedTaken.name())){
+                pred = Processor.predictor.fixedTaken; set = true;
+            }
+            if(predArg.equals(Processor.predictor.fixedNotTaken.name())){
+                pred = Processor.predictor.fixedNotTaken; set = true;
+            }
+            if(predArg.equals(Processor.predictor.bckTknFwdNTkn.name())){
+                pred = Processor.predictor.bckTknFwdNTkn; set = true;
+            }
+            if(predArg.equals(Processor.predictor.bckNTknFwdTkn.name())){
+                pred = Processor.predictor.bckNTknFwdTkn; set = true;
+            }
+            if(predArg.equals(Processor.predictor.oneBit.name())){
+                pred = Processor.predictor.oneBit; set = true;
+            }
+            if(predArg.equals(Processor.predictor.twoBit.name())){
+                pred = Processor.predictor.twoBit; set = true;
+            }
+            if(!set) throw new RuntimeException("main: " + PREDICTOR + "='" + predArg + "' is not a valid predictor type");
+        }
         if(argMap.containsKey(BTB_SIZE)) btbSize = stoi(argMap.get(BTB_SIZE));
         if(argMap.containsKey(SS_WIDTH)) superscalarWidth = stoi(argMap.get(SS_WIDTH));
         if(argMap.containsKey(ALUS)) aluCount = stoi(argMap.get(ALUS));
@@ -151,6 +176,7 @@ public class Main {
                 }
         );
         Utils.runKern(programPath, exampleMemory, quiet, null, false,
+            pred,
             btbSize,
             superscalarWidth,
             aluCount,

@@ -59,7 +59,8 @@ public class Utils {
     }
 
     public static Memory runKern(String filePath, Memory mem, boolean quiet, Integer divergenceLim, boolean quietStats,
-                  int btbSize,
+                 Processor.predictor predictor,
+                 int btbSize,
                  int superscalarWidth,
                  int aluCount,
                  int lsuCount,
@@ -78,7 +79,9 @@ public class Utils {
             throw new RuntimeException("runKern: program assembler failed to read program '" + filePath + "'");
         }
         InstructionCache ic = new InstructionCache(assembler.assemble());
-        Processor p = new Processor(ic, btbSize,
+        Processor p = new Processor(ic,
+            predictor,
+            btbSize,
             superscalarWidth,
             aluCount,
             lsuCount,

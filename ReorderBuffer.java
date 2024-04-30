@@ -33,7 +33,10 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     private final BranchTargetBuffer btb;
 
-    ReorderBuffer(int size, Map<Integer, List<Integer>> cdb, BranchTargetBuffer btb, RegisterFile rf, Memory mem, ProgramCounter pc, DecodeUnit dec){
+    private final Processor proc;
+
+    ReorderBuffer(int size, Map<Integer, List<Integer>> cdb, BranchTargetBuffer btb, RegisterFile rf, Memory mem, ProgramCounter pc, DecodeUnit dec, Processor proc){
+        this.proc = proc;
         this.dec = dec;
         this.buffer = new CircluarQueue<ReorderEntry>(size);
         this.cdb = cdb;
@@ -294,8 +297,8 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     }
 
     private void handleBranch(Instruction branch, boolean flag, int branchTo, boolean wasTakenAtFetch){
-        if(Processor.BR_PREDICTOR_IS_FIXED) {
-            if (flag != Processor.FIXED_PREDICTOR_SET_TAKEN) {
+        if(proc.BR_PREDICTOR_IS_FIXED) {
+            if (flag != proc.FIXED_PREDICTOR_SET_TAKEN) {
                 if (flag) {
                     pc.set(branchTo);
                 } else {
@@ -308,8 +311,8 @@ public class ReorderBuffer implements InstructionVoidVisitor{
             } else {
                 predictedBranches++;
             }
-        }else if(Processor.PREDICTOR.equals(Processor.predictor.bckTknFwdNTkn) ||
-                Processor.PREDICTOR.equals(Processor.predictor.bckNTknFwdTkn)){
+        }else if(proc.PREDICTOR.equals(Processor.predictor.bckTknFwdNTkn) ||
+                proc.PREDICTOR.equals(Processor.predictor.bckNTknFwdTkn)){
             if (flag != wasTakenAtFetch) {
                 if (flag) {
                     pc.set(branchTo);

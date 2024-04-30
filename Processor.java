@@ -10,25 +10,25 @@ public class Processor {
     }
     //@@@SETTINGS@@@
     private static final double CLOCK_SPEED_MHZ = 500;
-    public static final predictor PREDICTOR = predictor.twoBit;
-    private static final int BTB_CACHE_SIZE = 32;
-    public static final int SUPERSCALAR_WIDTH = 8;
-    private static final int ALU_COUNT = 4;
-    private static final int LSU_COUNT = 4;
-    private static final int BRU_COUNT = 2;
-    private static final int ALU_RS_COUNT = 4;
-    private static final int LSU_RS_COUNT = 4;
-    private static final int BRU_RS_COUNT = 2;
-    private static final int DP_ACC = 4;
-    public static final int ROB_ENTRIES = 64;
-    public static final boolean ALIGNED_FETCH = true; //we only fetch once we can fetch a whole instruction buffer
+    public final predictor PREDICTOR;
+    private final int BTB_CACHE_SIZE;
+    public final int SUPERSCALAR_WIDTH;
+    private final int ALU_COUNT;
+    private final int LSU_COUNT;
+    private final int BRU_COUNT;
+    private final int ALU_RS_COUNT;
+    private final int LSU_RS_COUNT;
+    private final int BRU_RS_COUNT;
+    private final int DP_ACC;
+    public final int ROB_ENTRIES ;
+    public final boolean ALIGNED_FETCH; //we only fetch once we can fetch a whole instruction buffer
     //public static final int PHYSICAL_REGISTER_FACTOR = 1; //how many times more physical registers we have than architectural ones
     //@@@DEPENDANT SETTINGS@@@
-    public static final boolean STATIC_PREDICTOR_BCK_TKN = PREDICTOR.equals(predictor.bckTknFwdNTkn);
-    public static final boolean BR_PREDICTOR_IS_FIXED = PREDICTOR.equals(predictor.fixedTaken) || PREDICTOR.equals(predictor.fixedNotTaken);
-    public static final boolean FIXED_PREDICTOR_SET_TAKEN = PREDICTOR.equals(predictor.fixedTaken);
-    private static final double ASSUMED_CYCLE_TIME = Math.pow(10, 3) / CLOCK_SPEED_MHZ;//ns
-    public static final int PHYSICAL_REGISTER_COUNT = 64;//PHYSICAL_REGISTER_FACTOR * RegisterName.values().length;
+    public final boolean STATIC_PREDICTOR_BCK_TKN;
+    public final boolean BR_PREDICTOR_IS_FIXED;
+    public final boolean FIXED_PREDICTOR_SET_TAKEN;
+    private final double ASSUMED_CYCLE_TIME;
+    public final int PHYSICAL_REGISTER_COUNT;
     //@@@@@@
 
     public static final int FLUSH_ALL = -1;
@@ -61,15 +61,16 @@ public class Processor {
     private final ReservationGroup lsuRss;
     private final ReservationGroup bruRss;
 
-    private final PipelineRegister prefec = new PipelineRegister(SUPERSCALAR_WIDTH); //just to pass the pc value to the fetch unit, and increment it!
-    private final PipelineRegister fecDec = new PipelineRegister(SUPERSCALAR_WIDTH);
-    private final PipelineRegister decIsu = new PipelineRegister(SUPERSCALAR_WIDTH); //instruction queue
-    private final PipelineRegister exeWbu = new PipelineRegister(SUPERSCALAR_WIDTH);
+    private final PipelineRegister prefec;
+    private final PipelineRegister fecDec;
+    private final PipelineRegister decIsu;
+    private final PipelineRegister exeWbu;
     //private final PipelineRegister aluLsu = new PipelineRegister();
-    private final PipelineRegister rtired = new PipelineRegister(1); //ignored pipe register to satisfy Unit inheritence
-    private final PipelineRegister delete = new PipelineRegister(SUPERSCALAR_WIDTH);
+    private final PipelineRegister rtired;
+    private final PipelineRegister delete;
 
     Processor(InstructionCache ic,
+              predictor p,
               int btbSize,
               int superscalarWidth,
               int aluCount,
@@ -82,8 +83,36 @@ public class Processor {
               int robEntries,
               boolean alignedFetch,
               Memory... mem) throws RuntimeException{
+
+        PREDICTOR = p;
+        BTB_CACHE_SIZE = btbSize;
+        SUPERSCALAR_WIDTH = superscalarWidth;
+        ALU_COUNT = aluCount;
+        LSU_COUNT = lsuCount;
+        BRU_COUNT = bruCount;
+        ALU_RS_COUNT = aluRsCount;
+        LSU_RS_COUNT = lsuRsCount;
+        BRU_RS_COUNT = bruRsCount;
+        DP_ACC = dpAcc;
+        ROB_ENTRIES = robEntries;
+        ALIGNED_FETCH = alignedFetch;
+
+        STATIC_PREDICTOR_BCK_TKN = PREDICTOR.equals(predictor.bckTknFwdNTkn);
+        BR_PREDICTOR_IS_FIXED = PREDICTOR.equals(predictor.fixedTaken) || PREDICTOR.equals(predictor.fixedNotTaken);
+        FIXED_PREDICTOR_SET_TAKEN = PREDICTOR.equals(predictor.fixedTaken);
+        ASSUMED_CYCLE_TIME = Math.pow(10, 3) / CLOCK_SPEED_MHZ;
+        PHYSICAL_REGISTER_COUNT = 64;
+
+        prefec = new PipelineRegister(SUPERSCALAR_WIDTH); //just to pass the pc value to the fetch unit, and increment it!
+        fecDec = new PipelineRegister(SUPERSCALAR_WIDTH);
+        decIsu = new PipelineRegister(SUPERSCALAR_WIDTH); //instruction queue
+        exeWbu = new PipelineRegister(SUPERSCALAR_WIDTH);
+        //private final PipelineRegister aluLsu = new PipelineRegister();
+        rtired = new PipelineRegister(1); //ignored pipe register to satisfy Unit inheritence
+        delete = new PipelineRegister(SUPERSCALAR_WIDTH);
+
         if(mem.length > 1) throw new RuntimeException("Processor: this constructor cannot have more than one memories");
-        this.btb = new BranchTargetBuffer(BTB_CACHE_SIZE);
+        this.btb = new BranchTargetBuffer(BTB_CACHE_SIZE, this);
         this.cdb = new HashMap<Integer, List<Integer>>();
         this.mem = mem.length > 0 ? mem[0] : new Memory();
         this.rf = new RegisterFile(cdb);
@@ -91,10 +120,11 @@ public class Processor {
 
         this.dec = new DecodeUnit(
                 this.rf,
+                this,
                 new PipeLike[]{fecDec},
                 new PipeLike[]{decIsu}); //loadstores go down the latter pipe
 
-        this.rob = new ReorderBuffer(ROB_ENTRIES, cdb, btb, rf, this.mem, this.pc, this.dec);
+        this.rob = new ReorderBuffer(ROB_ENTRIES, cdb, btb, rf, this.mem, this.pc, this.dec, this);
         this.ic = ic;
         this.tally = 0;
         this.rat = new RegisterAliasTable(cdb, rob);
@@ -108,6 +138,7 @@ public class Processor {
                 this.ic,
                 this.pc,
                 this.btb,
+                this,
                 new PipeLike[]{prefec},
                 new PipeLike[]{fecDec});
         this.isu = new IssueUnit(
@@ -356,7 +387,7 @@ public class Processor {
             System.out.println("settings: BRU_RS_COUNT="+BRU_RS_COUNT);
             System.out.println("settings: DP_ACC="+DP_ACC);
             System.out.println("settings: ROB_ENTRIES="+ROB_ENTRIES);
-            System.out.println("settings: PHYSICAL_REGISTER_FACTOR="+PHYSICAL_REGISTER_COUNT);
+            System.out.println("settings: PHYSICAL_REGISTER_COUNT="+PHYSICAL_REGISTER_COUNT);
 
             double ipc = Utils.toDecimalPlaces( (double) rob.getCommitted() / tally, DP_ACC);
             double time = (rob.getCommitted() * (1 / ipc) * ASSUMED_CYCLE_TIME) / Math.pow(10, 3);

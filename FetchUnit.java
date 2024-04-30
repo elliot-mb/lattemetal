@@ -11,8 +11,11 @@ public class FetchUnit extends Unit {
 
     private final Durate counter = new Durate(FETCH_LATENCY);
 
-    FetchUnit(InstructionCache ic, ProgramCounter pc, BranchTargetBuffer btb, PipeLike[] ins, PipeLike[] outs){
+    private final Processor proc;
+
+    FetchUnit(InstructionCache ic, ProgramCounter pc, BranchTargetBuffer btb, Processor proc, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
+        this.proc = proc;
         this.ic = ic;
         this.pc = pc;
         this.btb = btb;
@@ -122,16 +125,16 @@ public class FetchUnit extends Unit {
     @Override
     public void accept(Op.BrLZ op) {
         op.setResult(pcVal + 1); //branch untaken!
-        if(Processor.BR_PREDICTOR_IS_FIXED) {
-            if (Processor.FIXED_PREDICTOR_SET_TAKEN) {
+        if(proc.BR_PREDICTOR_IS_FIXED) {
+            if (proc.FIXED_PREDICTOR_SET_TAKEN) {
                 //next.setPcVal(op.getImVal());
                 pcVal = op.getImVal(); //pc.set(op.getImVal()); //static prediciton
             } else {
                 pcVal++;
             }
-        }else if (Processor.PREDICTOR.equals(Processor.predictor.bckTknFwdNTkn) ||
-                  Processor.PREDICTOR.equals(Processor.predictor.bckNTknFwdTkn)){
-            if(Processor.STATIC_PREDICTOR_BCK_TKN){
+        }else if (proc.PREDICTOR.equals(Processor.predictor.bckTknFwdNTkn) ||
+                  proc.PREDICTOR.equals(Processor.predictor.bckNTknFwdTkn)){
+            if(proc.STATIC_PREDICTOR_BCK_TKN){
                 if(op.getImVal() <= pcVal){ //backwards
                     pcVal = op.getImVal();  //taken
                     flag = true;
@@ -164,16 +167,16 @@ public class FetchUnit extends Unit {
     @Override
     public void accept(Op.JpLZ op) {
         op.setResult(pcVal + 1); //branch untaken!
-        if(Processor.BR_PREDICTOR_IS_FIXED) {
-            if (Processor.FIXED_PREDICTOR_SET_TAKEN) {
+        if(proc.BR_PREDICTOR_IS_FIXED) {
+            if (proc.FIXED_PREDICTOR_SET_TAKEN) {
                 //next.setPcVal(op.getImVal());
                 pcVal += op.getImVal();
             } else {
                 pcVal++;
             }
-        }else if (Processor.PREDICTOR.equals(Processor.predictor.bckTknFwdNTkn) ||
-                    Processor.PREDICTOR.equals(Processor.predictor.bckNTknFwdTkn)){
-                if(Processor.STATIC_PREDICTOR_BCK_TKN){
+        }else if (proc.PREDICTOR.equals(Processor.predictor.bckTknFwdNTkn) ||
+                    proc.PREDICTOR.equals(Processor.predictor.bckNTknFwdTkn)){
+                if(proc.STATIC_PREDICTOR_BCK_TKN){
                     if(op.getImVal() <= 0){ //backwards
                         pcVal += op.getImVal();  //taken
                         flag = true;//gets put into entry.second
