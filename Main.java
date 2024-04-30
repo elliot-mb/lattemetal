@@ -70,6 +70,7 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) throws FileNotFoundException {
+        //default params
         String programPath = "./benchmark_assembly/collatz.latte"; //prog
         int printWidth = 1;             // width
         boolean testing = false;        // testing
@@ -79,12 +80,12 @@ public class Main {
         int aluCount = 4;               // alus
         int lsuCount = 4;               // lsus
         int bruCount = 2;               // brus
-        int aluRsCount = 4;             // alu_rss
-        int lsuRsCount = 4;             // lsu_rss
-        int bruRsCount = 2;             // bru_rss
+        int aluRsCount = 8;             // alu_rss
+        int lsuRsCount = 8;             // lsu_rss
+        int bruRsCount = 4;             // bru_rss
         int dpAcc = 4;                  // dp_acc
         int robEntries = 64;            // rob_size
-        int physicalRegisters = 3;
+        int physicalRegisters = 64;
         boolean alignedFetch = false;   // aligned_fetch
         boolean showCommit = false;
         Processor.predictor pred = Processor.predictor.twoBit;
