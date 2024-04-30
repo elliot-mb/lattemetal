@@ -70,7 +70,7 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) throws FileNotFoundException {
-        String programPath = "./benchmark_assembly/ttttn.latte"; //prog
+        String programPath = "./benchmark_assembly/collatz.latte"; //prog
         int printWidth = 1;             // width
         boolean testing = false;        // testing
         boolean quiet = false;          // quiet
@@ -84,7 +84,7 @@ public class Main {
         int bruRsCount = 2;             // bru_rss
         int dpAcc = 4;                  // dp_acc
         int robEntries = 64;            // rob_size
-        int physicalRegisters = 128;
+        int physicalRegisters = 3;
         boolean alignedFetch = false;   // aligned_fetch
         boolean showCommit = false;
         Processor.predictor pred = Processor.predictor.twoBit;

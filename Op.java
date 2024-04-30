@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public class Op {
@@ -11,6 +12,14 @@ public class Op {
         Add(RegisterName rd, RegisterName rs, RegisterName rt){
             super(DURATION, null, rd, rs, rt);
             checkShape(rd, rs, rt);
+
+            List<Integer> regDest = new DestLocVisitor().accept(this);
+            List<RegisterName> regName = new ArrayList<RegisterName>();
+            for(Integer regNum : regDest){
+                if(regNum != ReservationStation.NO_DEPENDENCY) regName.add(RegisterName.values()[regNum]);
+            }
+            regsList.addAll(regName);
+            physicalRegistersNeeded = regsList.size();
         }
 
 
@@ -51,6 +60,14 @@ public class Op {
         AddI(RegisterName rd, RegisterName rs, Integer immediate){
             super(DURATION, immediate, rd, rs);
             checkShape(rd, rs, immediate);
+
+            List<Integer> regDest = new DestLocVisitor().accept(this);
+            List<RegisterName> regName = new ArrayList<RegisterName>();
+            for(Integer regNum : regDest){
+                if(regNum != ReservationStation.NO_DEPENDENCY) regName.add(RegisterName.values()[regNum]);
+            }
+            regsList.addAll(regName);
+            physicalRegistersNeeded = regsList.size();
         }
 
         @Override
@@ -88,6 +105,14 @@ public class Op {
         Mul(RegisterName rd, RegisterName rs, RegisterName rt){
             super(DURATION, null, rd, rs, rt);
             checkShape(rd, rs, rt);
+
+            List<Integer> regDest = new DestLocVisitor().accept(this);
+            List<RegisterName> regName = new ArrayList<RegisterName>();
+            for(Integer regNum : regDest){
+                if(regNum != ReservationStation.NO_DEPENDENCY) regName.add(RegisterName.values()[regNum]);
+            }
+            regsList.addAll(regName);
+            physicalRegistersNeeded = regsList.size();
         }
 
         @Override
@@ -127,6 +152,14 @@ public class Op {
         MulI(RegisterName rd, RegisterName rs, Integer immediate){
             super(DURATION, immediate, rd, rs);
             checkShape(rd, rs, immediate);
+
+            List<Integer> regDest = new DestLocVisitor().accept(this);
+            List<RegisterName> regName = new ArrayList<RegisterName>();
+            for(Integer regNum : regDest){
+                if(regNum != ReservationStation.NO_DEPENDENCY) regName.add(RegisterName.values()[regNum]);
+            }
+            regsList.addAll(regName);
+            physicalRegistersNeeded = regsList.size();
         }
 
         @Override
@@ -165,6 +198,14 @@ public class Op {
         Cmp(RegisterName rd, RegisterName rs, RegisterName rt){
             super(DURATION, null, rd, rs, rt);
             checkShape(rd, rs, rt);
+
+            List<Integer> regDest = new DestLocVisitor().accept(this);
+            List<RegisterName> regName = new ArrayList<RegisterName>();
+            for(Integer regNum : regDest){
+                if(regNum != ReservationStation.NO_DEPENDENCY) regName.add(RegisterName.values()[regNum]);
+            }
+            regsList.addAll(regName);
+            physicalRegistersNeeded = regsList.size();
         }
 
         @Override
@@ -204,6 +245,14 @@ public class Op {
         Ld(RegisterName rd, RegisterName rs, Integer immediate){
             super(DURATION, immediate, rd, rs);
             checkShape(rd, rs, immediate);
+
+            List<Integer> regDest = new DestLocVisitor().accept(this);
+            List<RegisterName> regName = new ArrayList<RegisterName>();
+            for(Integer regNum : regDest){
+                if(regNum != ReservationStation.NO_DEPENDENCY) regName.add(RegisterName.values()[regNum]);
+            }
+            regsList.addAll(regName);
+            physicalRegistersNeeded = regsList.size();
         }
 
         @Override
@@ -239,6 +288,14 @@ public class Op {
         LdC(RegisterName rd, Integer immediate){
             super(DURATION, immediate, rd);
             checkShape(rd, immediate);
+
+            List<Integer> regDest = new DestLocVisitor().accept(this);
+            List<RegisterName> regName = new ArrayList<RegisterName>();
+            for(Integer regNum : regDest){
+                if(regNum != ReservationStation.NO_DEPENDENCY) regName.add(RegisterName.values()[regNum]);
+            }
+            regsList.addAll(regName);
+            physicalRegistersNeeded = regsList.size();
         }
 
         @Override
@@ -274,6 +331,14 @@ public class Op {
         LdI(RegisterName rd, RegisterName rs, Integer immediate){
             super(DURATION, immediate, rd, rs);
             checkShape(rd, rs, immediate);
+
+            List<Integer> regDest = new DestLocVisitor().accept(this);
+            List<RegisterName> regName = new ArrayList<RegisterName>();
+            for(Integer regNum : regDest){
+                if(regNum != ReservationStation.NO_DEPENDENCY) regName.add(RegisterName.values()[regNum]);
+            }
+            regsList.addAll(regName);
+            physicalRegistersNeeded = regsList.size();
         }
 
         @Override
@@ -308,6 +373,14 @@ public class Op {
         St(RegisterName rd, RegisterName rs, Integer immediate){
             super(DURATION, immediate, rd, rs);
             checkShape(rd, rs, immediate);
+
+            List<Integer> regDest = new DestLocVisitor().accept(this);
+            List<RegisterName> regName = new ArrayList<RegisterName>();
+            for(Integer regNum : regDest){
+                if(regNum != ReservationStation.NO_DEPENDENCY) regName.add(RegisterName.values()[regNum]);
+            }
+            regsList.addAll(regName);
+            physicalRegistersNeeded = regsList.size();
         }
 
         @Override
@@ -345,6 +418,14 @@ public class Op {
         StI(RegisterName rd, RegisterName rs, Integer immediate){
             super(DURATION, immediate, rd, rs);
             checkShape(rd, rs, immediate);
+
+            List<Integer> regDest = new DestLocVisitor().accept(this);
+            List<RegisterName> regName = new ArrayList<RegisterName>();
+            for(Integer regNum : regDest){
+                if(regNum != ReservationStation.NO_DEPENDENCY) regName.add(RegisterName.values()[regNum]);
+            }
+            regsList.addAll(regName);
+            physicalRegistersNeeded = regsList.size();
         }
 
         @Override
@@ -382,6 +463,14 @@ public class Op {
         BrLZ(RegisterName rd, Integer immediate){
             super(DURATION, immediate, rd);
             checkShape(rd, immediate);
+
+            List<Integer> regDest = new DestLocVisitor().accept(this);
+            List<RegisterName> regName = new ArrayList<RegisterName>();
+            for(Integer regNum : regDest){
+                if(regNum != ReservationStation.NO_DEPENDENCY) regName.add(RegisterName.values()[regNum]);
+            }
+            regsList.addAll(regName);
+            physicalRegistersNeeded = regsList.size();
         }
 
         @Override
@@ -416,6 +505,14 @@ public class Op {
         JpLZ(RegisterName rd, Integer immediate){
             super(DURATION, immediate, rd);
             checkShape(rd, immediate);
+
+            List<Integer> regDest = new DestLocVisitor().accept(this);
+            List<RegisterName> regName = new ArrayList<RegisterName>();
+            for(Integer regNum : regDest){
+                if(regNum != ReservationStation.NO_DEPENDENCY) regName.add(RegisterName.values()[regNum]);
+            }
+            regsList.addAll(regName);
+            physicalRegistersNeeded = regsList.size();
         }
 
         @Override
@@ -448,6 +545,14 @@ public class Op {
         Br(Integer immediate){
             super(DURATION, immediate);
             checkShape(immediate);
+
+            List<Integer> regDest = new DestLocVisitor().accept(this);
+            List<RegisterName> regName = new ArrayList<RegisterName>();
+            for(Integer regNum : regDest){
+                if(regNum != ReservationStation.NO_DEPENDENCY) regName.add(RegisterName.values()[regNum]);
+            }
+            regsList.addAll(regName);
+            physicalRegistersNeeded = regsList.size();
         }
 
         @Override
@@ -478,6 +583,14 @@ public class Op {
         Jp(Integer immediate){
             super(DURATION, immediate);
             checkShape(immediate);
+
+            List<Integer> regDest = new DestLocVisitor().accept(this);
+            List<RegisterName> regName = new ArrayList<RegisterName>();
+            for(Integer regNum : regDest){
+                if(regNum != ReservationStation.NO_DEPENDENCY) regName.add(RegisterName.values()[regNum]);
+            }
+            regsList.addAll(regName);
+            physicalRegistersNeeded = regsList.size();
         }
 
         @Override
@@ -506,6 +619,14 @@ public class Op {
 
         No(){
             super(DURATION, 0);
+
+            List<Integer> regDest = new DestLocVisitor().accept(this);
+            List<RegisterName> regName = new ArrayList<RegisterName>();
+            for(Integer regNum : regDest){
+                if(regNum != ReservationStation.NO_DEPENDENCY) regName.add(RegisterName.values()[regNum]);
+            }
+            regsList.addAll(regName);
+            physicalRegistersNeeded = regsList.size();
         }
 
         @Override
