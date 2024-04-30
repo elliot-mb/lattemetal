@@ -98,6 +98,7 @@ public class Main {
             String key = kv[0];
             String val = kv.length < 2 ? null : kv[1];
             if(!recogArgs.contains(key)) throw new RuntimeException("main: argument name '" + key + "' does not correspond to an input for the program");
+            if(argMap.containsKey(key)) throw new RuntimeException("main: argument '" + key +"' already mapped");
             argMap.put(key, val);
         }
 
