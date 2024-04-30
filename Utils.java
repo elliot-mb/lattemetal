@@ -58,7 +58,18 @@ public class Utils {
         return Math.round(n * factor) / factor;
     }
 
-    public static Memory runKern(String filePath, Memory mem, boolean quiet, Integer divergenceLim, boolean quietStats) throws FileNotFoundException {
+    public static Memory runKern(String filePath, Memory mem, boolean quiet, Integer divergenceLim, boolean quietStats,
+                  int btbSize,
+                 int superscalarWidth,
+                 int aluCount,
+                 int lsuCount,
+                 int bruCount,
+                 int aluRsCount,
+                 int lsuRsCount,
+                 int bruRsCount,
+                 int dpAcc,
+                 int robEntries,
+                 boolean alignedFetch) throws FileNotFoundException {
         System.out.println(filePath);
         PrintStream silencer = new PrintStream("/dev/null");
         Assembler assembler = new Assembler(filePath);
@@ -67,7 +78,17 @@ public class Utils {
             throw new RuntimeException("runKern: program assembler failed to read program '" + filePath + "'");
         }
         InstructionCache ic = new InstructionCache(assembler.assemble());
-        Processor p = new Processor(ic, mem); //memory can be set if you like
+        Processor p = new Processor(ic, btbSize,
+            superscalarWidth,
+            aluCount,
+            lsuCount,
+            bruCount,
+            aluRsCount,
+            lsuRsCount,
+            bruRsCount,
+            dpAcc,
+            robEntries,
+            alignedFetch,mem); //memory can be set if you like
         return p.run(quiet ? silencer : System.out, divergenceLim, quietStats);
     }
 

@@ -28,7 +28,7 @@ public class Processor {
     public static final boolean BR_PREDICTOR_IS_FIXED = PREDICTOR.equals(predictor.fixedTaken) || PREDICTOR.equals(predictor.fixedNotTaken);
     public static final boolean FIXED_PREDICTOR_SET_TAKEN = PREDICTOR.equals(predictor.fixedTaken);
     private static final double ASSUMED_CYCLE_TIME = Math.pow(10, 3) / CLOCK_SPEED_MHZ;//ns
-    public static final int PHYSICAL_REGISTER_COUNT = 16;//PHYSICAL_REGISTER_FACTOR * RegisterName.values().length;
+    public static final int PHYSICAL_REGISTER_COUNT = 64;//PHYSICAL_REGISTER_FACTOR * RegisterName.values().length;
     //@@@@@@
 
     public static final int FLUSH_ALL = -1;
@@ -69,7 +69,19 @@ public class Processor {
     private final PipelineRegister rtired = new PipelineRegister(1); //ignored pipe register to satisfy Unit inheritence
     private final PipelineRegister delete = new PipelineRegister(SUPERSCALAR_WIDTH);
 
-    Processor(InstructionCache ic, Memory... mem) throws RuntimeException{
+    Processor(InstructionCache ic,
+              int btbSize,
+              int superscalarWidth,
+              int aluCount,
+              int lsuCount,
+              int bruCount,
+              int aluRsCount,
+              int lsuRsCount,
+              int bruRsCount,
+              int dpAcc,
+              int robEntries,
+              boolean alignedFetch,
+              Memory... mem) throws RuntimeException{
         if(mem.length > 1) throw new RuntimeException("Processor: this constructor cannot have more than one memories");
         this.btb = new BranchTargetBuffer(BTB_CACHE_SIZE);
         this.cdb = new HashMap<Integer, List<Integer>>();
