@@ -84,6 +84,7 @@ public class Processor {
               int robEntries,
               boolean alignedFetch,
               boolean showCommit,
+              int physicalRegisters,
               Memory... mem) throws RuntimeException{
 
         SHOW_COMMIT = showCommit;
@@ -104,7 +105,7 @@ public class Processor {
         BR_PREDICTOR_IS_FIXED = PREDICTOR.equals(predictor.fixedTaken) || PREDICTOR.equals(predictor.fixedNotTaken);
         FIXED_PREDICTOR_SET_TAKEN = PREDICTOR.equals(predictor.fixedTaken);
         ASSUMED_CYCLE_TIME = Math.pow(10, 3) / CLOCK_SPEED_MHZ;
-        PHYSICAL_REGISTER_COUNT = 64;
+        PHYSICAL_REGISTER_COUNT = physicalRegisters;
 
         prefec = new PipelineRegister(SUPERSCALAR_WIDTH); //just to pass the pc value to the fetch unit, and increment it!
         fecDec = new PipelineRegister(SUPERSCALAR_WIDTH);

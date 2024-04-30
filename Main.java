@@ -53,6 +53,7 @@ public class Main {
     static final String BRU_RSS = "bru_rss";
     static final String DP_ACC = "dp_acc";
     static final String ROB_SIZE = "rob_size";
+    static final String PHYS_REGS = "phys_regs";
     static final String ALIGN_FETCH = "align_fetch";
     static final String SHOW_COMMIT = "show_commit";
 
@@ -83,12 +84,13 @@ public class Main {
         int bruRsCount = 2;             // bru_rss
         int dpAcc = 4;                  // dp_acc
         int robEntries = 64;            // rob_size
+        int physicalRegisters = 128;
         boolean alignedFetch = false;   // aligned_fetch
         boolean showCommit = false;
         Processor.predictor pred = Processor.predictor.twoBit;
 
         List<String> recogArgs = Arrays.asList(
-                PROG, TESTING, WIDTH, QUIET, PREDICTOR, BTB_SIZE, SS_WIDTH, ALUS, LSUS, BRUS, ALU_RSS, LSU_RSS, BRU_RSS, DP_ACC, ROB_SIZE, ALIGN_FETCH, SHOW_COMMIT
+                PROG, TESTING, WIDTH, QUIET, PREDICTOR, BTB_SIZE, SS_WIDTH, ALUS, LSUS, BRUS, ALU_RSS, LSU_RSS, BRU_RSS, DP_ACC, ROB_SIZE, PHYS_REGS, ALIGN_FETCH, SHOW_COMMIT
         );
 
         Map<String, String> argMap = new HashMap<String, String>();
@@ -142,6 +144,7 @@ public class Main {
         if(argMap.containsKey(ROB_SIZE)) robEntries = stoi(argMap.get(ROB_SIZE));
         if(argMap.containsKey(ALIGN_FETCH)) alignedFetch = true;
         if(argMap.containsKey(SHOW_COMMIT)) showCommit = true;
+        if(argMap.containsKey(PHYS_REGS)) physicalRegisters = stoi(argMap.get(PHYS_REGS));
 
 //
 //        if(args.length >= 1){
@@ -191,7 +194,8 @@ public class Main {
             dpAcc,
             robEntries,
             alignedFetch,
-            showCommit
+            showCommit,
+            physicalRegisters
         );
 
     }

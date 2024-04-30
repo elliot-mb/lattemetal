@@ -18,6 +18,7 @@ public class Test {
     static final int robEntries = 64;
     static final boolean alignedFetch = false;
     static final boolean showCommit = false;
+    static final int physicalRegisters = 128;
 
     private static Memory getExampleMemory() {
         return new Memory(
@@ -69,7 +70,8 @@ public class Test {
             dpAcc,
             robEntries,
             alignedFetch,
-            showCommit
+            showCommit,
+            physicalRegisters
         )));
     }
 
@@ -91,7 +93,8 @@ public class Test {
                 dpAcc,
                 robEntries,
                 alignedFetch,
-                showCommit
+                showCommit,
+                physicalRegisters
         )));
     }
 
@@ -113,7 +116,8 @@ public class Test {
                 dpAcc,
                 robEntries,
                 alignedFetch,
-                showCommit
+                showCommit,
+                physicalRegisters
         )));
     }
 
@@ -135,7 +139,8 @@ public class Test {
                 dpAcc,
                 robEntries,
                 alignedFetch,
-                showCommit
+                showCommit,
+                physicalRegisters
         )));
     }
 
@@ -158,7 +163,8 @@ public class Test {
                 dpAcc,
                 robEntries,
                 alignedFetch,
-                showCommit
+                showCommit,
+                physicalRegisters
         )));
     }
 
@@ -181,7 +187,8 @@ public class Test {
                 dpAcc,
                 robEntries,
                 alignedFetch,
-                showCommit
+                showCommit,
+                physicalRegisters
         )));
     }
 
@@ -204,7 +211,8 @@ public class Test {
                 dpAcc,
                 robEntries,
                 alignedFetch,
-                showCommit
+                showCommit,
+                physicalRegisters
         )));
     }
     
@@ -223,7 +231,8 @@ public class Test {
                 dpAcc,
                 robEntries,
                 alignedFetch,
-                showCommit
+                showCommit,
+                physicalRegisters
         )));
     }
 
@@ -242,7 +251,8 @@ public class Test {
                 dpAcc,
                 robEntries,
                 alignedFetch,
-                showCommit
+                showCommit,
+                physicalRegisters
         )));
     }
 
@@ -261,7 +271,8 @@ public class Test {
                 dpAcc,
                 robEntries,
                 alignedFetch,
-                showCommit
+                showCommit,
+                physicalRegisters
         )));
     }
 
