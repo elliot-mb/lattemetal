@@ -54,7 +54,7 @@ public class Main {
     static final String DP_ACC = "dp_acc";
     static final String ROB_SIZE = "rob_size";
     static final String ALIGN_FETCH = "align_fetch";
-
+    static final String SHOW_COMMIT = "show_commit";
 
     /**
      * Decode gets data from registers etc.
@@ -84,10 +84,11 @@ public class Main {
         int dpAcc = 4;                  // dp_acc
         int robEntries = 64;            // rob_size
         boolean alignedFetch = false;   // aligned_fetch
+        boolean showCommit = false;
         Processor.predictor pred = Processor.predictor.twoBit;
 
         List<String> recogArgs = Arrays.asList(
-                PROG, TESTING, WIDTH, QUIET, PREDICTOR, BTB_SIZE, SS_WIDTH, ALUS, LSUS, BRUS, ALU_RSS, LSU_RSS, BRU_RSS, DP_ACC, ROB_SIZE, ALIGN_FETCH
+                PROG, TESTING, WIDTH, QUIET, PREDICTOR, BTB_SIZE, SS_WIDTH, ALUS, LSUS, BRUS, ALU_RSS, LSU_RSS, BRU_RSS, DP_ACC, ROB_SIZE, ALIGN_FETCH, SHOW_COMMIT
         );
 
         Map<String, String> argMap = new HashMap<String, String>();
@@ -140,6 +141,7 @@ public class Main {
         if(argMap.containsKey(DP_ACC)) dpAcc = stoi(argMap.get(DP_ACC));
         if(argMap.containsKey(ROB_SIZE)) robEntries = stoi(argMap.get(ROB_SIZE));
         if(argMap.containsKey(ALIGN_FETCH)) alignedFetch = true;
+        if(argMap.containsKey(SHOW_COMMIT)) showCommit = true;
 
 //
 //        if(args.length >= 1){
@@ -188,7 +190,8 @@ public class Main {
             bruRsCount,
             dpAcc,
             robEntries,
-            alignedFetch
+            alignedFetch,
+            showCommit
         );
 
     }

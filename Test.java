@@ -17,6 +17,7 @@ public class Test {
     static final int dpAcc = 4;
     static final int robEntries = 64;
     static final boolean alignedFetch = false;
+    static final boolean showCommit = false;
 
     private static Memory getExampleMemory() {
         return new Memory(
@@ -67,7 +68,8 @@ public class Test {
             bruRsCount,
             dpAcc,
             robEntries,
-            alignedFetch
+            alignedFetch,
+            showCommit
         )));
     }
 
@@ -88,7 +90,8 @@ public class Test {
                 bruRsCount,
                 dpAcc,
                 robEntries,
-                alignedFetch
+                alignedFetch,
+                showCommit
         )));
     }
 
@@ -109,7 +112,8 @@ public class Test {
                 bruRsCount,
                 dpAcc,
                 robEntries,
-                alignedFetch
+                alignedFetch,
+                showCommit
         )));
     }
 
@@ -130,7 +134,8 @@ public class Test {
                 bruRsCount,
                 dpAcc,
                 robEntries,
-                alignedFetch
+                alignedFetch,
+                showCommit
         )));
     }
 
@@ -152,7 +157,8 @@ public class Test {
                 bruRsCount,
                 dpAcc,
                 robEntries,
-                alignedFetch
+                alignedFetch,
+                showCommit
         )));
     }
 
@@ -174,7 +180,8 @@ public class Test {
                 bruRsCount,
                 dpAcc,
                 robEntries,
-                alignedFetch
+                alignedFetch,
+                showCommit
         )));
     }
 
@@ -196,7 +203,8 @@ public class Test {
                 bruRsCount,
                 dpAcc,
                 robEntries,
-                alignedFetch
+                alignedFetch,
+                showCommit
         )));
     }
     
@@ -214,7 +222,8 @@ public class Test {
                 bruRsCount,
                 dpAcc,
                 robEntries,
-                alignedFetch
+                alignedFetch,
+                showCommit
         )));
     }
 
@@ -232,7 +241,8 @@ public class Test {
                 bruRsCount,
                 dpAcc,
                 robEntries,
-                alignedFetch
+                alignedFetch,
+                showCommit
         )));
     }
 
@@ -250,7 +260,8 @@ public class Test {
                 bruRsCount,
                 dpAcc,
                 robEntries,
-                alignedFetch
+                alignedFetch,
+                showCommit
         )));
     }
 

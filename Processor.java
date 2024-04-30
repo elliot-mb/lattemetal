@@ -9,6 +9,7 @@ public class Processor {
         fixedTaken, fixedNotTaken, bckTknFwdNTkn, bckNTknFwdTkn, oneBit, twoBit
     }
     //@@@SETTINGS@@@
+    private final boolean SHOW_COMMIT;
     private static final double CLOCK_SPEED_MHZ = 500;
     public final predictor PREDICTOR;
     private final int BTB_CACHE_SIZE;
@@ -82,8 +83,10 @@ public class Processor {
               int dpAcc,
               int robEntries,
               boolean alignedFetch,
+              boolean showCommit,
               Memory... mem) throws RuntimeException{
 
+        SHOW_COMMIT = showCommit;
         PREDICTOR = p;
         BTB_CACHE_SIZE = btbSize;
         SUPERSCALAR_WIDTH = superscalarWidth;
@@ -402,7 +405,7 @@ public class Processor {
             System.out.println("run: percentage mispredicted branches " + Utils.toDecimalPlaces(rateMispredictedBranches * 100, DP_ACC) + "%");
             System.out.println("mem: " + Arrays.toString(mem.getData()));
             System.out.println("registers (dirty): " + rf);
-            //System.out.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
+            if(SHOW_COMMIT) System.out.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
         }
 
         return mem;
