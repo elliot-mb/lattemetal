@@ -12,4 +12,6 @@ public interface PipeLike {
     public PipelineEntry peek();
 
     public int getCount();
+
+    public boolean isEmpty();
 }

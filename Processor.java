@@ -10,24 +10,25 @@ public class Processor {
     }
     //@@@SETTINGS@@@
     private static final double CLOCK_SPEED_MHZ = 500;
-    public static final predictor PREDICTOR = predictor.bckTknFwdNTkn;
+    public static final predictor PREDICTOR = predictor.twoBit;
     private static final int BTB_CACHE_SIZE = 32;
-    public static final int SUPERSCALAR_WIDTH = 4;
+    public static final int SUPERSCALAR_WIDTH = 8;
     private static final int ALU_COUNT = 4;
     private static final int LSU_COUNT = 4;
     private static final int BRU_COUNT = 2;
-    private static final int ALU_RS_COUNT = 6;
+    private static final int ALU_RS_COUNT = 4;
     private static final int LSU_RS_COUNT = 4;
     private static final int BRU_RS_COUNT = 2;
     private static final int DP_ACC = 4;
     public static final int ROB_ENTRIES = 64;
-    public static final int PHYSICAL_REGISTER_FACTOR = 4; //how many times more physical registers we have than architectural ones
+    public static final boolean ALIGNED_FETCH = true; //we only fetch once we can fetch a whole instruction buffer
+    //public static final int PHYSICAL_REGISTER_FACTOR = 1; //how many times more physical registers we have than architectural ones
     //@@@DEPENDANT SETTINGS@@@
     public static final boolean STATIC_PREDICTOR_BCK_TKN = PREDICTOR.equals(predictor.bckTknFwdNTkn);
     public static final boolean BR_PREDICTOR_IS_FIXED = PREDICTOR.equals(predictor.fixedTaken) || PREDICTOR.equals(predictor.fixedNotTaken);
     public static final boolean FIXED_PREDICTOR_SET_TAKEN = PREDICTOR.equals(predictor.fixedTaken);
     private static final double ASSUMED_CYCLE_TIME = Math.pow(10, 3) / CLOCK_SPEED_MHZ;//ns
-    public static final int PHYSICAL_REGISTER_COUNT = PHYSICAL_REGISTER_FACTOR * RegisterName.values().length;
+    public static final int PHYSICAL_REGISTER_COUNT = 16;//PHYSICAL_REGISTER_FACTOR * RegisterName.values().length;
     //@@@@@@
 
     public static final int FLUSH_ALL = -1;
@@ -226,13 +227,13 @@ public class Processor {
     }
 
     private String pipelineToString(){
-        return "\t[" + prefec +
+        return "\t[" + //prefec +
                 fec + " " + fecDec + " " +
                 dec + " " + decIsu + " " +
                 isu + " " + "(" + exeRss + "," + lsuRss + "," + bruRss + ") ("
                 + alu1 + alu2 + alu3 + alu4 + ", " + lsu1 + lsu2 + ", " + bru1 + bru2 + ") (" + exeWbu + ") "
                 + wbu + "]\t@"
-                + tally + "\tpc " + pc.getCount() + "\t" + "\t" + rob;
+                + tally + "\tpc " + pc.getCount(); //+ "\t" + "\t" + rob;
     }
 
     public Memory run(PrintStream debugOut, Integer divergenceLim, boolean quietStats){
@@ -244,7 +245,6 @@ public class Processor {
 
         //AbstractMap<Instruction, Integer> inFlights = new HashMap<Instruction, Integer>();
         while((isPipelineBeingUsed() || !pc.isDone()) && (divergenceLim == null || tally < divergenceLim)){
-            debugOut.println(pipelineToString());
             boolean flushFlag = false;
             Durate counter = new Durate(SUPERSCALAR_WIDTH);
             counter.rst();
@@ -303,13 +303,16 @@ public class Processor {
             }
             counter.rst();
 
+            boolean emptyFecDec = fecDec.isEmpty();
+
             fec.clk();
             while(fecDec.canPush() && !pc.isDone() && !counter.isDone()){ //they all just shift a block along <=> they wont be able to do more than one pipeline buffer's worth!
-                prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));
+                if(emptyFecDec || !ALIGNED_FETCH) prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));
                 fec.clk();
                 counter.decr();
             }
             counter.rst();
+
 
             tally++;
 //            while(rtired.canPull()) { //if we retire more that one instruction per cycle
@@ -321,6 +324,7 @@ public class Processor {
             if(!quietStats) if(tally % 100000 == 0) System.out.print("\r" + tally / 100000 + "00K cycles");
 
             cdb.clear();
+            debugOut.println(pipelineToString());
         }
         if(divergenceLim != null && tally >= divergenceLim) throw new RuntimeException("run: program considered to diverge after " + divergenceLim + " instrs");
         debugOut.println("registers (dirty): " + rf);
@@ -340,7 +344,7 @@ public class Processor {
             System.out.println("settings: BRU_RS_COUNT="+BRU_RS_COUNT);
             System.out.println("settings: DP_ACC="+DP_ACC);
             System.out.println("settings: ROB_ENTRIES="+ROB_ENTRIES);
-            System.out.println("settings: PHYSICAL_REGISTER_FACTOR="+PHYSICAL_REGISTER_FACTOR);
+            System.out.println("settings: PHYSICAL_REGISTER_FACTOR="+PHYSICAL_REGISTER_COUNT);
 
             double ipc = Utils.toDecimalPlaces( (double) rob.getCommitted() / tally, DP_ACC);
             double time = (rob.getCommitted() * (1 / ipc) * ASSUMED_CYCLE_TIME) / Math.pow(10, 3);
@@ -355,7 +359,7 @@ public class Processor {
             System.out.println("run: percentage mispredicted branches " + Utils.toDecimalPlaces(rateMispredictedBranches * 100, DP_ACC) + "%");
             System.out.println("mem: " + Arrays.toString(mem.getData()));
             System.out.println("registers (dirty): " + rf);
-            System.out.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
+            //System.out.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
         }
 
         return mem;

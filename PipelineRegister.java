@@ -71,6 +71,11 @@ public class PipelineRegister implements PipeLike {
         return queue.getElementsIn();
     }
 
+    @Override
+    public boolean isEmpty() {
+        return queue.isEmpty();
+    }
+
     public String toString(){
         return queue.toString();
     }
