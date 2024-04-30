@@ -219,13 +219,9 @@ public class Assembler {
                     }
                 }
 
-                try{
-                    Instruction instr = makeInstr(code, regs, immediate);
-                    program.add(instr);
-                }
-                catch(RuntimeException err){
-                    throw new RuntimeException(errorPrefix(lnNum) + err.getMessage());
-                }
+                Instruction instr = makeInstr(code, regs, immediate);
+                program.add(instr);
+
             }
             lnNum++;
         }

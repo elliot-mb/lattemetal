@@ -4,83 +4,100 @@ LatteMetal is my own-brewed RISC-based ISA and micro-architecture written in Jav
 
 It is a pipelined superscalar implementation which focuses on hardware-optimisation to achieve amiable performance.
 
-# Development and running guide
+# Startup & running guide
 
-This requires you have javac and java versions at least ``17.0.2``
-The below commands are of the form ``$ command`` to represent the shell.
+This requires you have javac and java versions at least 17.0.2
+The below commands are of the form "$ command" to represent the shell.
 
-- ``$ ./run_noargs`` in this directory will run the processor with the default program (2x2 matrix multiplication) and some preset memory.
-- ``$ javac -d ./class Main.java && java -cp ./class Main [ASSEMBLY FILE PATH : string].latte [MEMORY ROW LENGTH : integer] `` in this directory will run the processor on a specified assembly program (all located in ./assembly) and will show the resulting memory with a row length MEMORY ROW LENGTH.
-  - For example, to run my vector dot product benchmark displaying 10 integers for each line of memory, please run ``$ javac -d ./class Main.java && java -cp ./class Main ./assembly/vec_dot.latte 10``
-    If all goes well an output like the following should be observed:
-    ````
-      ./assembly/vec_dot.latte
-      'addi    t0 zero #10'
-      ...program
-      'st      s6 s3 #0'
+- The program take the following arguments (<key>=<value> or where no value applies it is a flag, if unused a default is provided):
 
-      run: program finished in 887 cycles
-      registers (dirty):
-      t0     10
-      s0     10
-      s1     20
-      s2     30
-      s3     40
-      s4     425
-      s5     25
-      s6     7358
-      s11    1
-      memory:
-      [00]  10          [01]  20          [02]  30          [03]  40          [04]  0           [05]  0           [06]  0           [07]  0           [08]  0           [09]  0           
-      [10]  78          [11]  9           [12] -15          [13]  22          [14] -4           [15]  65          [16]  11          [17]  2           [18]  10          [19]  18          
-      [20]  58          [21]  11          [22] -11          [23]  6           [24] -4           [25]  51          [26]  51          [27]  4           [28]  51          [29]  17          
-      [30]  48          [31]  12          [32] -8           [33]  24          [34]  20          [35]  25          [36]  31          [37]  10          [38]  19          [39]  25          
-      [40]  7358        [41]  15          [42] -81          [43]  31          [44] -4           [45]  54          [46]  14          [47]  23          [48]  41          [49]  4           
-      [50]              [51]              [52]              [53]              [54]              [55]              [56]              [57]              [58]              [59]              
-      [60]              [61]              [62]              [63]   
-    ````
+    prog=<assembly_file_path>                               (program to run)
+                                                            (default "./benchmark_assembly/collatz.latte")
 
+    testing                                                 (run test kernels)
+                                                            (default not included)
 
-### Lab 1 tips 
+    width=<num_columns>                                     (prints memory at end of program as a table)
+                                                            (default 1)
 
-- Simulator can get complex quickly 
-- OOP Languages are good for this 
-- Like a state machine, one cycle of the core is a change in state
-  - A function call tick will be a cycle that changes the state; dont feel you need to go super low-level
-  - 'add' can be an add rather than binary logic
-- Start wide, create a skeleton which has the full width of the implementation
-  - Think ahead as you implement your simulator, like if you want five execution units create a skeleton for this
-- Don't overcomplicate your instruction set 
-- Experiments with your simulator are as important as the simulator itself 
-  - Spend ~60% time on sim, ~%40 time on experiments 
-  - Plan experiments early so you know what to implement in your simulator 
-- Debugging; log output of architectural state
-  - E.g. outputting register values 
-  - Track instructions flowing through the pipeline 
-  - Stepping modes e.g. keypress-activated clock cycle 
-  - Don't spend all your time on this 
-- Set of workloads with outputs are suitable for testing programs 
-  - Test that your sim is functionally correct as you develop it
-- OoO memory operations theres a queue called a load-store queue 
-  - Tracks in-flight memory requests, and checks their order
-  - Worth looking into when we get there 
-- Assembly code can use the assembly language strings, where each line is the address of the PC
-  - It is an extension though; compiling, decoding etc. 
-- Memory; somewhere to store the memory youre interacting with (L1 datacache accesses are ~4-5 cycles where addresses are like 0-1000)
-- Register; some vector of values 
-- Instructions that take n cycles can have an internal counter to abstract the different stages they go through
-  - The same is true for memory accesses or anything that takes non-zero time
-- What does the decode stage look like if our instructions are just strings?
-  - it could let the branch predictor know if this is a branch; early (mis)prediction
+    quiet                                                   (pipeline view is hidden)
+                                                            (default not included)
 
-# Devlog
+    predictor=<"fixedTaken" | "fixedNotTaken" | "bckTknFwdNTkn" | "bckNTknFwdTkn" | "oneBit" | "twoBit">
+                                                            (default "twoBit")
 
-@ 01/02/24
+    btb_size=<num_entries>                                  (how many branches we can hold the prediction of)
+                                                            (default 32)
 
-Instruction cache will be stored as integers! 
-an instruction may be 
-``big end << [opcode 0-11 (5b)] [register_s 0-31 (5b)] [register_s 0-31 (5b)] [register_t 0-31 (5b)] [immediate 0-8192 (12b)] small end >>``
+    ss_width=<num_n_way>                                    (n way superscalar)
+                                                            (default 8)
 
-# Interim
+    alus=<num_alus>                                         (up to eight)
+                                                            (default 4)
 
-Plan benchmarks for the interim etc.
+    lsus=<num_lsus>                                         (up to four)
+                                                            (default 2)
+
+    brus=<num_brus>                                         (up to four branch units)
+                                                            (default 2)
+
+    alu_rss=<num_n>                                         (any number n >= 1 alu reservation stations)
+                                                            (default 8)
+
+    lsu_rss=<num_n>                                         (any number n >= 1 lsu reservation stations)
+                                                            (default 4)
+
+    bru_rss=<num_n>                                         (any number n >= 1 bru reservation stations)
+                                                            (default 4)
+
+    dp_acc=<num_decimal_places>                             (stat decimal-point accuracy in trailing digits)
+                                                            (default 4)
+
+    rob_size=<num_entries>                                  (default 64)
+
+    phys_regs=<size_prf>                                    (default 128)
+
+    align_fetch                                             (fetch is aligned)
+                                                            (default not included)
+
+    show_commit                                             (print all instructions committed in order)
+                                                            (default not included)
+
+- For example, to run my vector dot product test kernel displaying 10 integers for each line of memory, please run
+
+    $ javac -d ./class Main.java && java -cp ./class Main prog="./assembly/vec_dot.latte" width=10
+
+    ...
+    ...(pipeline view)
+    ...
+    registers (dirty):      t0:10   s0:10   s1:20   s2:30   s3:40   s4:-2400        s5:120  s6:-8550        s11:1
+    memory:
+    [00]  10          [01]  20          [02]  30          [03]  40          [04]  0           [05]  0           [06]  0           [07]  0           [08]  0           [09]  0
+    [10]  92          [11]  84          [12]  76          [13]  68          [14]  50          [15]  42          [16]  34          [17]  26          [18]  18          [19]  0
+    [20] -2           [21] -4           [22] -6           [23] -8           [24] -10          [25] -12          [26] -14          [27] -16          [28] -18          [29] -20
+    [30]  12          [31]  24          [32]  36          [33]  48          [34]  51          [35]  62          [36]  74          [37]  86          [38]  98          [39]  120
+    [40] -8550        [41] -1           [42] -1           [43] -1           [44] -1           [45] -1           [46] -1           [47] -1           [48] -1           [49] -1
+    [50]              [51]              [52]              [53]              [54]              [55]              [56]              [57]              [58]              [59]
+    [60]              [61]              [62]              [63]
+    settings: CLOCK_SPEED_MHZ=500.0
+    settings: PREDICTOR=twoBit
+    settings: BTB_CACHE_SIZE=32
+    settings: SUPERSCALAR_WIDTH=8
+    settings: ALU_COUNT=4
+    settings: LSU_COUNT=2
+    settings: BRU_COUNT=2
+    settings: ALU_RS_COUNT=8
+    settings: LSU_RS_COUNT=4
+    settings: BRU_RS_COUNT=4
+    settings: DP_ACC=4
+    settings: ROB_ENTRIES=64
+    settings: PHYSICAL_REGISTER_COUNT=128
+    run: program finished in 63 cycles
+    run: program finished after committing 118 instructions
+    run: program incorrectly speculated and thereby flushed 27 instructions
+    run: instructions per cycle 1.873
+    run: cpu time 0.126μs @ 500.0MHz
+    run: percentage mispredicted instructions added to rob 18.6207%
+    run: percentage mispredicted branches 27.2727%
+    mem: [10, 20, 30, 40, 0, 0, 0, 0, 0, 0, 92, 84, 76, 68, 50, 42, 34, 26, 18, 0, -2, -4, -6, -8, -10, -12, -14, -16, -18, -20, 12, 24, 36, 48, 51, 62, 74, 86, 98, 120, -8550, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    registers (dirty):      t0:10   s0:10   s1:20   s2:30   s3:40   s4:-2400        s5:120  s6:-8550        s11:1

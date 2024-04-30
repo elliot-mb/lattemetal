@@ -33,7 +33,7 @@ public class DecodeUnit extends Unit{
     }
 
     public boolean noPrfsFree(){
-        return physicalRegisters.getElementsIn() > physicalRegisters.getSize() - 3;
+        return physicalRegisters.getElementsIn() > physicalRegisters.getSize() - 2;
     }
 
     @Override

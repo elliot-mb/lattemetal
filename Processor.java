@@ -9,6 +9,7 @@ public class Processor {
         fixedTaken, fixedNotTaken, bckTknFwdNTkn, bckNTknFwdTkn, oneBit, twoBit
     }
     //@@@SETTINGS@@@
+    private final boolean SHOW_COMMIT;
     private static final double CLOCK_SPEED_MHZ = 500;
     public final predictor PREDICTOR;
     private final int BTB_CACHE_SIZE;
@@ -42,13 +43,13 @@ public class Processor {
     private final ProgramCounter pc;
     private final InstructionCache ic;
     private final IssueUnit isu;
-    private final ArithmeticLogicUnit alu1, alu2, alu3, alu4;
+    private final ArithmeticLogicUnit alu1, alu2, alu3, alu4, alu5, alu6, alu7, alu8;
     private final RegisterFile rf;
     private final Memory mem;
     private final FetchUnit fec;
     private final DecodeUnit dec;
-    private final LoadStoreUnit lsu1, lsu2;
-    private final BranchUnit bru1, bru2;
+    private final LoadStoreUnit lsu1, lsu2, lsu3, lsu4;
+    private final BranchUnit bru1, bru2, bru3, bru4;
     private final WriteBackUnit wbu;
     private final ReorderBuffer rob;
     private final RegisterAliasTable rat;
@@ -82,8 +83,11 @@ public class Processor {
               int dpAcc,
               int robEntries,
               boolean alignedFetch,
+              boolean showCommit,
+              int physicalRegisters,
               Memory... mem) throws RuntimeException{
 
+        SHOW_COMMIT = showCommit;
         PREDICTOR = p;
         BTB_CACHE_SIZE = btbSize;
         SUPERSCALAR_WIDTH = superscalarWidth;
@@ -101,7 +105,7 @@ public class Processor {
         BR_PREDICTOR_IS_FIXED = PREDICTOR.equals(predictor.fixedTaken) || PREDICTOR.equals(predictor.fixedNotTaken);
         FIXED_PREDICTOR_SET_TAKEN = PREDICTOR.equals(predictor.fixedTaken);
         ASSUMED_CYCLE_TIME = Math.pow(10, 3) / CLOCK_SPEED_MHZ;
-        PHYSICAL_REGISTER_COUNT = 64;
+        PHYSICAL_REGISTER_COUNT = physicalRegisters;
 
         prefec = new PipelineRegister(SUPERSCALAR_WIDTH); //just to pass the pc value to the fetch unit, and increment it!
         fecDec = new PipelineRegister(SUPERSCALAR_WIDTH);
@@ -176,6 +180,34 @@ public class Processor {
                 this.rat,
                 new PipeLike[]{exeRss},
                 new PipeLike[]{exeWbu});
+        this.alu5 = new ArithmeticLogicUnit(
+                this.cdb,
+                this.rob,
+                this.rf,
+                this.rat,
+                new PipeLike[]{exeRss},
+                new PipeLike[]{exeWbu});
+        this.alu6 = new ArithmeticLogicUnit(
+                this.cdb,
+                this.rob,
+                this.rf,
+                this.rat,
+                new PipeLike[]{exeRss},
+                new PipeLike[]{exeWbu});
+        this.alu7 = new ArithmeticLogicUnit(
+                this.cdb,
+                this.rob,
+                this.rf,
+                this.rat,
+                new PipeLike[]{exeRss},
+                new PipeLike[]{exeWbu});
+        this.alu8 = new ArithmeticLogicUnit(
+                this.cdb,
+                this.rob,
+                this.rf,
+                this.rat,
+                new PipeLike[]{exeRss},
+                new PipeLike[]{exeWbu});
         this.lsu1 = new LoadStoreUnit(
                 this.mem,
                 this.rf,
@@ -185,6 +217,22 @@ public class Processor {
                 new PipeLike[]{lsuRss},
                 new PipeLike[]{exeWbu});
         this.lsu2 = new LoadStoreUnit(
+                this.mem,
+                this.rf,
+                this.rat,
+                this.cdb,
+                this.rob,
+                new PipeLike[]{lsuRss},
+                new PipeLike[]{exeWbu});
+        this.lsu3 = new LoadStoreUnit(
+                this.mem,
+                this.rf,
+                this.rat,
+                this.cdb,
+                this.rob,
+                new PipeLike[]{lsuRss},
+                new PipeLike[]{exeWbu});
+        this.lsu4 = new LoadStoreUnit(
                 this.mem,
                 this.rf,
                 this.rat,
@@ -204,6 +252,18 @@ public class Processor {
                 new PipeLike[]{bruRss},
                 new PipeLike[]{exeWbu}
         );
+        this.bru3 = new BranchUnit(
+                this.pc,
+                this.fec,
+                new PipeLike[]{bruRss},
+                new PipeLike[]{exeWbu}
+        );
+        this.bru4 = new BranchUnit(
+                this.pc,
+                this.fec,
+                new PipeLike[]{bruRss},
+                new PipeLike[]{exeWbu}
+        );
         this.wbu = new WriteBackUnit(
                 this.rf,
                 this.rob,
@@ -218,14 +278,23 @@ public class Processor {
         if(ALU_COUNT >= 2) alusInUse.add(alu2);
         if(ALU_COUNT >= 3) alusInUse.add(alu3);
         if(ALU_COUNT >= 4) alusInUse.add(alu4);
+        if(ALU_COUNT >= 5) alusInUse.add(alu5);
+        if(ALU_COUNT >= 6) alusInUse.add(alu6);
+        if(ALU_COUNT >= 7) alusInUse.add(alu7);
+        if(ALU_COUNT >= 8) alusInUse.add(alu8);
 
         brusInUse = new ArrayList<BranchUnit>();
         brusInUse.add(bru1);
         if(BRU_COUNT >= 2) brusInUse.add(bru2);
+        if(BRU_COUNT >= 3) brusInUse.add(bru3);
+        if(BRU_COUNT >= 4) brusInUse.add(bru4);
+
 
         lsusInUse = new ArrayList<LoadStoreUnit>();
         lsusInUse.add(lsu1);
         if(LSU_COUNT >= 2) lsusInUse.add(lsu2);
+        if(LSU_COUNT >= 3) lsusInUse.add(lsu3);
+        if(LSU_COUNT >= 4) lsusInUse.add(lsu4);
     }
 
 //    private void sendSingleInstruction(){
@@ -402,7 +471,7 @@ public class Processor {
             System.out.println("run: percentage mispredicted branches " + Utils.toDecimalPlaces(rateMispredictedBranches * 100, DP_ACC) + "%");
             System.out.println("mem: " + Arrays.toString(mem.getData()));
             System.out.println("registers (dirty): " + rf);
-            //System.out.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
+            if(SHOW_COMMIT) System.out.println("run: instructions \n" +  Utils.writeList(rob.getCommittedInstrs()));
         }
 
         return mem;

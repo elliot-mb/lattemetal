@@ -70,7 +70,9 @@ public class Utils {
                  int bruRsCount,
                  int dpAcc,
                  int robEntries,
-                 boolean alignedFetch) throws FileNotFoundException {
+                 boolean alignedFetch,
+                 boolean showCommit,
+                 int physicalRegisters) throws FileNotFoundException {
         System.out.println(filePath);
         PrintStream silencer = new PrintStream("/dev/null");
         Assembler assembler = new Assembler(filePath);
@@ -91,7 +93,7 @@ public class Utils {
             bruRsCount,
             dpAcc,
             robEntries,
-            alignedFetch,mem); //memory can be set if you like
+            alignedFetch, showCommit, physicalRegisters, mem); //memory can be set if you like
         return p.run(quiet ? silencer : System.out, divergenceLim, quietStats);
     }
 

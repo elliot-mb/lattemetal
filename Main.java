@@ -53,8 +53,9 @@ public class Main {
     static final String BRU_RSS = "bru_rss";
     static final String DP_ACC = "dp_acc";
     static final String ROB_SIZE = "rob_size";
+    static final String PHYS_REGS = "phys_regs";
     static final String ALIGN_FETCH = "align_fetch";
-
+    static final String SHOW_COMMIT = "show_commit";
 
     /**
      * Decode gets data from registers etc.
@@ -69,25 +70,28 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) throws FileNotFoundException {
-        String programPath = "./benchmark_assembly/ttttn.latte"; //prog
+        //default params
+        String programPath = "./benchmark_assembly/collatz.latte"; //prog
         int printWidth = 1;             // width
         boolean testing = false;        // testing
         boolean quiet = false;          // quiet
         int btbSize = 32;               // btb_size
         int superscalarWidth = 8;       // ss_width
         int aluCount = 4;               // alus
-        int lsuCount = 4;               // lsus
+        int lsuCount = 2;               // lsus
         int bruCount = 2;               // brus
-        int aluRsCount = 4;             // alu_rss
+        int aluRsCount = 8;             // alu_rss
         int lsuRsCount = 4;             // lsu_rss
-        int bruRsCount = 2;             // bru_rss
+        int bruRsCount = 4;             // bru_rss
         int dpAcc = 4;                  // dp_acc
         int robEntries = 64;            // rob_size
-        boolean alignedFetch = false;   // aligned_fetch
+        int physicalRegisters = 128;
+        boolean alignedFetch = false;   // align_fetch
+        boolean showCommit = false;
         Processor.predictor pred = Processor.predictor.twoBit;
 
         List<String> recogArgs = Arrays.asList(
-                PROG, TESTING, WIDTH, QUIET, PREDICTOR, BTB_SIZE, SS_WIDTH, ALUS, LSUS, BRUS, ALU_RSS, LSU_RSS, BRU_RSS, DP_ACC, ROB_SIZE, ALIGN_FETCH
+                PROG, TESTING, WIDTH, QUIET, PREDICTOR, BTB_SIZE, SS_WIDTH, ALUS, LSUS, BRUS, ALU_RSS, LSU_RSS, BRU_RSS, DP_ACC, ROB_SIZE, PHYS_REGS, ALIGN_FETCH, SHOW_COMMIT
         );
 
         Map<String, String> argMap = new HashMap<String, String>();
@@ -140,6 +144,8 @@ public class Main {
         if(argMap.containsKey(DP_ACC)) dpAcc = stoi(argMap.get(DP_ACC));
         if(argMap.containsKey(ROB_SIZE)) robEntries = stoi(argMap.get(ROB_SIZE));
         if(argMap.containsKey(ALIGN_FETCH)) alignedFetch = true;
+        if(argMap.containsKey(SHOW_COMMIT)) showCommit = true;
+        if(argMap.containsKey(PHYS_REGS)) physicalRegisters = stoi(argMap.get(PHYS_REGS));
 
 //
 //        if(args.length >= 1){
@@ -188,7 +194,9 @@ public class Main {
             bruRsCount,
             dpAcc,
             robEntries,
-            alignedFetch
+            alignedFetch,
+            showCommit,
+            physicalRegisters
         );
 
     }
