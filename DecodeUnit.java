@@ -49,7 +49,6 @@ public class DecodeUnit extends Unit{
         return false;//physicalRegisters.getElementsIn() > physicalRegisters.getSize() - 3; //block when we run out of prf, at least three physical registers must be free
     }
 
-
     @Override
     public void accept(Op.Add op) {
         currentOp = op;
