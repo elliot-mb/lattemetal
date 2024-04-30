@@ -78,15 +78,15 @@ public class Main {
         int btbSize = 32;               // btb_size
         int superscalarWidth = 8;       // ss_width
         int aluCount = 4;               // alus
-        int lsuCount = 4;               // lsus
+        int lsuCount = 2;               // lsus
         int bruCount = 2;               // brus
         int aluRsCount = 8;             // alu_rss
-        int lsuRsCount = 8;             // lsu_rss
+        int lsuRsCount = 4;             // lsu_rss
         int bruRsCount = 4;             // bru_rss
         int dpAcc = 4;                  // dp_acc
         int robEntries = 64;            // rob_size
-        int physicalRegisters = 64;
-        boolean alignedFetch = false;   // aligned_fetch
+        int physicalRegisters = 128;
+        boolean alignedFetch = false;   // align_fetch
         boolean showCommit = false;
         Processor.predictor pred = Processor.predictor.twoBit;
 
