@@ -4,11 +4,17 @@ public class DecodeUnit extends Unit{
 
     private final RegisterFile rf;
 
-    private final CircluarQueue<RegisterName> physicalRegisters = new CircluarQueue<RegisterName>(Processor.PHYSICAL_REGISTER_COUNT); //added to each time we make an instruction
-    private final CircluarQueue<Integer> physicalRobEntries = new CircluarQueue<Integer>(Processor.PHYSICAL_REGISTER_COUNT);
+    private final CircluarQueue<RegisterName> physicalRegisters; //added to each time we make an instruction
+    private final CircluarQueue<Integer> physicalRobEntries;
 
-    DecodeUnit(RegisterFile rf, PipeLike[] ins, PipeLike[] outs){
+    private final Processor proc;
+
+    DecodeUnit(RegisterFile rf, Processor proc, PipeLike[] ins, PipeLike[] outs){
         super(ins, outs);
+        this.proc = proc;
+        this.physicalRegisters = new CircluarQueue<RegisterName>(proc.PHYSICAL_REGISTER_COUNT); //added to each time we make an instruction
+        this.physicalRobEntries = new CircluarQueue<Integer>(proc.PHYSICAL_REGISTER_COUNT);
+
         this.rf = rf;
     }
 
@@ -48,7 +54,6 @@ public class DecodeUnit extends Unit{
     protected boolean isUnfinished() {
         return false;//physicalRegisters.getElementsIn() > physicalRegisters.getSize() - 3; //block when we run out of prf, at least three physical registers must be free
     }
-
 
     @Override
     public void accept(Op.Add op) {

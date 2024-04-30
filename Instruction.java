@@ -4,6 +4,8 @@ import java.util.List;
 
 public abstract class Instruction extends Durate {
 
+    private String annotation;
+
     public static final int INDEXED_ADDR_LOC = 0; //where we get the address location for the rs in any indexed load store cbd entry
     public static final int INDEXED_UPDT_LOC = 1; //where we get the updated value for rs in any indexed load store cbd entry
     private final int physicalRegistersNeeded;
@@ -33,6 +35,10 @@ public abstract class Instruction extends Durate {
         regsList.addAll(Arrays.asList(regs));
         this.id = gId;
         gId++;
+        this.annotation = "";
+    }
+    public void setAnnotation(){
+        annotation = "£";
     }
 
     public int getRegsNeeded(){
@@ -86,7 +92,7 @@ public abstract class Instruction extends Durate {
     @Override
     public String toString(){
         Opcode underlying = visit(new ConcreteCodeVisitor());
-        return underlying.name() + "\t" + regToString(rd) + regToString(rs) + regToString(rt) + immToString(im);
+        return underlying.name() + "\t" + regToString(rd) + regToString(rs) + regToString(rt) + immToString(im) + "\t\t" + annotation;
     }
 
     // term shapes:

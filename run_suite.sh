@@ -1,0 +1,3 @@
+#!/bin/zsh
+
+javac -d ./class Main.java && java -cp ./class Main "./benchmark_assembly/bubble_sort.latte" 10 quiet && java -cp ./class Main "./benchmark_assembly/collatz.latte" 10 quiet  && java -cp ./class Main "./benchmark_assembly/fact.latte" 10 quiet && java -cp ./class Main "./benchmark_assembly/mat3_mul.latte" 10 quiet && java -cp ./class Main "./benchmark_assembly/pi.latte" 10 quiet  && java -cp ./class Main "./benchmark_assembly/tn.latte" 10 quiet  && java -cp ./class Main "./benchmark_assembly/ttn.latte" 10 quiet && java -cp ./class Main "./benchmark_assembly/ttttn.latte" 10 quiet && java -cp ./class Main "./benchmark_assembly/unrolled_maths.latte" 10 quiet

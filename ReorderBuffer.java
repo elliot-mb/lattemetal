@@ -33,7 +33,10 @@ public class ReorderBuffer implements InstructionVoidVisitor{
 
     private final BranchTargetBuffer btb;
 
-    ReorderBuffer(int size, Map<Integer, List<Integer>> cdb, BranchTargetBuffer btb, RegisterFile rf, Memory mem, ProgramCounter pc, DecodeUnit dec){
+    private final Processor proc;
+
+    ReorderBuffer(int size, Map<Integer, List<Integer>> cdb, BranchTargetBuffer btb, RegisterFile rf, Memory mem, ProgramCounter pc, DecodeUnit dec, Processor proc){
+        this.proc = proc;
         this.dec = dec;
         this.buffer = new CircluarQueue<ReorderEntry>(size);
         this.cdb = cdb;
@@ -294,18 +297,33 @@ public class ReorderBuffer implements InstructionVoidVisitor{
     }
 
     private void handleBranch(Instruction branch, boolean flag, int branchTo, boolean wasTakenAtFetch){
-        if(Processor.BR_PREDICTOR_IS_FIXED){
-            if(flag != Processor.FIXED_PREDICTOR_SET_TAKEN){
-                if(flag){
+        if(proc.BR_PREDICTOR_IS_FIXED) {
+            if (flag != proc.FIXED_PREDICTOR_SET_TAKEN) {
+                if (flag) {
                     pc.set(branchTo);
-                }else{
+                } else {
                     pc.set(branch.getResult()); // untaken
                 }
                 shouldFlush = true;
                 mispredictedBranches++;
                 shouldFlushWhere = currentCommit.getId() + 1;
                 flushFrom(currentCommit.getId() + 1);
-            }else{
+            } else {
+                predictedBranches++;
+            }
+        }else if(proc.PREDICTOR.equals(Processor.predictor.bckTknFwdNTkn) ||
+                proc.PREDICTOR.equals(Processor.predictor.bckNTknFwdTkn)){
+            if (flag != wasTakenAtFetch) {
+                if (flag) {
+                    pc.set(branchTo);
+                } else {
+                    pc.set(branch.getResult()); // untaken
+                }
+                shouldFlush = true;
+                mispredictedBranches++;
+                shouldFlushWhere = currentCommit.getId() + 1;
+                flushFrom(currentCommit.getId() + 1);
+            } else {
                 predictedBranches++;
             }
         }else{
@@ -321,6 +339,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
                 shouldFlushWhere = currentCommit.getId() + 1;
                 flushFrom(currentCommit.getId() + 1);
             }else{
+                btb.predictForThisBranch(currentCommit.getPcVal() - 1, flag, branchTo);
                 predictedBranches++;
             }
         }
@@ -464,6 +483,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         handleBranch(op, flag, op.getImVal(), predTaken);
 
         cdb.remove(currentCommit.getId());
+        if(flag) op.setAnnotation();
     }
 
     @Override
@@ -475,6 +495,7 @@ public class ReorderBuffer implements InstructionVoidVisitor{
         handleBranch(op, flag, op.getResult() + op.getImVal() - 1, predTaken);
 
         cdb.remove(currentCommit.getId());
+        if(flag) op.setAnnotation();
     }
 
     @Override

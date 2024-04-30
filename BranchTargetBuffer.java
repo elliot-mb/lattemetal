@@ -4,6 +4,7 @@ import java.util.Map;
 
 public class BranchTargetBuffer {
 
+    private Processor proc;
 
     private final Map<Integer, Integer> pcToPredictionTarget;
     private final Map<Integer, twoBitPred> pcToPredState;
@@ -15,7 +16,8 @@ public class BranchTargetBuffer {
         strongNotTaken, weakNotTaken, weakTaken, strongTaken
     };
 
-    BranchTargetBuffer(int size){
+    BranchTargetBuffer(int size, Processor proc){
+        this.proc = proc;
         this.orderAdded = new CircluarQueue<Integer>(size); //models our size and replacement strategy (oldest evicted)
         //if the rob were full of branches this would be full too, and then its also everything we could put through the
         //fetch unit before it gets added to the rob (twice the superscalar width)
@@ -26,13 +28,15 @@ public class BranchTargetBuffer {
     }
 
     public boolean shouldBranch(int pc){
-        return Processor.PREDICTOR.equals(Processor.predictor.twoBit)
+        return proc.PREDICTOR.equals(Processor.predictor.twoBit)
                 ? pcToPredictionTarget.containsKey(pc) && (pcToPredState.get(pc).equals(twoBitPred.weakTaken) || pcToPredState.get(pc).equals(twoBitPred.strongTaken))
                 : pcToPredictionTarget.containsKey(pc);
     }
 
     private void addTo(int pc, int target){
-        if(!pcToPredictionTarget.containsKey(pc) && orderAdded.isFull()) pcToPredictionTarget.remove(orderAdded.pop()); //remove oldest mapping
+        if(!pcToPredictionTarget.containsKey(pc) && orderAdded.isFull()){
+            pcToPredictionTarget.remove(orderAdded.pop()); //remove oldest mapping
+        }
         if(!pcToPredictionTarget.containsKey(pc)) orderAdded.push(pc);
         pcToPredictionTarget.put(pc, target);
 
@@ -51,7 +55,7 @@ public class BranchTargetBuffer {
     public void predictForThisBranch(int pc, boolean taken, int target){
         if(taken){
             //do some prediction
-            if(Processor.PREDICTOR.equals(Processor.predictor.twoBit)){
+            if(proc.PREDICTOR.equals(Processor.predictor.twoBit)){
                 //strong taken does not get modified
                 if(pcToPredState.containsKey(pc) && pcToPredState.get(pc).equals(twoBitPred.weakTaken)) pcToPredState.put(pc, twoBitPred.strongTaken); //upgrade
                 else if(pcToPredState.containsKey(pc) && pcToPredState.get(pc).equals(twoBitPred.weakNotTaken)) pcToPredState.put(pc, twoBitPred.weakTaken); //upgrade
@@ -66,7 +70,7 @@ public class BranchTargetBuffer {
             //to do a dynamic predictor we can store some state for each branch to delay the decisions we make
         }else{
             //do some other prediction
-            if(Processor.PREDICTOR.equals(Processor.predictor.twoBit)){
+            if(proc.PREDICTOR.equals(Processor.predictor.twoBit)){
                 if(pcToPredState.containsKey(pc) && pcToPredState.get(pc).equals(twoBitPred.strongTaken)) pcToPredState.put(pc, twoBitPred.weakTaken); //downgrade
                 else if(pcToPredState.containsKey(pc) && pcToPredState.get(pc).equals(twoBitPred.weakTaken)) pcToPredState.put(pc, twoBitPred.weakNotTaken); //downgrade
                 else if(pcToPredState.containsKey(pc) && pcToPredState.get(pc).equals(twoBitPred.weakNotTaken)) {

@@ -6,29 +6,32 @@ import java.util.*;
 public class Processor {
     //@@@SETTING CHOICES@@@
     public enum predictor {
-        fixedTaken, fixedNotTaken, oneBit, twoBit
+        fixedTaken, fixedNotTaken, bckTknFwdNTkn, bckNTknFwdTkn, oneBit, twoBit
     }
     //@@@SETTINGS@@@
     private static final double CLOCK_SPEED_MHZ = 500;
-    public static final predictor PREDICTOR = predictor.twoBit;
-    private static final int BTB_CACHE_SIZE = 32;
-    public static final int SUPERSCALAR_WIDTH = 8;
-    private static final int ALU_COUNT = 4;
-    private static final int LSU_COUNT = 2;
-    private static final int BRU_COUNT = 2;
-    private static final int ALU_RS_COUNT = 4;
-    private static final int LSU_RS_COUNT = 4;
-    private static final int BRU_RS_COUNT = 2;
-    private static final int DP_ACC = 4;
-    public static final int ROB_ENTRIES = 32;
-    public static final int FLUSH_ALL = -1;
-    public static final int PHYSICAL_REGISTER_FACTOR = 2; //how many times more physical registers we have than architectural ones
+    public final predictor PREDICTOR;
+    private final int BTB_CACHE_SIZE;
+    public final int SUPERSCALAR_WIDTH;
+    private final int ALU_COUNT;
+    private final int LSU_COUNT;
+    private final int BRU_COUNT;
+    private final int ALU_RS_COUNT;
+    private final int LSU_RS_COUNT;
+    private final int BRU_RS_COUNT;
+    private final int DP_ACC;
+    public final int ROB_ENTRIES ;
+    public final boolean ALIGNED_FETCH; //we only fetch once we can fetch a whole instruction buffer
+    //public static final int PHYSICAL_REGISTER_FACTOR = 1; //how many times more physical registers we have than architectural ones
     //@@@DEPENDANT SETTINGS@@@
-    public static final boolean BR_PREDICTOR_IS_FIXED = PREDICTOR.equals(predictor.fixedTaken) || PREDICTOR.equals(predictor.fixedNotTaken);
-    public static final boolean FIXED_PREDICTOR_SET_TAKEN = PREDICTOR.equals(predictor.fixedTaken);
-    private static final double ASSUMED_CYCLE_TIME = Math.pow(10, 3) / CLOCK_SPEED_MHZ;//ns
-    public static final int PHYSICAL_REGISTER_COUNT = PHYSICAL_REGISTER_FACTOR * RegisterName.values().length;
+    public final boolean STATIC_PREDICTOR_BCK_TKN;
+    public final boolean BR_PREDICTOR_IS_FIXED;
+    public final boolean FIXED_PREDICTOR_SET_TAKEN;
+    private final double ASSUMED_CYCLE_TIME;
+    public final int PHYSICAL_REGISTER_COUNT;
     //@@@@@@
+
+    public static final int FLUSH_ALL = -1;
     private final ArrayList<ArithmeticLogicUnit> alusInUse;
 
     private final ArrayList<BranchUnit> brusInUse;
@@ -58,17 +61,58 @@ public class Processor {
     private final ReservationGroup lsuRss;
     private final ReservationGroup bruRss;
 
-    private final PipelineRegister prefec = new PipelineRegister(SUPERSCALAR_WIDTH); //just to pass the pc value to the fetch unit, and increment it!
-    private final PipelineRegister fecDec = new PipelineRegister(SUPERSCALAR_WIDTH);
-    private final PipelineRegister decIsu = new PipelineRegister(SUPERSCALAR_WIDTH); //instruction queue
-    private final PipelineRegister exeWbu = new PipelineRegister(SUPERSCALAR_WIDTH);
+    private final PipelineRegister prefec;
+    private final PipelineRegister fecDec;
+    private final PipelineRegister decIsu;
+    private final PipelineRegister exeWbu;
     //private final PipelineRegister aluLsu = new PipelineRegister();
-    private final PipelineRegister rtired = new PipelineRegister(1); //ignored pipe register to satisfy Unit inheritence
-    private final PipelineRegister delete = new PipelineRegister(SUPERSCALAR_WIDTH);
+    private final PipelineRegister rtired;
+    private final PipelineRegister delete;
 
-    Processor(InstructionCache ic, Memory... mem) throws RuntimeException{
+    Processor(InstructionCache ic,
+              predictor p,
+              int btbSize,
+              int superscalarWidth,
+              int aluCount,
+              int lsuCount,
+              int bruCount,
+              int aluRsCount,
+              int lsuRsCount,
+              int bruRsCount,
+              int dpAcc,
+              int robEntries,
+              boolean alignedFetch,
+              Memory... mem) throws RuntimeException{
+
+        PREDICTOR = p;
+        BTB_CACHE_SIZE = btbSize;
+        SUPERSCALAR_WIDTH = superscalarWidth;
+        ALU_COUNT = aluCount;
+        LSU_COUNT = lsuCount;
+        BRU_COUNT = bruCount;
+        ALU_RS_COUNT = aluRsCount;
+        LSU_RS_COUNT = lsuRsCount;
+        BRU_RS_COUNT = bruRsCount;
+        DP_ACC = dpAcc;
+        ROB_ENTRIES = robEntries;
+        ALIGNED_FETCH = alignedFetch;
+
+        STATIC_PREDICTOR_BCK_TKN = PREDICTOR.equals(predictor.bckTknFwdNTkn);
+        BR_PREDICTOR_IS_FIXED = PREDICTOR.equals(predictor.fixedTaken) || PREDICTOR.equals(predictor.fixedNotTaken);
+        FIXED_PREDICTOR_SET_TAKEN = PREDICTOR.equals(predictor.fixedTaken);
+        ASSUMED_CYCLE_TIME = Math.pow(10, 3) / CLOCK_SPEED_MHZ;
+        PHYSICAL_REGISTER_COUNT = 64;
+
+        prefec = new PipelineRegister(SUPERSCALAR_WIDTH); //just to pass the pc value to the fetch unit, and increment it!
+        fecDec = new PipelineRegister(SUPERSCALAR_WIDTH);
+        decIsu = new PipelineRegister(SUPERSCALAR_WIDTH); //instruction queue
+        exeWbu = new PipelineRegister(SUPERSCALAR_WIDTH);
+        //private final PipelineRegister aluLsu = new PipelineRegister();
+        rtired = new PipelineRegister(1); //ignored pipe register to satisfy Unit inheritence
+        delete = new PipelineRegister(SUPERSCALAR_WIDTH);
+
         if(mem.length > 1) throw new RuntimeException("Processor: this constructor cannot have more than one memories");
-        this.btb = new BranchTargetBuffer(BTB_CACHE_SIZE);
+        this.btb = new BranchTargetBuffer(BTB_CACHE_SIZE, this);
         this.cdb = new HashMap<Integer, List<Integer>>();
         this.mem = mem.length > 0 ? mem[0] : new Memory();
         this.rf = new RegisterFile(cdb);
@@ -76,10 +120,11 @@ public class Processor {
 
         this.dec = new DecodeUnit(
                 this.rf,
+                this,
                 new PipeLike[]{fecDec},
                 new PipeLike[]{decIsu}); //loadstores go down the latter pipe
 
-        this.rob = new ReorderBuffer(ROB_ENTRIES, cdb, btb, rf, this.mem, this.pc, this.dec);
+        this.rob = new ReorderBuffer(ROB_ENTRIES, cdb, btb, rf, this.mem, this.pc, this.dec, this);
         this.ic = ic;
         this.tally = 0;
         this.rat = new RegisterAliasTable(cdb, rob);
@@ -93,6 +138,7 @@ public class Processor {
                 this.ic,
                 this.pc,
                 this.btb,
+                this,
                 new PipeLike[]{prefec},
                 new PipeLike[]{fecDec});
         this.isu = new IssueUnit(
@@ -224,13 +270,13 @@ public class Processor {
     }
 
     private String pipelineToString(){
-        return "\t[" + prefec +
+        return "\t[" + //prefec +
                 fec + " " + fecDec + " " +
                 dec + " " + decIsu + " " +
                 isu + " " + "(" + exeRss + "," + lsuRss + "," + bruRss + ") ("
                 + alu1 + alu2 + alu3 + alu4 + ", " + lsu1 + lsu2 + ", " + bru1 + bru2 + ") (" + exeWbu + ") "
                 + wbu + "]\t@"
-                + tally + "\tpc " + pc.getCount() + "\t" + "\t" + rob;
+                + tally + "\tpc " + pc.getCount(); //+ "\t" + "\t" + rob;
     }
 
     public Memory run(PrintStream debugOut, Integer divergenceLim, boolean quietStats){
@@ -242,7 +288,6 @@ public class Processor {
 
         //AbstractMap<Instruction, Integer> inFlights = new HashMap<Instruction, Integer>();
         while((isPipelineBeingUsed() || !pc.isDone()) && (divergenceLim == null || tally < divergenceLim)){
-            debugOut.println(pipelineToString());
             boolean flushFlag = false;
             Durate counter = new Durate(SUPERSCALAR_WIDTH);
             counter.rst();
@@ -301,13 +346,16 @@ public class Processor {
             }
             counter.rst();
 
+            boolean emptyFecDec = fecDec.isEmpty();
+
             fec.clk();
             while(fecDec.canPush() && !pc.isDone() && !counter.isDone()){ //they all just shift a block along <=> they wont be able to do more than one pipeline buffer's worth!
-                prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));
+                if(emptyFecDec || !ALIGNED_FETCH) prefec.push(new PipelineEntry(Utils.opFactory.new No(), pc.getCount(), false));
                 fec.clk();
                 counter.decr();
             }
             counter.rst();
+
 
             tally++;
 //            while(rtired.canPull()) { //if we retire more that one instruction per cycle
@@ -316,9 +364,10 @@ public class Processor {
 //            } //delete whats inside (voided is used to detect when writebacks are finished)
             delete.flush(FLUSH_ALL); // any instructions we want to throw away can be put into delete
 
-            if(!quietStats) if(tally % 1000 == 0) System.out.print("\r" + tally / 1000 + "K cycles");
+            if(!quietStats) if(tally % 100000 == 0) System.out.print("\r" + tally / 100000 + "00K cycles");
 
             cdb.clear();
+            debugOut.println(pipelineToString());
         }
         if(divergenceLim != null && tally >= divergenceLim) throw new RuntimeException("run: program considered to diverge after " + divergenceLim + " instrs");
         debugOut.println("registers (dirty): " + rf);
@@ -338,8 +387,7 @@ public class Processor {
             System.out.println("settings: BRU_RS_COUNT="+BRU_RS_COUNT);
             System.out.println("settings: DP_ACC="+DP_ACC);
             System.out.println("settings: ROB_ENTRIES="+ROB_ENTRIES);
-            System.out.println("settings: FLUSH_ALL="+FLUSH_ALL);
-            System.out.println("settings: PHYSICAL_REGISTER_FACTOR="+PHYSICAL_REGISTER_FACTOR);
+            System.out.println("settings: PHYSICAL_REGISTER_COUNT="+PHYSICAL_REGISTER_COUNT);
 
             double ipc = Utils.toDecimalPlaces( (double) rob.getCommitted() / tally, DP_ACC);
             double time = (rob.getCommitted() * (1 / ipc) * ASSUMED_CYCLE_TIME) / Math.pow(10, 3);

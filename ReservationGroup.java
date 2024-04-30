@@ -98,6 +98,8 @@ public class ReservationGroup implements PipeLike, InstructionVoidVisitor{ //to 
         return freeRss;
     }
 
+
+
     public List<ReservationStation> getReadyAndFullRss(){
         List<ReservationStation> readyRss = new ArrayList<ReservationStation>();
         for(ReservationStation rs : rss){
@@ -163,6 +165,11 @@ public class ReservationGroup implements PipeLike, InstructionVoidVisitor{ //to 
     @Override
     public int getCount() {
         return size - getFreeRss().size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return getFreeRss().size() == size;
     }
 
 

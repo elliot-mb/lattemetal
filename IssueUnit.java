@@ -50,6 +50,11 @@ public class IssueUnit extends Unit{
         return rob.isFull() || !outs[chooseUnit().ordinal()].canPush() || dec.noPrfsFree(); //if we cant push to the right unit! block otherwise...
     }
 
+    @Override
+    protected String writeUnfinished(){
+        return dec.noPrfsFree() ? "PRF" : !outs[chooseUnit().ordinal()].canPush() ? "NRS" : "ROB";
+    }
+
     private unitType chooseUnit(){
         if(Utils.isBranch(currentOp)) return unitType.bru;
         if(Utils.isLoadStore(currentOp)) return unitType.lsu;

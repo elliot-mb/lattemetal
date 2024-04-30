@@ -1,0 +1,64 @@
+--              suggested test memory
+--
+--              new Memory(
+--                   printWidth,
+--                   new int[]{
+--                        40, 10, 0, 0, 0, 0, 0, 0, 0, 0,
+--                        78, 9, -15, 22, -4, 65, 11, 2, 10, 18,
+--                        58, 11, -11, 6, -4, 51, 51, 4, 51, 17,
+--                        48, 12, -8, 24, 20, 25, 31, 10, 19, 25,
+--                        148, 15, -81, 31, -4, 54, 14, 23, 41, 4,
+--                   }
+--               ));
+--
+
+
+
+-- bubble sort based primarily on some swap function
+-- three tab spaces in to allow for large label names
+            --here
+
+--          addi t0 zero #10        --lengths of array (mem[0])
+--          st t0 zero #0
+--          addi t0 zero #10        --start of array (mem[1])
+--          st t0 zero #1
+
+            br prestart
+
+-- swap method swaps mem[s0] with mem[s1] (uses s2 and s3)
+swap:       ld s2 s0 #0
+            ld s3 s1 #0
+            st s2 s1 #0
+            st s3 s0 #0
+            addi t1 t1 #1           --increment swap counter
+            br swapret              --the only site this function is called from
+
+prestart:   ld s4 zero #0           --len
+            addi s4 s4 #-1          --decrement the length so we only ever have len-1 adjacent pairs in the list
+            ld s5 zero #1           --loc of array
+
+start:      addi t0 zero #0         --i = 0
+            addi t1 zero #0         --swap counter
+
+-- this loop is called length times inside each run of bubble sort
+loop:       add s6 s5 t0            --loc + i
+            ld s6 s6 #0             --mem[loc + i]
+            add s7 s5 t0
+            addi s7 s7 #1           --loc + i + 1
+            ld s7 s7 #0             --mem[loc + i + 1]
+            cmp s8 s7 s6            -- s6 < s7 ? -1 : s6 == s7 ? 0 : 1
+            addi s8 s8 #1           --            0              1   2
+            add s0 s5 t0            -- loc + i
+            addi s1 s0 #1           -- loc + i + 1 (copy to address swap registers in swap:)
+            jplz s8 swap
+
+swapret:    addi t0 t0 #1           -- i++
+            cmp s6 t0 s4            -- i < len - 1 ?
+            addi s6 s6 #1           -- 0 1 2
+            jplz s6 loop
+
+-- out of the loop now, we check if swaps occurred
+            jplz t1 halt
+            br start
+
+halt:       addi t0 zero #1000
