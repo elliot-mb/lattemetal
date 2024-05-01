@@ -77,7 +77,6 @@ public class IssueUnit extends Unit{
 
     @Override
     protected PipelineEntry makeEntryToWrite(){
-
         return new PipelineEntry(currentOp, pcVal, flag, currentRobEntry); //send currentRobEntry to resi station!
     }
 

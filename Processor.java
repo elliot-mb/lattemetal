@@ -308,7 +308,10 @@ public class Processor {
     private boolean isPipelineBeingUsed(){
         return prefec.canPull() || fecDec.canPull() || decIsu.canPull() ||
                 exeWbu.canPull() || rtired.canPull() || !wbu.isDone() || !lsu1.isDone() || !lsu2.isDone() ||
-                !alu1.isDone() || !alu2.isDone() || !alu3.isDone() || !alu4.isDone() || !bru1.isDone() || !bru2.isDone()
+                !lsu3.isDone() || !lsu4.isDone() ||
+                !alu1.isDone() || !alu2.isDone() || !alu3.isDone() || !alu4.isDone() ||
+                !alu5.isDone() || !alu6.isDone() || !alu7.isDone() || !alu8.isDone() || !bru1.isDone() || !bru2.isDone() ||
+                !bru3.isDone() || !bru4.isDone()
                 || !dec.isDone() || !fec.isDone() || !isu.isDone() || !rob.isEmpty();
     }
 
@@ -321,11 +324,19 @@ public class Processor {
         alu2.flush(branchIdInRob);
         alu3.flush(branchIdInRob);
         alu4.flush(branchIdInRob);
+        alu5.flush(branchIdInRob);
+        alu6.flush(branchIdInRob);
+        alu7.flush(branchIdInRob);
+        alu8.flush(branchIdInRob);
         lsu1.flush(branchIdInRob);
         lsu2.flush(branchIdInRob);
+        lsu3.flush(branchIdInRob);
+        lsu4.flush(branchIdInRob);
         wbu.flush(branchIdInRob);
         bru1.flush(branchIdInRob);
         bru2.flush(branchIdInRob);
+        bru3.flush(branchIdInRob);
+        bru4.flush(branchIdInRob);
         prefec.flush(branchIdInRob);
         fecDec.flush(branchIdInRob);
         decIsu.flush(branchIdInRob);
@@ -343,9 +354,9 @@ public class Processor {
                 fec + " " + fecDec + " " +
                 dec + " " + decIsu + " " +
                 isu + " " + "(" + exeRss + "," + lsuRss + "," + bruRss + ") ("
-                + alu1 + alu2 + alu3 + alu4 + ", " + lsu1 + lsu2 + ", " + bru1 + bru2 + ") (" + exeWbu + ") "
+                + alusInUse + ", " + lsusInUse + ", " + brusInUse + ") (" + exeWbu + ") "
                 + wbu + "]\t@"
-                + tally + "\tpc " + pc.getCount(); //+ "\t" + "\t" + rob;
+                + tally + "\tpc " + pc.getCount() + "\t" + "\t" + rob;
     }
 
     public Memory run(PrintStream debugOut, Integer divergenceLim, boolean quietStats){

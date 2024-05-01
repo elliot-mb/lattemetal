@@ -34,7 +34,7 @@ public class ReservationGroup implements PipeLike, InstructionVoidVisitor{ //to 
 
     public void update(){
         for(ReservationStation rs : rss){
-            if(rs.isBusy()) rs.update(); //dont update those with no instruction inside
+            if(!rs.isReady()) rs.update(); //dont update those with no instruction inside
         }
     }
 
@@ -64,6 +64,7 @@ public class ReservationGroup implements PipeLike, InstructionVoidVisitor{ //to 
         }
         return index;
     }
+
 
     /**
      *

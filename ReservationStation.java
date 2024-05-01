@@ -155,36 +155,36 @@ public class ReservationStation implements InstructionVoidVisitor {
 
     @Override
     public void accept(Op.Add op) {
-        op.setRsVal(vJ);
-        op.setRtVal(vK);
+        if(rJ) op.setRsVal(vJ);
+        if(rK) op.setRtVal(vK);
     }
 
     @Override
     public void accept(Op.AddI op) {
-        op.setRsVal(vJ);
+        if(rJ) op.setRsVal(vJ);
     }
 
     @Override
     public void accept(Op.Mul op) {
-        op.setRsVal(vJ);
-        op.setRtVal(vK);
+        if(rJ) op.setRsVal(vJ);
+        if(rK) op.setRtVal(vK);
     }
 
     @Override
     public void accept(Op.MulI op) {
-        op.setRsVal(vJ);
+        if(rJ) op.setRsVal(vJ);
     }
 
     @Override
     public void accept(Op.Cmp op) {
-        op.setRsVal(vJ);
-        op.setRtVal(vK);
+        if(rJ) op.setRsVal(vJ);
+        if(rK) op.setRtVal(vK);
     }
 
     @Override
     public void accept(Op.Ld op) {
-        op.setRsVal(vJ);
-        op.setResult(vJ); //set so we can tell if we have calculated the address, from the rob
+        if(rJ) op.setRsVal(vJ);
+        if(rJ) op.setResult(vJ + op.getImVal()); //set so we can tell if we have calculated the address, from the rob
     }
 
     @Override
@@ -194,30 +194,30 @@ public class ReservationStation implements InstructionVoidVisitor {
 
     @Override
     public void accept(Op.LdI op) {
-        op.setRsVal(vJ);
-        op.setResult(vJ);
+        if(rJ) op.setRsVal(vJ);
+        if(rJ) op.setResult(vJ);
     }
 
     @Override
     public void accept(Op.St op) {
-        op.setRdVal(vJ);
-        op.setRsVal(vK);
+        if(rJ) op.setRdVal(vJ);
+        if(rJ) op.setRsVal(vK);
     }
 
     @Override
     public void accept(Op.StI op) {
-        op.setRdVal(vJ);
-        op.setRsVal(vK);
+        if(rJ) op.setRdVal(vJ);
+        if(rK) op.setRsVal(vK);
     }
 
     @Override
     public void accept(Op.BrLZ op) {
-        op.setRdVal(vJ);
+        if(rJ) op.setRdVal(vJ);
     }
 
     @Override
     public void accept(Op.JpLZ op) {
-        op.setRdVal(vJ);
+        if(rJ) op.setRdVal(vJ);
     }
 
     @Override
