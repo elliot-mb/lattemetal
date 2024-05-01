@@ -10,7 +10,7 @@ This requires you have javac and java versions at least 17.0.2.
 The below commands are of the form "$ command" to represent the shell.
 Navigate to the './src' folder before you run anything below.
 
-- To run with the default arguments+quiet please run $ chmod 700 "compile_and_run" && ./compile_and_run 
+- To run with the default arguments+quiet (note this script does not take any arguments itself) please run $ chmod 700 "compile_and_run" && ./compile_and_run 
   or if you do not have zsh as a shell environment installed please run $ javac -d ./class Main.java && java -cp ./class Main quiet
 
 - The program will take all of the following arguments in any order (<key>=<value> or where there is no equals it is a flag):
