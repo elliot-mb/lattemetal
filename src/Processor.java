@@ -356,7 +356,7 @@ public class Processor {
                 isu + " " + "(" + exeRss + "," + lsuRss + "," + bruRss + ") ("
                 + alusInUse + ", " + lsusInUse + ", " + brusInUse + ") (" + exeWbu + ") "
                 + wbu + "]\t@"
-                + tally + "\tpc " + pc.getCount() + "\t" + "\t" + rob;
+                + tally + "\tpc " + pc.getCount();// + "\t" + "\t" + rob;
     }
 
     public Memory run(PrintStream debugOut, Integer divergenceLim, boolean quietStats){
