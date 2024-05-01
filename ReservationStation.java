@@ -195,7 +195,7 @@ public class ReservationStation implements InstructionVoidVisitor {
     @Override
     public void accept(Op.LdI op) {
         if(rJ) op.setRsVal(vJ);
-        if(rJ) op.setResult(vJ);
+        if(rJ) op.setResult(vJ + op.getImVal());
     }
 
     @Override
