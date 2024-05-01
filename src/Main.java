@@ -71,7 +71,7 @@ public class Main {
      */
     public static void main(String[] args) throws FileNotFoundException {
         //default params
-        String programPath = "./benchmark_assembly/collatz.latte"; //prog
+        String programPath = "./kernels_benchmark/collatz.latte"; //prog
         int printWidth = 1;             // width
         boolean testing = false;        // testing
         boolean quiet = false;          // quiet
