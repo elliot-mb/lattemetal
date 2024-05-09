@@ -107,4 +107,4 @@ Navigate to the './src' folder before you run anything below.
     registers (dirty):      t0:10   s0:10   s1:20   s2:30   s3:40   s4:-2400        s5:120  s6:-8550        s11:1
     
     
-   email: np21862@bristol.ac.uk
+  
