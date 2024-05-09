@@ -1,4 +1,0 @@
-#!/bin/zsh
-
-cp README.md readme.txt &&\
-git archive main --format=zip --output=../submission__$(date '+%Y_%m_%d_%H_%M_%S').zip -v

@@ -2,26 +2,30 @@
 
 LatteMetal is my own-brewed RISC-based ISA and micro-architecture written in Java. 
 
-It is a pipelined superscalar implementation which focuses on hardware-optimisation to achieve amiable performance.
+It is a pipelined OoO superscalar implementation which aims to approximate the behaviours and limitations of a real RISC processor.
 
 # Startup & running guide
 
-This requires you have javac and java versions at least 17.0.2
+This requires you have javac and java versions at least 17.0.2.
 The below commands are of the form "$ command" to represent the shell.
+Navigate to the './src' folder before you run anything below.
 
-- The program take the following arguments (<key>=<value> or where no value applies it is a flag, if unused a default is provided):
+- To run with the default arguments+quiet (note this script does not take any arguments itself) please run $ chmod 700 "compile_and_run" && ./compile_and_run 
+  or if you do not have zsh as a shell environment installed please run $ javac -d ./class Main.java && java -cp ./class Main quiet
+
+- The program will take all of the following arguments in any order (<key>=<value> or where there is no equals it is a flag):
 
     prog=<assembly_file_path>                               (program to run)
-                                                            (default "./benchmark_assembly/collatz.latte")
+                                                            (default "./kernels_benchmark/collatz.latte")
 
-    testing                                                 (run test kernels)
-                                                            (default not included)
+    testing                                                 (run test kernels quietly to inspect correctness)
+                                                            (default off)
 
     width=<num_columns>                                     (prints memory at end of program as a table)
                                                             (default 1)
 
     quiet                                                   (pipeline view is hidden)
-                                                            (default not included)
+                                                            (default off)
 
     predictor=<"fixedTaken" | "fixedNotTaken" | "bckTknFwdNTkn" | "bckNTknFwdTkn" | "oneBit" | "twoBit">
                                                             (default "twoBit")
@@ -58,14 +62,14 @@ The below commands are of the form "$ command" to represent the shell.
     phys_regs=<size_prf>                                    (default 128)
 
     align_fetch                                             (fetch is aligned)
-                                                            (default not included)
+                                                            (default off)
 
     show_commit                                             (print all instructions committed in order)
-                                                            (default not included)
+                                                            (default off)
 
 - For example, to run my vector dot product test kernel displaying 10 integers for each line of memory, please run
 
-    $ javac -d ./class Main.java && java -cp ./class Main prog="./assembly/vec_dot.latte" width=10
+    $ javac -d ./class Main.java && java -cp ./class Main prog="./kernels_test/vec_dot.latte" width=10
 
     ...
     ...(pipeline view)
@@ -101,3 +105,6 @@ The below commands are of the form "$ command" to represent the shell.
     run: percentage mispredicted branches 27.2727%
     mem: [10, 20, 30, 40, 0, 0, 0, 0, 0, 0, 92, 84, 76, 68, 50, 42, 34, 26, 18, 0, -2, -4, -6, -8, -10, -12, -14, -16, -18, -20, 12, 24, 36, 48, 51, 62, 74, 86, 98, 120, -8550, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     registers (dirty):      t0:10   s0:10   s1:20   s2:30   s3:40   s4:-2400        s5:120  s6:-8550        s11:1
+    
+    
+   email: np21862@bristol.ac.uk
